@@ -1,0 +1,12 @@
+{
+  "name": "慢慢计划｜每日每周每月每年计划",
+  "short_name": "慢慢计划",
+  "description": "简单、私密的个人计划清单。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8fc",
+  "theme_color": "#f7f8fc",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
