@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v9-database-auth';
+const CACHE_NAME = 'daily-weekly-planner-v10-trash-undo-archive';
 const APP_FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
