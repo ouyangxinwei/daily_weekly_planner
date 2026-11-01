@@ -1,5 +1,14 @@
 # 更新记录
 
+## V10.2 · remove_login_lockout — 2026-11-01
+
+- 移除 `planner_check_password` 的登录失败次数统计与连续失败 5 次锁定 10 分钟逻辑。
+- 新版初始化 SQL 不再创建 `planner_login_attempts` 表。
+- 新增 `docs/migration_V10.2_remove_login_lockout.sql`，用于更新已部署的 Supabase 数据库并删除旧统计表。
+- 保留 `planner_login`、`planner_get_data`、`planner_put_data` RPC 接口和 bcrypt 密码摘要校验。
+- 更新需求、验收、影响分析、部署排障及技术文档，并升级 Service Worker 缓存版本。
+- 风险说明：移除失败次数锁定会降低对密码猜测的防护。
+
 ## V10.1 · trash_undo_archive_entryfix — 2026-11-01
 
 - 修复首页缺少“回收站”和“已归档”入口的问题。

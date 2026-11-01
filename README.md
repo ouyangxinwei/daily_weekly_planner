@@ -1,4 +1,4 @@
-# 慢慢计划 V9 · database_auth
+# 慢慢计划 V10.2 · remove_login_lockout
 
 每日、每周、每月、每年的轻量计划网页。无需构建步骤或后端，可直接发布到 GitHub Pages。
 
@@ -65,11 +65,11 @@ docs/
 
 ## 数据库账号说明
 
-登录由 Supabase SQL 函数校验，网页中不再包含固定密码。先执行 `docs/supabase-setup.sql`，再在 SQL Editor 单独创建初始账号。初始化命令不要提交到公开仓库；数据库保存 bcrypt 密码摘要。连续登录失败会触发短暂锁定。
+登录由 Supabase SQL 函数校验，网页中不再包含固定密码。先执行 `docs/supabase-setup.sql`，再在 SQL Editor 单独创建初始账号。初始化命令不要提交到公开仓库；数据库保存 bcrypt 密码摘要。V10.2 起不再记录登录失败次数，也不再设置临时锁定。
 
 ## Supabase 账号认证配置
 
-先在 Supabase SQL Editor 执行 `docs/supabase-setup.sql`。再单独执行脚本末尾注释中的初始账号 SQL，将用户名设为 `oooo`，密码设为 `683253`。不要将填写了实际密码的 SQL 保存或提交到公开仓库。登录页填写项目 URL、publishable/anon key、用户名和密码。连续错误 5 次会锁定 10 分钟。
+新建数据库先在 Supabase SQL Editor 执行 `docs/supabase-setup.sql`；已部署的数据库先执行 `docs/migration_V10.2_remove_login_lockout.sql`。再按脚本末尾注释单独创建或保留初始账号。不要将包含真实密码的 SQL 保存或提交到公开仓库。登录页填写项目 URL、publishable/anon key、用户名和密码。
 
 ## 云端同步配置
 
@@ -88,9 +88,11 @@ docs/
 - 回收站及归档状态包含在 JSON 备份与 Supabase 云端数据快照中。云端仍需手动上传/下载才能跨设备同步。
 - 回收站保留期限按删除时间计算；清理仅针对回收站，不会清理普通计划或归档计划。
 
-详见 `docs/requirements_V10_trash_undo_archive.md`、`docs/acceptance_V10_trash_undo_archive.md` 与 `docs/impact_analysis_V10_trash_undo_archive.md`。
+详见 V10 回收站文档，以及 `docs/requirements_V10.2_remove_login_lockout.md`、`docs/acceptance_V10.2_remove_login_lockout.md` 和 `docs/impact_analysis_V10.2_remove_login_lockout.md`。
 
 ## 版本
+
+V10.2 · remove_login_lockout（2026-11-01）。移除连续登录失败 5 次后暂停 10 分钟的项目自定义锁定；提供现有数据库迁移 SQL。
 
 V10 · trash_undo_archive（2026-11-01）。增加回收站、归档与短时操作撤销。
 
@@ -106,6 +108,12 @@ V6 · reminders（2026-10-28）。在 V5 基础上增加计划日期、提醒时
 
 V5 · bulk_clear_controls（2026-10-28）。在 V4 基础上增加按当前标签清空全部计划或已完成计划的确认操作。
 
+
+## V10.2 移除登录失败锁定
+- 移除 Supabase `planner_check_password` 中的失败次数与 10 分钟锁定逻辑。
+- 新建数据库脚本不再创建 `planner_login_attempts` 表；已有数据库需执行独立迁移脚本。
+- 登录、云端上传和下载继续使用原有 RPC 与 bcrypt 密码摘要校验。
+- 注意：移除锁定降低了对密码猜测的防护，请使用强密码并保护公开客户端配置及数据库权限。
 
 ## V10.1 首页入口修复
 - 首页顶部“账号与同步”旁新增“回收站”和“已归档”按钮。
