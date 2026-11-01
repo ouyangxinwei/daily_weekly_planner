@@ -1,4 +1,4 @@
-# 慢慢计划 V10.3 · reference_website
+# 慢慢计划 V10.4 · pdf_export
 
 每日、每周、每月、每年的轻量计划网页。无需构建步骤或后端，可直接发布到 GitHub Pages。
 
@@ -23,6 +23,7 @@
 - 显示当前周期的完成数量和进度。
 - 使用浏览器 `localStorage` 保存数据；每种周期的完成状态独立记录。
 - 一键导出 JSON 备份；选择备份 JSON 并确认后可恢复，导入前会校验结构。
+- “导出 PDF”仅导出当前可见计划，遵循当前周期、搜索、分类筛选和排序；生成打印排版页，在浏览器打印窗口选择“另存为 PDF”。每条计划尽量保持在同一页，长备注和 URL 自动换行。
 - 支持工作、学习、生活、健康、财务、兴趣和未分类；可按分类筛选。
 - 可搜索计划名称、备注或参考网站，并按默认顺序、名称或添加时间排序。
 - 每项计划可设置 1–3 星优先级，列表以矢量星形图标显示，也可按优先级排序。
@@ -89,9 +90,13 @@ docs/
 - 回收站及归档状态包含在 JSON 备份与 Supabase 云端数据快照中。云端仍需手动上传/下载才能跨设备同步。
 - 回收站保留期限按删除时间计算；清理仅针对回收站，不会清理普通计划或归档计划。
 
-详见 V10 回收站文档，以及 `docs/requirements_V10.2_remove_login_lockout.md`、`docs/acceptance_V10.2_remove_login_lockout.md` 和 `docs/impact_analysis_V10.2_remove_login_lockout.md`。
+详见 V10.4 PDF 导出需求与验收文档、V10 回收站文档，以及 `docs/requirements_V10.2_remove_login_lockout.md`、`docs/acceptance_V10.2_remove_login_lockout.md` 和 `docs/impact_analysis_V10.2_remove_login_lockout.md`。
 
 ## 版本
+
+V10.4 · pdf_export（2026-11-01）。新增按当前可见列表导出 PDF，使用防拆分分页样式。
+
+V10.3 · reference_website（2026-11-01）。新增每条计划可选参考网站。
 
 V10.2 · remove_login_lockout（2026-11-01）。移除连续登录失败 5 次后暂停 10 分钟的项目自定义锁定；提供现有数据库迁移 SQL。
 
