@@ -1,3 +1,9 @@
+## V10.8 版本记录与部署状态
+
+首页「版本与更新记录」弹窗通过公开 GitHub 内容地址读取 CHANGELOG，并调用 GitHub API 检查 main 最新提交与 Pages 构建部署工作流。若 API 受网络限制或匿名请求达到额度，状态会显示「检查失败」，可稍后刷新；完整履历仍可通过弹窗内 GitHub 链接查看。
+
+「部署成功」表示 GitHub Pages 的 build and deployment workflow 已对当前 main SHA 成功完成。它不保证浏览器或 PWA 缓存已经切换到最新文件。若仍看到旧界面，请刷新网页；已安装 PWA 请完全关闭后重新打开。Service Worker 缓存名为 `daily-weekly-planner-v10-8-release-history`。
+
 ## V10.7 快速添加计划
 
 部署新版 `index.html`、`sw.js` 及更新后的文档。Service Worker 缓存名升级为 `daily-weekly-planner-v10-7-quick-add`；更新后重新载入网页，已安装 PWA 建议完全关闭后重新打开。无需 Supabase SQL 或数据迁移，`schemaVersion: 1` 保持不变。
