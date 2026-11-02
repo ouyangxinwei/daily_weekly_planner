@@ -1,3 +1,12 @@
+## V10.8 版本履历与部署状态
+
+- 入口：`#open-release`；弹窗：`#release-dialog`。
+- 当前运行版本来自 `APP_VERSION`，只显示语义版本前缀（例如 V10.8）。
+- 履历：`loadReleaseHistory()` 请求 `raw.githubusercontent.com/.../main/CHANGELOG.md`，`renderReleaseHistory()` 将 Markdown 标题和列表项通过 DOM `textContent` 构建，避免将远程内容作为 HTML 执行。
+- 部署状态：`refreshReleaseStatus()` 并行请求 GitHub REST `commits/main` 与 `actions/runs?branch=main&per_page=20`，匹配 Pages build and deployment workflow 的 `head_sha` 与 main 当前 SHA。按 workflow 状态显示 success / in progress / failure / no matching run；GitHub API 网络或限流错误显示检查失败并可手动刷新。
+- 不使用认证 token；依赖公开仓库 GitHub API 的匿名访问额度。更新履历读取失败时提供 CHANGELOG 页面链接。
+- Service Worker 缓存名升级至 V10.8；业务数据 schema 与 `commitState()` 不变。
+
 ## V10.7 快速添加计划实现
 
 - UI：`#quick-add-form`、`#quick-add-title` 与 `#quick-add-error` 位于当前计划卡片的进度条下方，桌面端横向排列，窄屏自动适配。
