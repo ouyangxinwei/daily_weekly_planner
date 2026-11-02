@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-4-pdf-export';
+const CACHE_NAME = 'daily-weekly-planner-v10-5-five-star-priority';
 const APP_FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
