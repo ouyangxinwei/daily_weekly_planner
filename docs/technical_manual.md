@@ -1,3 +1,11 @@
+## V10.7 快速添加计划实现
+
+- UI：`#quick-add-form`、`#quick-add-title` 与 `#quick-add-error` 位于当前计划卡片的进度条下方，桌面端横向排列，窄屏自动适配。
+- 交互：表单 submit 同时支持 Enter 和按钮点击；输入仅做 trim，空字符串不提交。输入变更时清除错误状态。
+- 数据：创建普通 `daily` 计划，字段沿用现有结构：`title`、空 `note`／`referenceUrl`／`dueAt`、`category: '未分类'`、`priority: 1`、空提醒标记及时间戳；不增加 schema 字段。
+- 事务：`quickAddPlan()` 使用 `commitState()` 写入候选状态。只有成功后才切换每日标签、清理搜索／分类过滤、重绘、清空输入并提示成功；失败保留输入框内容。
+- 快速添加不替代 `openDialog()` 完整表单。无 SQL 或数据迁移。
+
 ## V10.6 事务式保存机制
 
 - `save(nextState = state)` 将指定候选状态序列化并写入浏览器存储，返回布尔结果；失败时不修改正式状态。
