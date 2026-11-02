@@ -1,3 +1,14 @@
+## V10.9 优先级默认排序实现
+
+- 版本标识：APP_VERSION 为 V10.9_priority_sorting；Service Worker cache 为 daily-weekly-planner-v10-9-priority-sorting。
+- 排序偏好使用独立键 personal-planner:sort-mode:v1 保存，不写入 personal-planner:v1 业务状态、JSON 备份或 Supabase 快照。
+- loadSortMode() 只接受白名单模式；首次使用、存储缺失或读取失败时默认为 priority-desc。
+- render() 先应用周期、归档、搜索与分类过滤，再排序。优先级模式使用完成状态（未完成 0、已完成 1）、有效星级降序、筛选后原始索引作为三级排序键。
+- 同星级排序通过筛选结果的原始索引稳定打破平局；不依赖创建时间，不改变 state.plans 的原始顺序。
+- 保留 default（原始顺序）、title、created-desc、created-asc 现有模式。排序模式切换只写独立偏好键并重绘，不调用 commitState()。
+- 所有周期标签共用 render()，普通与随机临时视图均使用相同规则。完成状态、星级编辑、导入、恢复等现有操作重绘后自动重新排序。
+- 不修改计划 schema、完成记录、撤销逻辑或云端同步接口；无 SQL 迁移。
+
 ## V10.8 版本履历与部署状态
 
 - 入口：`#open-release`；弹窗：`#release-dialog`。
