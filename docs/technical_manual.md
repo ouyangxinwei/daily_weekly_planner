@@ -1,3 +1,11 @@
+## V10.5 五级优先级实现
+
+- `validPriority(value)` 接受 1–5 的整数；其他值（含缺失、非整数、0 或大于 5）回退为 1。
+- 计划对象字段名仍为 `priority`，JSON 与 Supabase 快照结构不变；`schemaVersion` 继续为 1。
+- UI 提供五个星级按钮；列表按 `validPriority(plan.priority)` 绘制相应数量的 SVG 星形。高优先级排序沿用数值降序。
+- PDF 从 `.priority-display` 的无障碍标签读取优先级，因此输出 1–5 星。
+- 旧数据中的 1/2/3 不变；旧备份缺少该字段仍按 1 星处理。无需 SQL 迁移。
+
 # 技术手册
 
 ## V9 数据库认证接口
@@ -38,7 +46,7 @@
 }
 ```
 
-周期值包括 `daily`、`weekly`、`monthly`、`yearly`，以及临时的 `daily_random`、`weekly_random`、`monthly_random`。随机临时计划还保存创建时的 `cycleId`。计划分类允许 `未分类`、`工作`、`学习`、`生活`、`健康`、`财务`、`兴趣`。优先级是 1–3 的整数。提醒时间 `dueAt` 为本地 `YYYY-MM-DDTHH:mm` 字符串，`notifiedFor` 记录已发送提醒对应的时间；旧数据缺少这些字段时视为未设置提醒。读取时会检查 schema 版本、字段类型和周期枚举；旧数据缺少 category 时映射为“未分类”，缺少 priority 时映射为 1。列表文本通过 `textContent` 显示，不作为 HTML 执行。
+周期值包括 `daily`、`weekly`、`monthly`、`yearly`，以及临时的 `daily_random`、`weekly_random`、`monthly_random`。随机临时计划还保存创建时的 `cycleId`。计划分类允许 `未分类`、`工作`、`学习`、`生活`、`健康`、`财务`、`兴趣`。优先级是 1–5 的整数。提醒时间 `dueAt` 为本地 `YYYY-MM-DDTHH:mm` 字符串，`notifiedFor` 记录已发送提醒对应的时间；旧数据缺少这些字段时视为未设置提醒。读取时会检查 schema 版本、字段类型和周期枚举；旧数据缺少 category 时映射为“未分类”，缺少 priority 时映射为 1。列表文本通过 `textContent` 显示，不作为 HTML 执行。
 
 ### JSON 备份格式与校验
 
@@ -46,7 +54,7 @@
 
 ## 2.2 分类、筛选与排序
 
-计划 `category` 是本地受控枚举，`priority` 范围 1–3；旧版本数据和备份按默认值“未分类”和 1 星兼容。列表先按当前周期筛选，再按分类和标题／备注关键词筛选，最后按添加顺序、优先级、标题 localeCompare 或 ISO 创建时间排序。进度统计基于筛选后的可见计划。星形使用内嵌 SVG symbol，无外部图片资源。
+计划 `category` 是本地受控枚举，`priority` 范围 1–5；旧版本数据和备份按默认值“未分类”和 1 星兼容。列表先按当前周期筛选，再按分类和标题／备注关键词筛选，最后按添加顺序、优先级、标题 localeCompare 或 ISO 创建时间排序。进度统计基于筛选后的可见计划。星形使用内嵌 SVG symbol，无外部图片资源。
 
 ## 临时计划过期规则
 
