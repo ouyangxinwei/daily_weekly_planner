@@ -1,3 +1,11 @@
+## V10.10 首页星级统计与任务快速定位
+
+部署新版 index.html、sw.js 和更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-10-star-dashboard-jump。无需 Supabase SQL 或数据迁移，schemaVersion: 1 和现有 JSON 备份格式保持不变。
+
+首页欢迎语下方会显示 1–5 星未完成任务数量。统计仅包括每日、每周、每月、每年正式计划，排除已完成、已归档和随机临时计划。点击非零星级后进入任务数量最多的周期；并列时每日优先，其次每周、每月、每年。系统会清空搜索和分类筛选，保留排序模式，并定位高亮第一条匹配任务。
+
+更新后若没有看到新面板，请刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。统计为 0 的星级不可点击属于正常行为。
+
 ## V10.9 优先级默认排序更新
 
 部署新版 index.html、sw.js 及更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-9-priority-sorting。无需 Supabase SQL 或数据迁移，计划 schemaVersion: 1 不变。
