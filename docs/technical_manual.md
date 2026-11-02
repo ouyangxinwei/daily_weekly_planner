@@ -1,3 +1,13 @@
+## V10.10 首页星级统计与定位实现
+
+- 版本标识：APP_VERSION 为 V10.10_star_dashboard_jump；Service Worker cache 为 daily-weekly-planner-v10-10-star-dashboard-jump。
+- renderStarSummary() 遍历 state.plans，只纳入 daily、weekly、monthly、yearly，排除 archivedAt 非空及 state.completions[completionKey(plan)] === true 的计划；优先级经 validPriority() 归一为 1–5。
+- 统计使用 completionKey(plan)，因此每日／每周／每月／每年的完成状态均按当前周期计算；随机周期不计入。
+- 点击星级时按 daily → weekly → monthly → yearly 顺序查找最大计数；使用严格大于比较保留首次命中的周期作为并列规则。
+- 跳转时清空搜索和分类筛选，更新周期标签并调用统一 render()；排序偏好不变。列表行写入 data-priority，再查找首个匹配的 .task，平滑滚动并添加短时高亮 class。
+- 统计按钮由 DOM API 创建，标签使用 textContent；零计数按钮 disabled。功能不调用 commitState()，不修改 state、不新增存储键、不改变 schema 或 Supabase 接口。
+- 首页摘要在 render() 中同步刷新，因此完成状态、计划新增／编辑／归档／恢复、导入及云端下载等现有重绘操作都会更新计数。
+
 ## V10.9 优先级默认排序实现
 
 - 版本标识：APP_VERSION 为 V10.9_priority_sorting；Service Worker cache 为 daily-weekly-planner-v10-9-priority-sorting。
