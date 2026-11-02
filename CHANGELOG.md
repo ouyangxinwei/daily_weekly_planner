@@ -1,3 +1,12 @@
+## V10.8 · release_history_and_deploy_status — 2026-11-03
+
+- 首页顶部新增「版本与更新记录」入口，弹窗展示从 V0 至当前版本的完整 CHANGELOG。
+- 更新履历从 GitHub main 分支实时读取，网络不可用时提供 GitHub 文档链接。
+- 弹窗显示当前运行版本，并可刷新 GitHub Pages 部署状态。
+- 部署判断通过 GitHub API 比较 main 最新提交 SHA 与对应的 Pages build and deployment workflow：成功、进行中、失败或等待记录；显示提交短 SHA、更新时间及 Actions 运行链接。
+- 部署状态是 GitHub Actions 工作流结果，不等同于对用户设备缓存已更新的保证；PWA 仍可能因缓存需要重新打开。
+- 不修改计划数据结构、保存逻辑或 Supabase 数据库；升级 Service Worker 缓存名。
+
 ## V10.7 · quick_add_plan — 2026-11-02
 
 - 在计划列表中增加常驻快速添加输入框，可直接输入名称并按 Enter 或点击“添加”创建计划。
