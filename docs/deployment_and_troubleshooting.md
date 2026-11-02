@@ -1,3 +1,9 @@
+## V10.7 快速添加计划
+
+部署新版 `index.html`、`sw.js` 及更新后的文档。Service Worker 缓存名升级为 `daily-weekly-planner-v10-7-quick-add`；更新后重新载入网页，已安装 PWA 建议完全关闭后重新打开。无需 Supabase SQL 或数据迁移，`schemaVersion: 1` 保持不变。
+
+快速添加位于计划卡片进度条下方。输入名称后按 Enter 或点击“＋ 添加”。新计划进入每日视图，默认未完成、未分类、1 星且无提醒。保存失败时输入内容会保留；若出现存储错误，请先检查浏览器站点存储，不要清除网站数据。
+
 ## V10.6 保存一致性修复
 
 部署新版 `index.html` 与 `sw.js`。Service Worker 缓存名升级为 V10.6，更新后建议重新载入页面；已安装 PWA 可完全关闭后重新打开。无需数据库迁移，数据结构保持 `schemaVersion: 1`。
