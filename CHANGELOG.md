@@ -1,3 +1,11 @@
+## V10.7 · quick_add_plan — 2026-11-02
+
+- 在计划列表中增加常驻快速添加输入框，可直接输入名称并按 Enter 或点击“添加”创建计划。
+- 快速添加默认加入“每日”计划，默认未完成、未分类、1 星，不设置提醒；成功后切换到每日视图并清空输入框，便于连续录入。
+- 快速添加复用 V10.6 `commitState()` 事务保存；只有 LocalStorage 写入成功后才清空输入框、刷新界面并提示成功。失败时保留输入内容。
+- 不改变 `schemaVersion: 1`、现有计划字段结构、完整新增／编辑表单或 Supabase 数据库，无需 SQL 迁移。
+- 更新 PWA 缓存名、README、功能说明、技术手册、部署说明及验收文档。
+
 ## V10.6 - save consistency - 2026-11-02
 
 - Added a shared transaction helper that persists a candidate state before replacing the live state.
