@@ -1,3 +1,11 @@
+## V10.9 优先级默认排序更新
+
+部署新版 index.html、sw.js 及更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-9-priority-sorting。无需 Supabase SQL 或数据迁移，计划 schemaVersion: 1 不变。
+
+首次使用 V10.9 时，若当前浏览器没有已保存的排序偏好，将默认显示「优先级（未完成优先）」。之后用户切换的排序方式保存在该浏览器的独立 LocalStorage 键中。排序偏好不会随 JSON 备份或 Supabase 云端快照迁移；其他设备首次使用时也会默认优先级排序。
+
+若仍显示旧排序界面，请刷新页面；已安装 PWA 建议完全关闭后重新打开，以便 Service Worker 更新缓存。
+
 ## V10.8 版本记录与部署状态
 
 首页「版本与更新记录」弹窗通过公开 GitHub 内容地址读取 CHANGELOG，并调用 GitHub API 检查 main 最新提交与 Pages 构建部署工作流。若 API 受网络限制或匿名请求达到额度，状态会显示「检查失败」，可稍后刷新；完整履历仍可通过弹窗内 GitHub 链接查看。
