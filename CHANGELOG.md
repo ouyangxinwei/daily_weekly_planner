@@ -1,3 +1,11 @@
+## V10.6 - save consistency - 2026-11-02
+
+- Added a shared transaction helper that persists a candidate state before replacing the live state.
+- Save failures no longer show successful completion for create, edit, completion, delete, archive, restore, permanent delete, import, cloud download, undo, or cleanup.
+- Undo history and UI refresh now follow successful persistence.
+- Existing schemaVersion 1 and cloud data format are unchanged. No database migration is needed.
+- Updated the service worker cache. Browser failure-path tests remain required.
+
 ## V10.5 · five_star_priority — 2026-11-02
 
 - 将计划优先级从 1–3 星扩展为 1–5 星，1 星最低、5 星最高。
