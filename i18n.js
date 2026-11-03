@@ -34,6 +34,7 @@ function trimTranslate(value,lang){
  if((m=core.match(/^已永久删除 (\d+) 个计划$/)))return lead+(lang==='en'?'Permanently deleted '+m[1]+' plans':m[1]+' 件の計画を完全に削除しました')+trail;
  if((m=core.match(/^已撤销：(.*)$/)))return lead+(lang==='en'?'Undone: ':'元に戻しました：')+m[1]+trail;
  if((m=core.match(/^计划已保存，但(.*)$/)))return lead+(lang==='en'?'Plan saved, but '+m[1]:'計画を保存しましたが、'+m[1])+trail;
+ if((m=core.match(/^Supabase 请求失败（(.*)）$/)))return lead+(lang==='en'?'Supabase request failed (HTTP '+m[1]+')':'Supabase リクエストに失敗しました（HTTP '+m[1]+'）')+trail;
  if((m=core.match(/^GitHub API 暂不可用（HTTP (.*)）$/)))return lead+(lang==='en'?'GitHub API is temporarily unavailable (HTTP '+m[1]+')':'GitHub API は一時的に利用できません（HTTP '+m[1]+'）')+trail;
  if((m=core.match(/^第 (\d+) 页$/)))return lead+(lang==='en'?'Page '+m[1]:m[1]+' ページ')+trail;
  if((m=core.match(/^(.+) · 删除于 (.+) · (\d+) 天后清理$/))){const period=trimTranslate(m[1],lang);return lead+(lang==='en'?period+' · Deleted '+m[2]+' · Cleanup in '+m[3]+' days':period+' · 削除日時 '+m[2]+' · '+m[3]+' 日後に削除')+trail}
@@ -45,7 +46,7 @@ function trimTranslate(value,lang){
  if((m=core.match(/^当前 main 提交 (.+) 的 Pages 部署尚未完成。(?: 查看运行记录：(.*))?$/)))return lead+(lang==='en'?'Pages deployment for current main commit '+m[1]+' is still in progress.'+(m[2]?' View run: '+m[2]:''):'現在の main コミット '+m[1]+' の Pages デプロイはまだ完了していません。'+(m[2]?' 実行記録：'+m[2]:''))+trail;
  if((m=core.match(/^(.+) 的部署结果：$/)))return lead+(lang==='en'?'Deployment result for '+m[1]+':':m[1]+' のデプロイ結果：')+trail;
  if((m=core.match(/^main 最新提交 (.+) 尚无对应的 Pages 部署结果。$/)))return lead+(lang==='en'?'No Pages deployment result is available yet for the latest main commit '+m[1]+'.':'main の最新コミット '+m[1]+' に対応する Pages デプロイ結果はまだありません。')+trail;
- if((m=core.match(/^最近一次部署记录：(.*)$/)))return lead+(lang==='en'?' Latest deployment record: '+m[1]:' 最新のデプロイ記録：'+m[1])+trail;
+ if((m=core.match(/^最近一次部署记录：(.*)$/)))return lead+(lang==='en'?'Latest deployment record: '+m[1]:'最新のデプロイ記録：'+m[1])+trail;
  if((m=core.match(/^将“(.+)”移入回收站？$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash?':'「'+m[1]+'」をゴミ箱に移動しますか？')+trail;
  if((m=core.match(/^将“(.+)”移入回收站？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash? It can be restored within 30 days.':'「'+m[1]+'」をゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
  if((m=core.match(/^永久删除“(.+)”？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete “'+m[1]+'”? This cannot be undone.':'「'+m[1]+'」を完全に削除しますか？この操作は取り消せません。')+trail;
