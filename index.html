@@ -140,7 +140,7 @@
       const records=rows.map((row,index)=>{
         const title=row.querySelector('.task-title')?.textContent||'（无标题）';
         const categoryText=row.querySelector('.category-tag')?.textContent||'未分类';
-        const priority=(row.querySelector('.priority-display')?.getAttribute('aria-label')||'').match(/\\d+/)?.[0]||'';
+        const priority=(row.querySelector('.priority-display')?.getAttribute('aria-label')||'').match(/\d+/)?.[0]||'';
         const due=row.querySelector('.due-at')?.textContent||'';
         const reference=row.querySelector('.task-reference a');
         const note=row.querySelector('.task-note')?.textContent||'';
