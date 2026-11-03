@@ -144,7 +144,7 @@
       const query=$('search-input').value.trim();
       const category=$('category-filter').value;
       const sortLabel=$('sort-order').selectedOptions[0]?.textContent||window.PlannerI18n.t('默认顺序');
-      const metadata=[activeModule==='organize'?t('整理项目：')+rows.length:t('计划周期：')+periodLabel,t(activeModule==='organize'?'整理数量：':'计划数量：')+rows.length,t('导出时间：')+new Date().toLocaleString(locale),t('分类：')+(category==='all'?t('所有分类'):t(category)),t('排序：')+sortLabel];
+      const metadata=activeModule==='organize'?[t('整理项目：')+rows.length,t('导出时间：')+new Date().toLocaleString(locale),t('分类：')+(category==='all'?t('所有分类'):t(category)),t('排序：')+sortLabel]:[t('计划周期：')+periodLabel,t('计划数量：')+rows.length,t('导出时间：')+new Date().toLocaleString(locale),t('分类：')+(category==='all'?t('所有分类'):t(category)),t('排序：')+sortLabel];
       if(query)metadata.push(t('搜索关键词：')+query);
       const records=rows.map((row,index)=>{
         const title=row.querySelector('.task-title')?.textContent||'（无标题）';
