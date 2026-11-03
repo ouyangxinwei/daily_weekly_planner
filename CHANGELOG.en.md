@@ -1,3 +1,15 @@
+## V10.13 · Independent Organization Module — 2026-11-03
+
+- Added an **Organize** entry beside **Plans** on the home screen. Both modules run in the same app and reuse the existing UI and business logic.
+- Reused create, edit, delete, quick add, search, filtering, sorting, category management, archive, Trash, undo, JSON backup/restore and PWA behavior.
+- Added five initial organization categories in order: Books, Electronics, Software/Apps, Websites and Other. New items default to Books. Categories remain user-manageable; deleting a used category requires moving its items first.
+- Organization content, categories, completion state, archive and Trash use the separate local storage key `personal-organizer:v1`. Plans retain `personal-planner:v1`; the two modules do not overwrite each other's local business data.
+- Organization uses one flat list rather than plan periods. Shared item fields include title, notes, reference URL, priority, reminder and category.
+- JSON exports include `moduleType`; backups are module-specific and cannot be imported into the other module by mistake.
+- Added an `organizer` partition to the existing Supabase JSON snapshot. Upload reads and merges the cloud snapshot before updating only the active module; download restores only the active module. Legacy plan-only snapshots remain supported.
+- Existing Supabase RPC and database schema are unchanged; the root planner fields continue to satisfy current validation. No SQL migration; planner schemaVersion remains 1.
+- Updated Chinese, English and Japanese UI strings, PWA cache and V10.13 requirements, acceptance, impact, technical, deployment and delivery documentation.
+
 ## V10.12 · Custom Category Management — 2026-11-03
 
 - Added category management for adding, renaming and deleting categories while retaining the original seven categories and order.
