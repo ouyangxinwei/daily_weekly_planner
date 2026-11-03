@@ -121,6 +121,7 @@ function init(){
  const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='characterData')translateNode(record.target);else if(record.type==='childList'){record.addedNodes.forEach(n=>{if(n.nodeType===Node.TEXT_NODE)translateNode(n);else if(n.nodeType===Node.ELEMENT_NODE)apply(n)})}else if(record.type==='attributes')translateAttribute(record.target,record.attributeName)}});
  observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','aria-valuetext','title','alt']});
  const nativeConfirm=window.confirm.bind(window);window.confirm=message=>nativeConfirm(t(message));
+ window.dispatchEvent(new CustomEvent('planner-language-change',{detail:{language,locale:locales[language]}}));
 }
 window.PlannerI18n={getLanguage,setLanguage,locale,t};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
