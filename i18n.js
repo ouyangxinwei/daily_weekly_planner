@@ -24,6 +24,7 @@ function trimTranslate(value,lang){
  if((m=core.match(/^(\d+) 星$/)))return lead+(lang==='en'?m[1]+' Stars':'星 '+m[1])+trail;
  if((m=core.match(/^(\d+) 星优先级$/)))return lead+(lang==='en'?m[1]+'-star priority':'星 '+m[1]+' の優先度')+trail;
  if((m=core.match(/^提醒：(.*)$/)))return lead+(lang==='en'?'Reminder: ':'リマインダー：')+m[1]+trail;
+ if((m=core.match(/^选择(.+)，标记完成$/)))return lead+(lang==='en'?'Mark '+m[1]+' as complete':m[1]+' を完了にする')+trail;
  if((m=core.match(/^选择(.+)$/)))return lead+(lang==='en'?'Select ':'選択：')+m[1]+trail;
  if((m=core.match(/^编辑：(.*)$/)))return lead+(lang==='en'?'Edit: ':'編集：')+m[1]+trail;
  if((m=core.match(/^归档：(.*)$/)))return lead+(lang==='en'?'Archive: ':'アーカイブ：')+m[1]+trail;
@@ -44,7 +45,7 @@ function trimTranslate(value,lang){
  if((m=core.match(/^当前 main 提交 (.+) 的 Pages 部署尚未完成。(?: 查看运行记录：(.*))?$/)))return lead+(lang==='en'?'Pages deployment for current main commit '+m[1]+' is still in progress.'+(m[2]?' View run: '+m[2]:''):'現在の main コミット '+m[1]+' の Pages デプロイはまだ完了していません。'+(m[2]?' 実行記録：'+m[2]:''))+trail;
  if((m=core.match(/^(.+) 的部署结果：$/)))return lead+(lang==='en'?'Deployment result for '+m[1]+':':m[1]+' のデプロイ結果：')+trail;
  if((m=core.match(/^main 最新提交 (.+) 尚无对应的 Pages 部署结果。$/)))return lead+(lang==='en'?'No Pages deployment result is available yet for the latest main commit '+m[1]+'.':'main の最新コミット '+m[1]+' に対応する Pages デプロイ結果はまだありません。')+trail;
- if((m=core.match(/^ 最近一次部署记录：(.*)$/)))return lead+(lang==='en'?' Latest deployment record: '+m[1]:' 最新のデプロイ記録：'+m[1])+trail;
+ if((m=core.match(/^最近一次部署记录：(.*)$/)))return lead+(lang==='en'?' Latest deployment record: '+m[1]:' 最新のデプロイ記録：'+m[1])+trail;
  if((m=core.match(/^将“(.+)”移入回收站？$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash?':'「'+m[1]+'」をゴミ箱に移動しますか？')+trail;
  if((m=core.match(/^将“(.+)”移入回收站？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash? It can be restored within 30 days.':'「'+m[1]+'」をゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
  if((m=core.match(/^永久删除“(.+)”？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete “'+m[1]+'”? This cannot be undone.':'「'+m[1]+'」を完全に削除しますか？この操作は取り消せません。')+trail;
