@@ -145,3 +145,10 @@
 顶部“导出 PDF”按钮从当前渲染后的 `#task-list .task` DOM 读取记录，因此导出范围与屏幕当前可见结果一致：当前周期、搜索关键词、分类筛选和排序均生效。回收站、归档管理窗口以及被筛选隐藏的计划不会被导出。导出器将当前可见记录转为独立打印页，采用内联 CSS 和系统中文字体回退，不依赖第三方库或在线 CDN。浏览器打印对话框中选择“另存为 PDF”即可保存。
 
 每条计划使用 `.plan-record { break-inside: avoid; page-break-inside: avoid; }`，长备注保留换行并允许断词，长 URL 可折行；打印使用 A4 页面、适合打印的页边距和页码。该 CSS 可避免一般长度的计划记录被拆开，但 CSS 分页规则不能保证将超过整页可打印高度的单条记录缩放到一页；此类极端长内容仍可能由浏览器分页引擎拆开。导出只读取 DOM，不修改本地计划或云端快照，不需要数据库迁移。
+
+
+## V10.11 多语言模块设计
+
+`i18n.js` 在应用脚本之前加载，提供 `window.PlannerI18n` 的 `getLanguage()`、`setLanguage(lang)`、`locale()` 和 `t(text)` 接口。翻译字典以现有中文系统文案为键，支持 zh（默认）、en、ja。语言偏好保存在独立 LocalStorage 键 `personal-planner:language:v1`，不写入业务状态对象。模块扫描系统界面文本及 placeholder、aria-label、title 等显示属性，并监听后续动态 DOM 更新；计划标题、备注、参考链接等用户内容节点被排除。日期格式通过当前语言 locale 输出。版本履历按语言加载 `CHANGELOG.md`、`CHANGELOG.en.md` 或 `CHANGELOG.ja.md`。PDF 导出使用当前语言的系统标签。
+
+语言功能不得改变 `schemaVersion: 1`、计划字段、分类枚举、周期枚举、完成记录、JSON 备份、Supabase RPC 或事务式保存机制。新增语言仅扩展字典和对应版本履历。
