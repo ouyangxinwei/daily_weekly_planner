@@ -38,7 +38,7 @@ function trimTranslate(value,lang){
  if((m=core.match(/^(.+) · 删除于 (.+) · (\d+) 天后清理$/))){const period=trimTranslate(m[1],lang);return lead+(lang==='en'?period+' · Deleted '+m[2]+' · Cleanup in '+m[3]+' days':period+' · 削除日時 '+m[2]+' · '+m[3]+' 日後に削除')+trail}
  if((m=core.match(/^(.+) · 归档于 (.+)$/))){const period=trimTranslate(m[1],lang);return lead+(lang==='en'?period+' · Archived '+m[2]:period+' · アーカイブ日時 '+m[2])+trail}
 
- if((m=core.match(/^([1-5]) 星，(\\d+) 个未完成任务(，不可定位)?$/)))return lead+(lang==='en'?m[1]+' stars, '+m[2]+' open tasks'+(m[3]?', not clickable':''): '星 '+m[1]+'：未完了タスク '+m[2]+' 件'+(m[3]?'（移動不可）':''))+trail;
+ if((m=core.match(/^([1-5]) 星，(\d+) 个未完成任务(，不可定位)?$/)))return lead+(lang==='en'?m[1]+' stars, '+m[2]+' open tasks'+(m[3]?', not clickable':''): '星 '+m[1]+'：未完了タスク '+m[2]+' 件'+(m[3]?'（移動不可）':''))+trail;
  if((m=core.match(/^(.+)，标记完成$/)))return lead+(lang==='en'?'Mark '+m[1]+' as complete':m[1]+' を完了にする')+trail;
  if((m=core.match(/^GitHub Pages 构建与部署已成功 · (.*)$/)))return lead+(lang==='en'?'GitHub Pages build and deployment succeeded · '+m[1]:'GitHub Pages のビルドとデプロイに成功しました · '+m[1])+trail;
  if((m=core.match(/^当前 main 提交 (.+) 的 Pages 部署尚未完成。(?: 查看运行记录：(.*))?$/)))return lead+(lang==='en'?'Pages deployment for current main commit '+m[1]+' is still in progress.'+(m[2]?' View run: '+m[2]:''):'現在の main コミット '+m[1]+' の Pages デプロイはまだ完了していません。'+(m[2]?' 実行記録：'+m[2]:''))+trail;
@@ -48,11 +48,11 @@ function trimTranslate(value,lang){
  if((m=core.match(/^将“(.+)”移入回收站？$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash?':'「'+m[1]+'」をゴミ箱に移動しますか？')+trail;
  if((m=core.match(/^将“(.+)”移入回收站？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move “'+m[1]+'” to Trash? It can be restored within 30 days.':'「'+m[1]+'」をゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
  if((m=core.match(/^永久删除“(.+)”？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete “'+m[1]+'”? This cannot be undone.':'「'+m[1]+'」を完全に削除しますか？この操作は取り消せません。')+trail;
- if((m=core.match(/^确定将“(.+)”标签中的全部 (\\d+) 个计划移入回收站吗？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move all '+m[2]+' plans in the “'+trimTranslate(m[1],lang)+'” tab to Trash? They can be restored within 30 days.':'「'+trimTranslate(m[1],lang)+'」タブの計画 '+m[2]+' 件すべてをゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
- if((m=core.match(/^确定将“(.+)”标签中已完成的 (\\d+) 个计划移入回收站吗？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move '+m[2]+' completed plans in the “'+trimTranslate(m[1],lang)+'” tab to Trash? They can be restored within 30 days.':'「'+trimTranslate(m[1],lang)+'」タブの完了済み計画 '+m[2]+' 件をゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
- if((m=core.match(/^永久删除选中的 (\\d+) 个计划？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete the '+m[1]+' selected plans? This cannot be undone.':'選択した計画 '+m[1]+' 件を完全に削除しますか？この操作は取り消せません。')+trail;
- if((m=core.match(/^永久删除回收站中的全部 (\\d+) 个计划？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete all '+m[1]+' plans in Trash? This cannot be undone.':'ゴミ箱内の計画 '+m[1]+' 件すべてを完全に削除しますか？この操作は取り消せません。')+trail;
- if((m=core.match(/^将导入 (\\d+) 个计划（普通计划 (\\d+) 个，随机临时计划 (\\d+) 个）。\\n\\n导入会替换此浏览器当前保存的所有计划，无法自动撤销。建议先导出当前备份。\\n\\n确定继续吗？$/)))return lead+(lang==='en'?'Import '+m[1]+' plans ('+m[2]+' regular, '+m[3]+' temporary random).\\n\\nImporting replaces all plans saved in this browser and cannot be undone automatically. Export a backup first.\\n\\nContinue?':'計画 '+m[1]+' 件をインポートします（通常 '+m[2]+' 件、一時ランダム '+m[3]+' 件）。\\n\\nインポートすると、このブラウザーに保存されているすべての計画が置き換えられ、自動では元に戻せません。先にバックアップをエクスポートしてください。\\n\\n続行しますか？')+trail;
+ if((m=core.match(/^确定将“(.+)”标签中的全部 (\d+) 个计划移入回收站吗？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move all '+m[2]+' plans in the “'+trimTranslate(m[1],lang)+'” tab to Trash? They can be restored within 30 days.':'「'+trimTranslate(m[1],lang)+'」タブの計画 '+m[2]+' 件すべてをゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
+ if((m=core.match(/^确定将“(.+)”标签中已完成的 (\d+) 个计划移入回收站吗？可在 30 天内恢复。$/)))return lead+(lang==='en'?'Move '+m[2]+' completed plans in the “'+trimTranslate(m[1],lang)+'” tab to Trash? They can be restored within 30 days.':'「'+trimTranslate(m[1],lang)+'」タブの完了済み計画 '+m[2]+' 件をゴミ箱に移動しますか？30 日以内に復元できます。')+trail;
+ if((m=core.match(/^永久删除选中的 (\d+) 个计划？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete the '+m[1]+' selected plans? This cannot be undone.':'選択した計画 '+m[1]+' 件を完全に削除しますか？この操作は取り消せません。')+trail;
+ if((m=core.match(/^永久删除回收站中的全部 (\d+) 个计划？此操作无法撤销。$/)))return lead+(lang==='en'?'Permanently delete all '+m[1]+' plans in Trash? This cannot be undone.':'ゴミ箱内の計画 '+m[1]+' 件すべてを完全に削除しますか？この操作は取り消せません。')+trail;
+ if((m=core.match(/^将导入 (\d+) 个计划（普通计划 (\d+) 个，随机临时计划 (\d+) 个）。\n\n导入会替换此浏览器当前保存的所有计划，无法自动撤销。建议先导出当前备份。\n\n确定继续吗？$/)))return lead+(lang==='en'?'Import '+m[1]+' plans ('+m[2]+' regular, '+m[3]+' temporary random).\n\nImporting replaces all plans saved in this browser and cannot be undone automatically. Export a backup first.\n\nContinue?':'計画 '+m[1]+' 件をインポートします（通常 '+m[2]+' 件、一時ランダム '+m[3]+' 件）。\n\nインポートすると、このブラウザーに保存されているすべての計画が置き換えられ、自動では元に戻せません。先にバックアップをエクスポートしてください。\n\n続行しますか？')+trail;
  if((m=core.match(/^(.+) /)))return raw;
  return raw;
 }
