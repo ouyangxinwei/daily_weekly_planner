@@ -26,7 +26,7 @@
 
 优先级由 1–3 星扩展为 1–5 星。1 星最低、5 星最高；旧任务的 1/2/3 星数值保持不变，新增 4/5 星。新建、编辑、列表、优先级排序、JSON 备份恢复、云端快照和 PDF 导出均支持五级。数据结构仍为 schemaVersion 1，无需 SQL 迁移。
 
-# 慢慢计划 V10.10 · star_dashboard_and_task_jump
+# 慢慢计划 V10.11 · multilingual_ui
 
 每日、每周、每月、每年的轻量计划网页。无需构建步骤或后端，可直接发布到 GitHub Pages。
 
@@ -61,6 +61,7 @@
 - 通过 Supabase 数据库中的用户名和密码认证后进入计划系统。
 - 增加每日随机、每周随机、每月随机临时计划视图；临时计划只保留到本周期结束。
 - 七个计划视图均提供清空当前标签全部计划、清空当前标签已完成计划的操作；执行前会确认。
+- 支持简体中文、English、日本語三种界面语言；首次默认中文，切换后记住上次选择。登录页和主界面均可切换；只翻译系统界面，不修改用户输入的计划名称、备注或 URL。
 - 自适应手机和桌面布局；提供可选的 PWA 离线缓存。
 
 ## 数据说明
@@ -75,11 +76,14 @@
 
 ```text
 index.html
+i18n.js
 manifest.webmanifest
 sw.js
 icon.svg
 README.md
 CHANGELOG.md
+CHANGELOG.en.md
+CHANGELOG.ja.md
 docs/
   部署与故障排查.md
   AI协作开发指南.md
