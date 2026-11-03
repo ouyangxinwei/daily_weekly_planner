@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-12-custom-category-management';
+const CACHE_NAME = 'daily-weekly-planner-v10-13-organize-module';
 const APP_FILES = ['./', './index.html', './i18n.js', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
