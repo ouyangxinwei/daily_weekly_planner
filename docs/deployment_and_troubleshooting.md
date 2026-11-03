@@ -1,3 +1,7 @@
+# V10.12 自定义分类管理部署说明
+
+部署新版 index.html、i18n.js、sw.js、三种语言的 CHANGELOG 和文档。Service Worker 缓存名为 daily-weekly-planner-v10-12-custom-category-management。无需 Supabase SQL 或数据库迁移，schemaVersion: 1 不变。分类配置进入本地状态、JSON 备份／恢复和 Supabase 快照。旧版数据缺少 categories 时自动补充原有七个分类。删除使用中分类前需选择目标分类，普通、归档和回收站计划先迁移再删除。更新后刷新网页；已安装 PWA 请完全关闭后重新打开。不要直接清除整个站点数据。
+
 ## V10.10 首页星级统计与任务快速定位
 
 部署新版 index.html、sw.js 和更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-10-star-dashboard-jump。无需 Supabase SQL 或数据迁移，schemaVersion: 1 和现有 JSON 备份格式保持不变。

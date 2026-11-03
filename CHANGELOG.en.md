@@ -1,3 +1,13 @@
+## V10.12 · Custom Category Management — 2026-11-03
+
+- Added category management for adding, renaming and deleting categories while retaining the original seven categories and order.
+- New and quick-added plans default to the first category. Forms and filters refresh when categories change.
+- Names must be non-empty, no longer than 30 characters, and unique case-insensitively. At least one category must remain.
+- Renaming updates active, archived and Trash plans.
+- Deleting a category in use requires a destination. Plans are moved in one transaction before deletion; cancellation or save failure leaves data unchanged, and deletion can be undone.
+- Categories sync through local storage, JSON backup/restore and Supabase snapshots. Older data uses the original categories. schemaVersion: 1 remains unchanged; no SQL migration.
+- Updated Chinese, English and Japanese UI, PWA cache and V10.12 specifications, acceptance, impact and delivery documents.
+
 ## V10.11 · Multilingual UI — 2026-11-03
 - Added a standalone i18n module for Simplified Chinese, English and Japanese. Chinese is the first-use default; language changes apply immediately and persist in a separate browser setting.
 - Added language selectors to the sign-in screen and app header. System UI, dialogs, feedback, sync, date/time, notifications, PDF export and release history follow the selected language.

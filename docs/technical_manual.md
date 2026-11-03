@@ -1,3 +1,12 @@
+# V10.12 分类管理实现
+
+- 业务状态新增 categories 数组，默认保留原有七项；计划 category 字段不变，schemaVersion: 1 不变。
+- normalizeCategories() 和 safeState() 兼容旧状态／旧备份缺少 categories 的情况，并兼顾回收站计划引用。
+- 分类增删改通过 commitState() 事务保存。改名同步 plans 与 trash[].plan；删除使用中的分类时先迁移两处引用，再移除分类。撤销快照包含完整状态。
+- renderCategoryOptions() 统一刷新新建／编辑下拉框和筛选器。新建及快速添加均使用 state.categories[0]。
+- JSON 备份与 Supabase 整份快照均包含 categories；旧快照自动回退原有分类。无需 SQL 迁移。
+- i18n 增加中英日静态文案，并跳过用户自定义分类名称。
+
 ## V10.10 首页星级统计与定位实现
 
 - 版本标识：APP_VERSION 为 V10.10_star_dashboard_jump；Service Worker cache 为 daily-weekly-planner-v10-10-star-dashboard-jump。
