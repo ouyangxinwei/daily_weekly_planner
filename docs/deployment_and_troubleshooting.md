@@ -1,3 +1,11 @@
+# V10.13 整理模块部署与数据说明
+
+- V10.13 沿用现有 GitHub Pages 和 Supabase 配置，不需要新建数据库表或执行 SQL 迁移。
+- 整理数据本地保存在 `personal-organizer:v1`；计划仍保存在 `personal-planner:v1`。清除浏览器数据前，请分别在两个模块导出 JSON 备份。
+- 云端上传会先读取当前完整快照，再合并当前模块；请在整理模块中上传整理数据，在计划模块中上传计划数据。下载只替换当前打开的模块。
+- 旧云端快照只有计划数据时仍可下载计划；整理模块会提示尚无整理备份，上传整理数据后才建立 organizer 分区。
+- JSON 文件包含 moduleType，不能将整理备份导入计划，反之亦然。跨设备恢复时先登录相同 Supabase 账号，再分别下载计划和整理数据。
+
 # V10.12 自定义分类管理部署说明
 
 部署新版 index.html、i18n.js、sw.js、三种语言的 CHANGELOG 和文档。Service Worker 缓存名为 daily-weekly-planner-v10-12-custom-category-management。无需 Supabase SQL 或数据库迁移，schemaVersion: 1 不变。分类配置进入本地状态、JSON 备份／恢复和 Supabase 快照。旧版数据缺少 categories 时自动补充原有七个分类。删除使用中分类前需选择目标分类，普通、归档和回收站计划先迁移再删除。更新后刷新网页；已安装 PWA 请完全关闭后重新打开。不要直接清除整个站点数据。
