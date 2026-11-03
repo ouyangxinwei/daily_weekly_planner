@@ -1,3 +1,12 @@
+# V10.13 整理模块技术实现
+
+- 模块标识：`activeModule`，取值 `plan` 或 `organize`；两个模块共用页面和渲染／编辑／分类／归档／回收站引擎。
+- 本地存储：计划使用 `personal-planner:v1`，整理使用 `personal-organizer:v1`。切换模块时加载对应状态；`save()` 按当前模块写入独立键。整理默认分类为书籍、电子产品、软件/APP、网站、其他，项目周期固定为 `daily` 以复用既有状态校验，但 UI 隐藏周期选择并将列表作为整体显示。
+- JSON：导出增加 `moduleType`（`plan`／`organize`）。整理导入要求 `moduleType: organize`；计划拒绝整理备份，旧版无 moduleType 的计划备份仍可导入。
+- Supabase：沿用 `planner_get_data`／`planner_put_data` RPC。云端根对象继续保存原计划 schema（`schemaVersion`、`plans`、`categories`、`completions`、`trash`），另加 `organizer` 对象保存整理完整状态。上传前先读取远端快照，只替换当前模块并保留另一个分区；下载只解析当前模块。旧版无 `organizer` 字段时视为尚无整理云端备份。
+- SQL `planner_put_data` 仅校验根对象的 schemaVersion、plans 和 completions，允许额外 JSON 字段，因此无需 SQL 迁移；计划 schemaVersion 保持 1。
+- Service Worker cache 更新至 `daily-weekly-planner-v10-13-organize-module`。
+
 # V10.12 分类管理实现
 
 - 业务状态新增 categories 数组，默认保留原有七项；计划 category 字段不变，schemaVersion: 1 不变。
