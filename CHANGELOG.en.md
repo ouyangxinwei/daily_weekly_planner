@@ -1,3 +1,13 @@
+## V10.17 · Runtime Log Viewer — 2026-11-04
+
+- Added an in-app Runtime Logs entry so users can inspect locally stored logs without browser developer tools.
+- Added overview counts for total logs, ERROR, WARN, latest error time, and IndexedDB/in-memory storage status.
+- Added filters for level, module and date range, plus keyword search across feature, function, message and error text.
+- Added a detail view with redacted fields, error information, Execution ID, span relationships, duration and the complete trace for the selected execution.
+- Added JSON/CSV export of the current filtered result, manual refresh, clear-all with confirmation, and a DEBUG toggle (off by default).
+- Added Chinese, English and Japanese UI translations and responsive mobile layout. Logs remain local to IndexedDB, are retained for 30 days, and are never uploaded.
+- No changes to four-module business data, JSON backup format, Supabase RPC or database schema.
+
 ## V10.16 · runtime_logging_foundation — 2026-11-04
 
 - Added a standalone runtime logger module using IndexedDB, isolated from the four business modules' LocalStorage data.
