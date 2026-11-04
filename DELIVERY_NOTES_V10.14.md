@@ -9,11 +9,11 @@
 - 保留中英日、PDF、分类管理、归档、回收站、撤销和 PWA。
 
 ## 检查记录
-- GitHub Actions 静态检查：待运行／待核验。
+- GitHub Actions 静态检查：已通过（PR #1，run #19；验证 JavaScript 语法与 V10.14 四模块静态契约）。
 - 真实浏览器交互：尚未执行。
 - Supabase 线上四分区上传／下载：尚未执行。
 - Android PWA 安装与离线：尚未执行。
-- Pages 部署：以最新提交 SHA 对应的 Pages workflow 结果为准；未核验前不得标记部署成功。
+- Pages 部署：PR 合并至 main 后等待对应 main SHA 的 Pages build and deployment workflow；成功前不得标记部署完成。
 
 ## 数据安全
 不修改 Supabase SQL schema；保留旧 organizer 云端分区和无 moduleType 的计划备份兼容。分类迁移保存失败时不覆盖旧数据。
