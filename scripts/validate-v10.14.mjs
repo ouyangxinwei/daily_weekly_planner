@@ -15,7 +15,7 @@ const required = [
   ['work defaults', "WORK_DEFAULT_CATEGORIES=['待处理','进行中','已完成','工作记录','会议','其他']"],
   ['language defaults', "LANGUAGE_DEFAULT_CATEGORIES=['英语','德语','俄语','日语','其他']"],
   ['plan migration', 'migrateLegacyPlanWorkCategory'],
-  ['trash migration', "t.plan.category==='工作'"],
+  ['trash migration', "t.plan?.category==='工作'"],
   ['fixed Uncategorized', "category==='未分类'"],
   ['work status field', 'id="work-status-field"'],
   ['persistent completion key', 'plan.id}|${activeModule}'],
