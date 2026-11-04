@@ -1,3 +1,13 @@
+## V10.14 · Four-Module Management — 2026-11-04
+
+- Fixed home-module order: Plans → Work → Foreign Language Learning → Organize. All modules reuse the existing UI and management actions while keeping their data independent.
+- Work categories: To Do, In Progress, Completed, Work Log, Meetings, Other. Categories remain separate from the Work task-status field (To Do / In Progress / Completed), which stays synchronized with the completion control.
+- Foreign Language Learning categories: English, German, Russian, Japanese, Other. Norwegian is intentionally excluded. The first release uses the existing general record workflow, not a dedicated flashcard or spaced-repetition system.
+- Removed Work from Plan categories. Existing Plan records in the Work category—including archived and Trash records—are moved to the fixed, non-editable/non-deletable Uncategorized category without changing other fields.
+- Added independent local storage, categories, archive, Trash, and JSON `moduleType` backups for all four modules. Legacy Plan backups without `moduleType` remain supported.
+- Extended the existing Supabase JSON snapshot with `work` and `language` partitions while preserving the legacy `organizer` partition. Module-specific upload/download does not overwrite other modules; no SQL migration is required.
+- Retained Chinese, English, Japanese, PDF export, undo, category management, and PWA support. The app remembers the last active module and updates its service-worker cache.
+
 ## V10.13 · Independent Organization Module — 2026-11-03
 
 - Added an **Organize** entry beside **Plans** on the home screen. Both modules run in the same app and reuse the existing UI and business logic.
