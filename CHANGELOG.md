@@ -1,3 +1,14 @@
+## V10.16 · runtime_logging_foundation — 2026-11-04
+
+- 新增独立运行日志核心模块 `logger.js`，使用 IndexedDB 保存日志，不与四个业务模块的 LocalStorage 数据混用。
+- 建立 ERROR、WARN、INFO、DEBUG 等级；DEBUG 默认关闭。
+- 建立统一日志记录结构与 START / END / FAILED / CANCELLED 执行追踪 API，支持 Execution ID、函数跨度、耗时和关联调用。
+- 增加 30 天过期清理、约 10,000 条容量保护、敏感字段脱敏及有限内存降级；日志不可用时不阻断业务启动。
+- 增加全局未捕获错误与未处理 Promise rejection 的基础记录。
+- 新增最终开发规格文档 `docs/runtime_logging_V1.0_final_spec.md`。
+- 本阶段完成日志基础设施；日志查看页面、业务函数覆盖、健康检查及专项验收将在后续 Phase 实施。
+- 更新 Service Worker 缓存版本；不修改四模块业务数据结构、备份格式或 Supabase 数据库。
+
 ## V10.15 · whole_cloud_sync — 2026-11-04
 
 - 新增四模块一键整体上传与整体下载，覆盖计划、工作、外语学习和整理四个云端分区；原有当前模块独立上传／下载保持不变。
