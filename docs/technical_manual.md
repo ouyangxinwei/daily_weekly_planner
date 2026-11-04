@@ -1,3 +1,16 @@
+# V10.19 数据与云端专项追踪、系统健康检查（Phase 4）
+
+- Supabase `supabaseRequest()` 记录 START / END SUCCESS / END FAILED；仅记录路径、HTTP 方法、HTTP 状态，不记录请求体、用户名、密码、apikey 或会话信息。
+- 单模块及整体上传／下载的失败分支写入 Cloud ERROR；底层 RPC 请求保留独立 trace。
+- `localModuleSnapshot()`、`validateWholeCloudSnapshot()`、`persistWholeLocalSnapshot()` 分别记录本地快照读取、云端整体分区校验、本地四模块覆盖及失败回滚执行结果。
+- 首页「系统健康检查」由 `health-check.js` 提供。检查项：应用版本／入口、四个 LocalStorage 分区结构、运行日志 IndexedDB 诊断写入与查询、Service Worker 注册、Supabase `planner_get_data` 只读调用、当前 main 对应 GitHub Pages workflow。
+- 健康检查仅读取业务数据；不会写入／修复／覆盖业务 LocalStorage。Supabase 只调用读取 RPC。IndexedDB 测试只产生一条普通运行日志诊断记录。
+- 未登录时 Supabase 状态为 Not Checked；GitHub API 网络失败时部署状态为 Not Checked，不误报部署失败。
+- 检查结果按 INFO/WARN/ERROR 写入本机日志并显示时间；支持中英日及响应式布局。
+- 不改变四模块键、`schemaVersion: 1`、JSON 备份结构、Supabase RPC／DB schema 或登录流程。
+- APP_VERSION：`V10.19_data_cloud_health_check`；Service Worker cache：`daily-weekly-planner-v10-19-data-cloud-health-check`。
+- Phase 4 验收见 `docs/acceptance_V10.19_runtime_logging_phase4.md`。
+
 # V10.16 运行日志基础设施（Phase 1）\n\n- 独立模块：`logger.js`，通过 `window.AppLogger` 暴露统一接口；在主应用脚本前加载。\n- 存储：IndexedDB 数据库 `manman-planner-runtime-logs`，对象仓库 `entries`；索引包括 createdAt、level、module、executionId。与四个业务模块的 LocalStorage 键隔离。\n- 等级：ERROR、WARN、INFO、DEBUG；DEBUG 默认关闭，设置键为 `personal-planner:runtime-log-settings:v1`。\n- 追踪：`start/end/fail/cancel`，记录 Execution ID、spanId、parentSpanId、耗时和版本。\n- 保留：30 天；容量目标 10,000 条，优先淘汰最旧 DEBUG/INFO；IndexedDB 不可用时使用最多 200 条内存降级队列。\n- 安全：敏感字段名、Bearer 凭据和带查询参数 URL 做基础脱敏；日志失败不得影响业务启动。\n- 全局监听：记录 window error 和 unhandledrejection。\n- 主应用版本：V10.16_runtime_logging_foundation；Service Worker cache：`daily-weekly-planner-v10-16-runtime-logging`。\n- Phase 1 不包含日志 UI、完整业务函数接入或健康检查；验收步骤见 `docs/acceptance_V10.16_runtime_logging_phase1.md`。\n\n# V10.15 四模块整体云端同步技术实现
 
 - 新增首页整体同步区，入口按钮为 `sync-all-upload` 与 `sync-all-download`；当前模块独立按钮及原处理函数保持不变。
