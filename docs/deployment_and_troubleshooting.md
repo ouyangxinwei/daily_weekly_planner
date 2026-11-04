@@ -1,3 +1,16 @@
+# V10.14 四模块管理部署与数据说明
+
+- V10.14 沿用现有 GitHub Pages、Supabase 登录和 `planner_get_data`／`planner_put_data` RPC，不需要新建数据库表或执行 SQL 迁移。
+- Service Worker 缓存名为 `daily-weekly-planner-v10-14-four-module-management`。部署新版时同时发布 `index.html`、`i18n.js`、`sw.js`、三种语言 CHANGELOG 和文档。
+- 本地数据键：计划 `personal-planner:v1`、工作 `personal-work:v1`、外语学习 `personal-language:v1`、整理 `personal-organizer:v1`。切换模块不会混合数据。
+- 首次打开 V10.14 时，计划模块会将普通记录、归档记录和回收站中 category=「工作」的记录迁移为「未分类」，并从计划分类中移除「工作」。迁移只修改分类字段；保存失败时保留原数据。其他计划分类顺序保持不变。
+- 工作分类与任务状态独立；外语学习分类为英语、德语、俄语、日语、其他（不含挪威语）。
+- JSON 备份分别使用 `moduleType: plan/work/language/organize`。旧版没有 `moduleType` 的计划备份仍可导入；跨模块备份会被拒绝。
+- 云端快照保留原计划根结构，并使用 `work`、`language`、`organizer` 分区保存其他模块。上传当前模块时先读取云端快照并合并，不覆盖其他模块；下载只恢复当前模块。若要把本机计划分类迁移同步到云端，请在计划模块完成首次迁移后上传计划数据。
+- 更新后刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。不要为了刷新版本而清除整个站点数据，以免删除尚未备份的本地记录。
+
+---
+
 # V10.13 整理模块部署与数据说明
 
 - V10.13 沿用现有 GitHub Pages 和 Supabase 配置，不需要新建数据库表或执行 SQL 迁移。
