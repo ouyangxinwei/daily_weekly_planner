@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-16-runtime-logging']
+  ['service worker cache version', 'daily-weekly-planner-v10-17-runtime-log-viewer']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -40,4 +40,24 @@ for (const term of ['外语学习','英语','德语','俄语','日语','工作�
   if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing i18n source term: ' + term);
 }
 if (!changelog.includes('## V10.14 · four_module_management')) throw new Error('Missing V10.14 changelog');
-console.log('V10.14 four-module static contract checks passed.');
+
+const loggingRequired = [
+  ['runtime log entry', 'id="open-runtime-logs"'],
+  ['runtime log dialog', 'id="runtime-log-dialog"'],
+  ['runtime log details', 'id="runtime-log-detail-dialog"'],
+  ['runtime log search', 'id="runtime-log-search"'],
+  ['runtime log export JSON', 'id="runtime-log-export-json"'],
+  ['runtime log export CSV', 'id="runtime-log-export-csv"'],
+  ['runtime log clear', 'id="runtime-log-clear"'],
+  ['runtime log script', 'runtime-logs.js'],
+  ['runtime log app version', "APP_VERSION='V10.17_runtime_log_viewer'"]
+];
+for (const [label, needle] of loggingRequired) {
+  if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
+}
+const viewer = fs.readFileSync('runtime-logs.js', 'utf8');
+for (const needle of ['AppLogger.list', 'executionId', 'application/json', 'text/csv', 'setDebug']) {
+  if (!viewer.includes(needle)) throw new Error('Missing runtime log viewer capability: ' + needle);
+}
+
+console.log('V10.14 four-module and V10.17 runtime-log viewer static contract checks passed.');
