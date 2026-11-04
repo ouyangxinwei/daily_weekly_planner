@@ -1,5 +1,7 @@
 ## V10.14 · Four-Module Management — 2026-11-04
 
+- Added executable regression tests for legacy Plan category migration, covering active/archived/Trash records, field preservation, category order, idempotence and source immutability; failed persistence does not commit the migrated state.
+
 - Fixed home-module order: Plans → Work → Foreign Language Learning → Organize. All modules reuse the existing UI and management actions while keeping their data independent.
 - Work categories: To Do, In Progress, Completed, Work Log, Meetings, Other. Categories remain separate from the Work task-status field (To Do / In Progress / Completed), which stays synchronized with the completion control.
 - Foreign Language Learning categories: English, German, Russian, Japanese, Other. Norwegian is intentionally excluded. The first release uses the existing general record workflow, not a dedicated flashcard or spaced-repetition system.

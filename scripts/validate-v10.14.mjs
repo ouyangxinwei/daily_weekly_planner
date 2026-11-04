@@ -15,9 +15,11 @@ const required = [
   ['plan defaults preserve order', "PLAN_DEFAULT_CATEGORIES=['学习','生活','健康','财务','兴趣','未分类']"],
   ['work defaults', "WORK_DEFAULT_CATEGORIES=['待处理','进行中','已完成','工作记录','会议','其他']"],
   ['language defaults', "LANGUAGE_DEFAULT_CATEGORIES=['英语','德语','俄语','日语','其他']"],
-  ['plan migration', 'migrateLegacyPlanWorkCategory'],
+  ['plan migration runner', 'migrateLegacyPlanWorkCategory'],
+  ['pure plan migration transformer', 'buildPlanCategoryMigration(source)'],
+  ['migration persistence guard', 'save(migration.state)'],
   ['append fixed Uncategorized', "next.categories.push('未分类')"],
-  ['trash migration', "t.plan?.category==='工作'"],
+  ['trash migration', "item.plan?.category==='工作'"],
   ['fixed Uncategorized', "category==='未分类'"],
   ['work status field', 'id="work-status-field"'],
   ['persistent completion key', 'plan.id}|${activeModule}'],
@@ -27,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker V10.14 cache', 'daily-weekly-planner-v10-14-four-module-management']
+  ['service worker V10.14 cache', 'daily-weekly-planner-v10-14-phase2-plan-migration']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker V10.14 cache' ? sw : html;
