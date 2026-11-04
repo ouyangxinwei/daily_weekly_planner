@@ -29,11 +29,11 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker V10.14 cache', 'daily-weekly-planner-v10-14-phase2-plan-migration']
+  ['service worker cache version', 'daily-weekly-planner-v10-16-runtime-logging']
 ];
 for (const [label, needle] of required) {
-  const source = label === 'service worker V10.14 cache' ? sw : html;
-  if (!source.includes(needle)) throw new Error('Missing V10.14 contract: ' + label);
+  const source = label === 'service worker cache version' ? sw : html;
+  if (!source.includes(needle)) throw new Error('Missing application contract: ' + label);
 }
 if (html.includes('挪威语')) throw new Error('Norwegian category must not be present in app code');
 for (const term of ['外语学习','英语','德语','俄语','日语','工作记录','会议','待处理','进行中']) {
