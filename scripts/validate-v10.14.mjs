@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-18-business-operation-tracing']
+  ['service worker cache version', 'daily-weekly-planner-v10-19-data-cloud-health-check']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -50,7 +50,14 @@ const loggingRequired = [
   ['runtime log export CSV', 'id="runtime-log-export-csv"'],
   ['runtime log clear', 'id="runtime-log-clear"'],
   ['runtime log script', 'runtime-logs.js'],
-  ['runtime log app version', "APP_VERSION='V10.18_business_operation_tracing'"]
+  ['health check button', 'id="open-health-check"'],
+  ['health check dialog', 'id="health-check-dialog"'],
+  ['health check script', 'health-check.js'],
+  ['Supabase request trace', "start('Cloud','supabaseRequest'"],
+  ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
+  ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
+  ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
+  ['runtime log app version', "APP_VERSION='V10.19_data_cloud_health_check'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
