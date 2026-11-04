@@ -1,3 +1,14 @@
+## V10.16 · runtime_logging_foundation — 2026-11-04
+
+- Added a standalone runtime logger module using IndexedDB, isolated from the four business modules' LocalStorage data.
+- Added ERROR, WARN, INFO and DEBUG levels; DEBUG is disabled by default.
+- Added a unified record format and START / END / FAILED / CANCELLED tracing API with Execution IDs, spans, duration and parent-call linkage.
+- Added 30-day retention cleanup, an approximately 10,000-entry capacity guard, sensitive-field redaction and bounded in-memory fallback. Logging failures do not block app startup.
+- Added baseline capture for uncaught window errors and unhandled Promise rejections.
+- Added the final specification at `docs/runtime_logging_V1.0_final_spec.md`.
+- This phase delivers the logging foundation. The in-app viewer, business-function instrumentation, health checks and dedicated acceptance tests are scheduled for later phases.
+- Updated the Service Worker cache version. No changes to business data schemas, backup formats or Supabase database structure.
+
 ## V10.15 · Whole-Module Cloud Sync — 2026-11-04
 
 - Added one-click upload and download for all four modules: Plan, Work, Foreign Language Learning, and Organize. Existing per-module sync remains unchanged.
