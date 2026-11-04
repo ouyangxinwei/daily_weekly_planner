@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-17-runtime-log-viewer']
+  ['service worker cache version', 'daily-weekly-planner-v10-18-business-operation-tracing']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -50,7 +50,7 @@ const loggingRequired = [
   ['runtime log export CSV', 'id="runtime-log-export-csv"'],
   ['runtime log clear', 'id="runtime-log-clear"'],
   ['runtime log script', 'runtime-logs.js'],
-  ['runtime log app version', "APP_VERSION='V10.17_runtime_log_viewer'"]
+  ['runtime log app version', "APP_VERSION='V10.18_business_operation_tracing'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -60,4 +60,4 @@ for (const needle of ['AppLogger.list', 'executionId', 'application/json', 'text
   if (!viewer.includes(needle)) throw new Error('Missing runtime log viewer capability: ' + needle);
 }
 
-console.log('V10.14 four-module and V10.17 runtime-log viewer static contract checks passed.');
+console.log('V10.14 four-module and V10.18 four-module operation tracing static contract checks passed.');

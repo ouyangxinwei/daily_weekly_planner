@@ -1,3 +1,12 @@
+## V10.18 · Business Operation Tracing — 2026-11-04
+
+- Added important-operation tracing across Plan, Work, Language and Organizer; each trace is tagged with the active module.
+- Covered module switching, local initialization/read, state persistence, shared state commits, quick add, create/edit dialogs, delete/bulk delete, archive, completion/work-status changes, Trash restore/cleanup, undo, category create/update/delete and related-item migration, JSON backup export/validation, and notification permission requests.
+- Added START → END SUCCESS/NO_CHANGE or FAILED records. Nested synchronous operations share an Execution ID and include span/parent-span relationships and duration.
+- Instrumentation wraps existing functions without changing their business logic, return values, data schema, confirmation flow or failure handling. If the logger is unavailable, original functions run normally.
+- DEBUG remains off by default. Function arguments, full business records, passwords and cloud credentials are not logged. Dedicated cloud data-transfer tracing remains in Phase 4.
+- Updated the Service Worker cache version.
+
 ## V10.17 · Runtime Log Viewer — 2026-11-04
 
 - Added an in-app Runtime Logs entry so users can inspect locally stored logs without browser developer tools.
