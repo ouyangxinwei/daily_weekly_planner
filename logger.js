@@ -178,6 +178,8 @@
   let currentVersion = 'unknown';
   function start(moduleName, functionName, details, parentTrace) {
     const trace = {
+      module: String(moduleName || 'System'),
+      functionName: String(functionName || ''),
       executionId: parentTrace && parentTrace.executionId || makeId(),
       spanId: makeId(),
       parentSpanId: parentTrace && parentTrace.spanId || '',
