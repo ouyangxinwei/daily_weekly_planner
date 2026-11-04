@@ -72,7 +72,7 @@
       $('runtime-log-list').replaceChildren(node('p', 'runtime-log-empty', '读取日志失败：' + (error.message || error)));
     }
   }
-  function showDetail(record) {
+  async function showDetail(record) {
     state.selected = record;
     const host = $('runtime-log-detail'); host.replaceChildren();
     const grid = node('div', 'runtime-log-detail-grid');
@@ -96,7 +96,7 @@
     host.append(node('h3', '', '完整脱敏详情'), node('pre', 'runtime-log-pre', JSON.stringify(record.details || {}, null, 2)));
     const chain = $('runtime-log-chain'); chain.replaceChildren();
     if (record.executionId) {
-      const related = state.records.filter(item => item.executionId === record.executionId).sort((a,b) => a.createdAt-b.createdAt);
+      const related = (await window.AppLogger.list({ executionId: record.executionId })).sort((a,b) => a.createdAt-b.createdAt);
       chain.append(node('h3', '', '同一操作执行链路 · ' + related.length + ' 条'));
       related.forEach(item => {
         const line = node('div', 'runtime-log-chain-item');
