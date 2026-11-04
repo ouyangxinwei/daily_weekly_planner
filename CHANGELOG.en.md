@@ -1,3 +1,12 @@
+## V10.19 · Data, Cloud Tracing and Health Check — 2026-11-04
+
+- Added START / END / FAILED tracing for Supabase RPC requests. Only endpoint path, HTTP method and status are logged; credentials, request bodies and cloud business data are excluded.
+- Added step tracing for whole-module upload snapshots, whole-cloud download validation, local persistence and rollback. Single-module and whole-cloud sync failures now emit explicit ERROR events.
+- Added an in-app System Health Check for all four local data partitions, runtime-log IndexedDB read/write, core initialization, Service Worker, Supabase read-only connectivity and the Pages deployment corresponding to the current main commit.
+- Health checks only read business data. Signed-out and network/API-unavailable states are reported as Not Checked rather than failures. Results and timestamps are shown in the app and recorded locally.
+- No changes to business LocalStorage keys, schemaVersion, JSON backup format, Supabase RPC/database contract or sign-in flow. Runtime logs remain local-only.
+- Updated the Service Worker cache and added Phase 4 acceptance documentation.
+
 ## V10.18 · Business Operation Tracing — 2026-11-04
 
 - Added important-operation tracing across Plan, Work, Language and Organizer; each trace is tagged with the active module.

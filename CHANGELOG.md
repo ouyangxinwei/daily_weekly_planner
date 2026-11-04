@@ -1,3 +1,12 @@
+## V10.19 · data_cloud_health_check — 2026-11-04
+
+- 为 Supabase RPC 请求增加 START / END / FAILED 追踪，仅记录路径、方法和状态码，不记录凭据、请求体或云端业务数据。
+- 为四模块整体上传快照读取、整体下载分区校验、本地覆盖及失败回滚增加专项步骤追踪；单模块与整体同步异常增加明确 ERROR 事件。
+- 新增「系统健康检查」入口，检查四模块本地数据结构、日志 IndexedDB 读写、关键初始化、Service Worker、Supabase 只读连接及当前 main 对应的 GitHub Pages 部署状态。
+- 健康检查只读业务数据；未登录或网络/API 不可用时显示「未检查」，不误报为失败。结果和检查时间在页面展示，并记录到本机运行日志。
+- 不修改业务 LocalStorage 键、schemaVersion、JSON 备份格式、Supabase RPC／数据库结构或登录流程；日志不上传云端。
+- 更新 Service Worker 缓存版本并增加 Phase 4 验收文档。
+
 ## V10.18 · business_operation_tracing — 2026-11-04
 
 - 为计划、工作、外语学习、整理四个模块接入重要操作追踪；日志模块字段随当前模块自动标记。
