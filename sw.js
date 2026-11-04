@@ -1,5 +1,5 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-15-whole-cloud-sync';
-const APP_FILES = ['./', './index.html', './i18n.js', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'daily-weekly-planner-v10-16-runtime-logging';
+const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
   self.skipWaiting();
