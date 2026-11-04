@@ -1,3 +1,11 @@
+## V10.20 · Full JSON Backup and Module Colors — 2026-11-04
+
+- Added a single full JSON export for Plan, Work, Foreign Language Learning and Organize, including all business data supported by each module's existing backup format: categories, records, completion state, archives and Trash.
+- The full backup has its own `backupType: full`, format version and export timestamp; each module retains its `moduleType`. Export is cancelled if any module cannot be read or validated, preventing incomplete files.
+- Existing per-module JSON export and import remain unchanged. No full import, runtime-log/system-settings export, or cloud access was added.
+- Added distinct soft blue, green, purple and orange backgrounds to the four module buttons without changing their actions, order, dimensions or other UI.
+- Updated Chinese/English/Japanese translations and the Service Worker cache. No business LocalStorage keys, data schema, single-module backup format, Supabase RPC or database schema changed.
+
 ## V10.19 · Data, Cloud Tracing and Health Check — 2026-11-04
 
 - Added START / END / FAILED tracing for Supabase RPC requests. Only endpoint path, HTTP method and status are logged; credentials, request bodies and cloud business data are excluded.
