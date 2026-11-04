@@ -1,3 +1,13 @@
+# V10.15 四模块整体云端同步技术实现
+
+- 新增首页整体同步区，入口按钮为 `sync-all-upload` 与 `sync-all-download`；当前模块独立按钮及原处理函数保持不变。
+- 模块顺序：`plan`、`work`、`language`、`organize`；云端 JSONB 分区映射为根对象（计划）、`work`、`language`、`organizer`。
+- 整体上传分别读取四个 LocalStorage 键，按模块默认分类执行 `safeState()` 校验，构建单个根 JSON 对象并调用一次 `planner_put_data` RPC。现有 SQL 函数对根计划结构校验后在单条 INSERT ... ON CONFLICT 中写入完整 JSONB 快照，PostgreSQL 事务保证云端整体替换。
+- 整体下载调用一次 `planner_get_data`，要求根计划及 `work`、`language`、`organizer` 均存在且可通过对应模块数据校验；任何分区缺失或格式异常均在写入本地前终止。
+- 用户确认覆盖后，先读取四个本地存储原值，再逐键写入；任一写入异常时尽力恢复四个原值。恢复成功后清空模块内存缓存，重新载入当前活动模块并刷新分类、列表、归档和回收站视图。整体覆盖不做智能合并。
+- 整体下载清除当前撤销快照，避免撤销操作把旧状态重新写回。模块独立上传／下载逻辑不变。
+- PWA cache：`daily-weekly-planner-v10-15-whole-cloud-sync`。不修改业务 schemaVersion（仍为 1），不需要 SQL 迁移。
+
 # V10.14 四模块管理技术实现
 
 - 模块标识：`activeModule` 取值 `plan`、`work`、`language`、`organize`；模块入口顺序固定。四个模块复用渲染、编辑、搜索、分类、归档、回收站、撤销和 PDF 引擎。
