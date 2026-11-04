@@ -1,3 +1,11 @@
+## V10.15 · Whole-Module Cloud Sync — 2026-11-04
+
+- Added one-click upload and download for all four modules: Plan, Work, Foreign Language Learning, and Organize. Existing per-module sync remains unchanged.
+- Whole upload validates all four local storage partitions and submits one complete JSONB snapshot through the existing `planner_put_data` RPC; no database migration is required.
+- Whole download reads and validates all four cloud partitions before asking for confirmation, then fully replaces the corresponding local partitions without merging. Missing or invalid partitions abort before local writes.
+- If local writes fail, the app attempts to restore the four previous storage values. Successful restore refreshes the active module and clears its undo snapshot.
+- Updated the service-worker cache version.
+
 ## V10.14 · Four-Module Management — 2026-11-04
 
 - Added executable regression tests for legacy Plan category migration, covering active/archived/Trash records, field preservation, category order, idempotence and source immutability; failed persistence does not commit the migrated state.
