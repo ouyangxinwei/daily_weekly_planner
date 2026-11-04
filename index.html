@@ -129,7 +129,7 @@
   <script>
   (()=>{
     'use strict';
-    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',APP_VERSION='V10.17_runtime_log_viewer',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
+    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',APP_VERSION='V10.18_business_operation_tracing',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
     const PERIODS={daily:{label:'每日',progress:'今日进度'},daily_random:{label:'每日随机',progress:'今日临时安排'},weekly:{label:'每周',progress:'本周进度'},weekly_random:{label:'每周随机',progress:'本周临时安排'},monthly:{label:'每月',progress:'本月进度'},monthly_random:{label:'每月随机',progress:'本月临时安排'},yearly:{label:'每年',progress:'今年进度'}};
     const RANDOM_BASE={daily_random:'daily',weekly_random:'weekly',monthly_random:'monthly'};
     const VALID_PERIODS=Object.keys(PERIODS);
@@ -261,6 +261,48 @@
     function removePlans(plans){if(trashPlans(plans))toast(`已将 ${plans.length} 个计划移入回收站`,true)}
     function clearCurrentTab(){const plans=state.plans.filter(plan=>(activeModule!=='plan'||plan.period===activePeriod)&&!plan.archivedAt);if(!plans.length)return;const name=activeModule==='plan'?PERIODS[activePeriod].label:moduleNoun();if(!askConfirm(`确定将“${name}”标签中的全部 ${plans.length} 个计划移入回收站吗？可在 30 天内恢复。`))return;removePlans(plans)}
     function clearCompletedInCurrentTab(){const completed=state.plans.filter(plan=>(activeModule!=='plan'||plan.period===activePeriod)&&!plan.archivedAt&&state.completions[completionKey(plan)]===true);if(!completed.length)return;const name=activeModule==='plan'?PERIODS[activePeriod].label:moduleNoun();if(!askConfirm(`确定将“${name}”标签中已完成的 ${completed.length} 个计划移入回收站吗？可在 30 天内恢复。`))return;removePlans(completed)}
+
+    // Phase 3: trace important user operations without changing their business logic.
+    // Nested synchronous calls share an Execution ID; asynchronous calls retain their own span.
+    const __plannerTraceStack=[];
+    function __plannerTraceWrap(functionName, original, resolveName){
+      return function(...args){
+        const logger=window.AppLogger;
+        if(!logger||typeof logger.start!=='function')return original.apply(this,args);
+        const resolvedName=resolveName?resolveName(args):functionName;
+        const parent=__plannerTraceStack.length?__plannerTraceStack[__plannerTraceStack.length-1]:null;
+        let trace;
+        try{trace=logger.start(activeModule||'System',resolvedName,{module:activeModule||'System'},parent)}catch(_){}
+        if(!trace)return original.apply(this,args);
+        __plannerTraceStack.push(trace);
+        let result;
+        try{result=original.apply(this,args)}
+        catch(error){__plannerTraceStack.pop();try{const pending=logger.fail(trace,error,{operation:resolvedName});if(pending&&pending.catch)pending.catch(()=>{})}catch(_){}throw error}
+        __plannerTraceStack.pop();
+        const complete=value=>{try{const pending=logger.end(trace,value===false?'NO_CHANGE':'SUCCESS',{operation:resolvedName,returnedFalse:value===false});if(pending&&pending.catch)pending.catch(()=>{})}catch(_){}return value};
+        if(result&&typeof result.then==='function'){
+          return Promise.resolve(result).then(value=>complete(value),error=>{
+            try{const pending=logger.fail(trace,error,{operation:resolvedName});if(pending&&pending.catch)pending.catch(()=>{})}catch(_){}
+            throw error;
+          });
+        }
+        return complete(result);
+      };
+    }
+    const __plannerTraceTargets=[
+      ['load'],['loadModuleState'],['save'],['switchModule'],['commitState',args=>args[1]?.undoLabel||'commitState'],
+      ['quickAddPlan'],['openDialog'],['closeDialog'],['deletePlan'],['archivePlan'],['removePlans'],
+      ['clearCurrentTab'],['clearCompletedInCurrentTab'],['trashPlans',args=>args[0]?.length>1?'batchTrashPlans':'trashPlans'],
+      ['restoreTrashItem'],['undoLastAction'],['cleanExpiredTrash'],['exportBackup'],['validateBackup'],
+      ['confirmDeleteCategory'],['requestDeleteCategory'],['migrateLegacyPlanWorkCategory'],
+      ['requestNotificationPermission']
+    ];
+    for(const [name,resolveName] of __plannerTraceTargets){
+      if(typeof window[name]==='function')continue;
+      if(typeof eval==='undefined')continue;
+      try{const original=({load,loadModuleState,save,switchModule,commitState,quickAddPlan,openDialog,closeDialog,deletePlan,archivePlan,removePlans,clearCurrentTab,clearCompletedInCurrentTab,trashPlans,restoreTrashItem,undoLastAction,cleanExpiredTrash,exportBackup,validateBackup,confirmDeleteCategory,requestDeleteCategory,migrateLegacyPlanWorkCategory,requestNotificationPermission})[name];if(typeof original==='function')({load,loadModuleState,save,switchModule,commitState,quickAddPlan,openDialog,closeDialog,deletePlan,archivePlan,removePlans,clearCurrentTab,clearCompletedInCurrentTab,trashPlans,restoreTrashItem,undoLastAction,cleanExpiredTrash,exportBackup,validateBackup,confirmDeleteCategory,requestDeleteCategory,migrateLegacyPlanWorkCategory,requestNotificationPermission})[name]=__plannerTraceWrap(name,original,resolveName)}catch(_){}
+    }
+
     $('notice-undo').addEventListener('click',undoLastAction);
     $('export-pdf').addEventListener('click',exportPdf);
     $('open-trash')?.addEventListener('click',()=>{cleanExpiredTrash();renderTrash();$('trash-dialog').showModal()});$('trash-close').addEventListener('click',()=>$('trash-dialog').close());$('trash-done').addEventListener('click',()=>$('trash-dialog').close());$('trash-select-all').addEventListener('click',()=>{const checks=[...$('trash-list').querySelectorAll('input[type=checkbox]')];const all=checks.length&&checks.every(c=>c.checked);checks.forEach(c=>c.checked=!all);$('trash-select-all').textContent=all?'全选':'取消全选'});$('trash-restore-selected').addEventListener('click',()=>{const indexes=[...$('trash-list').querySelectorAll('input[type=checkbox]:checked')].map(c=>Number(c.dataset.trashIndex)).sort((a,b)=>b-a);if(!indexes.length){toast('请先选择要恢复的计划');return}const eligible=indexes.filter(index=>{const item=state.trash[index];return item&&!state.plans.some(p=>p.id===item.plan.id)});if(!eligible.length){toast('没有可恢复的计划：可能存在相同 ID');return}commitState(next=>{for(const index of eligible){const item=next.trash[index];if(item){next.plans.push({...item.plan,archivedAt:item.plan.archivedAt||''});Object.assign(next.completions,item.completions||{});next.trash.splice(index,1)}}},{undoLabel:'批量恢复计划',render:true,after:()=>{renderTrash();updateTrashCount()},message:`已恢复 ${eligible.length} 个计划`})});$('trash-delete-selected').addEventListener('click',()=>{const indexes=[...$('trash-list').querySelectorAll('input[type=checkbox]:checked')].map(c=>Number(c.dataset.trashIndex)).sort((a,b)=>b-a);if(!indexes.length){toast('请先选择要永久删除的计划');return}if(!askConfirm(`永久删除选中的 ${indexes.length} 个计划？此操作无法撤销。`))return;commitState(next=>{for(const index of indexes)next.trash.splice(index,1)},{clearUndo:true,after:()=>{renderTrash();updateTrashCount()},message:`已永久删除 ${indexes.length} 个计划`})});$('trash-empty').addEventListener('click',()=>{if(!state.trash.length)return;if(!askConfirm(`永久删除回收站中的全部 ${state.trash.length} 个计划？此操作无法撤销。`))return;commitState(next=>{next.trash=[]},{clearUndo:true,after:()=>{renderTrash();updateTrashCount()},message:'回收站已清空'})});
