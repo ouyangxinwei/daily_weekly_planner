@@ -1,4 +1,4 @@
-# V10.15 四模块整体云端同步技术实现
+# V10.16 运行日志基础设施（Phase 1）\n\n- 独立模块：`logger.js`，通过 `window.AppLogger` 暴露统一接口；在主应用脚本前加载。\n- 存储：IndexedDB 数据库 `manman-planner-runtime-logs`，对象仓库 `entries`；索引包括 createdAt、level、module、executionId。与四个业务模块的 LocalStorage 键隔离。\n- 等级：ERROR、WARN、INFO、DEBUG；DEBUG 默认关闭，设置键为 `personal-planner:runtime-log-settings:v1`。\n- 追踪：`start/end/fail/cancel`，记录 Execution ID、spanId、parentSpanId、耗时和版本。\n- 保留：30 天；容量目标 10,000 条，优先淘汰最旧 DEBUG/INFO；IndexedDB 不可用时使用最多 200 条内存降级队列。\n- 安全：敏感字段名、Bearer 凭据和带查询参数 URL 做基础脱敏；日志失败不得影响业务启动。\n- 全局监听：记录 window error 和 unhandledrejection。\n- 主应用版本：V10.16_runtime_logging_foundation；Service Worker cache：`daily-weekly-planner-v10-16-runtime-logging`。\n- Phase 1 不包含日志 UI、完整业务函数接入或健康检查；验收步骤见 `docs/acceptance_V10.16_runtime_logging_phase1.md`。\n\n# V10.15 四模块整体云端同步技术实现
 
 - 新增首页整体同步区，入口按钮为 `sync-all-upload` 与 `sync-all-download`；当前模块独立按钮及原处理函数保持不变。
 - 模块顺序：`plan`、`work`、`language`、`organize`；云端 JSONB 分区映射为根对象（计划）、`work`、`language`、`organizer`。
