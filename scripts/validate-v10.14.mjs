@@ -19,7 +19,7 @@ const required = [
   ['pure plan migration transformer', 'buildPlanCategoryMigration(source)'],
   ['migration persistence guard', 'save(migration.state)'],
   ['append fixed Uncategorized', "next.categories.push('未分类')"],
-  ['trash migration', "t.plan?.category==='工作'"],
+  ['trash migration', "item.plan?.category==='工作'"],
   ['fixed Uncategorized', "category==='未分类'"],
   ['work status field', 'id="work-status-field"'],
   ['persistent completion key', 'plan.id}|${activeModule}'],
@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker V10.14 cache', 'daily-weekly-planner-v10-14-four-module-management']
+  ['service worker V10.14 cache', 'daily-weekly-planner-v10-14-phase2-plan-migration']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker V10.14 cache' ? sw : html;
