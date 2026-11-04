@@ -22,3 +22,5 @@ jobs:
           node --check /tmp/planner-inline.js
       - name: Verify V10.14 four-module isolation contract
         run: node scripts/validate-v10.14.mjs
+      - name: Test legacy Plan category migration and data preservation
+        run: node scripts/test-plan-migration.mjs
