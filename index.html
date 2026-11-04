@@ -289,18 +289,26 @@
         return complete(result);
       };
     }
+    const __plannerTraceOriginals={load,loadModuleState,save,switchModule,commitState,quickAddPlan,openDialog,closeDialog,deletePlan,archivePlan,removePlans,clearCurrentTab,clearCompletedInCurrentTab,trashPlans,restoreTrashItem,undoLastAction,cleanExpiredTrash,exportBackup,validateBackup,confirmDeleteCategory,requestDeleteCategory,migrateLegacyPlanWorkCategory,requestNotificationPermission};
+    const __plannerTraceSetters={
+      load:fn=>{load=fn},loadModuleState:fn=>{loadModuleState=fn},save:fn=>{save=fn},switchModule:fn=>{switchModule=fn},
+      commitState:fn=>{commitState=fn},quickAddPlan:fn=>{quickAddPlan=fn},openDialog:fn=>{openDialog=fn},closeDialog:fn=>{closeDialog=fn},
+      deletePlan:fn=>{deletePlan=fn},archivePlan:fn=>{archivePlan=fn},removePlans:fn=>{removePlans=fn},clearCurrentTab:fn=>{clearCurrentTab=fn},
+      clearCompletedInCurrentTab:fn=>{clearCompletedInCurrentTab=fn},trashPlans:fn=>{trashPlans=fn},restoreTrashItem:fn=>{restoreTrashItem=fn},
+      undoLastAction:fn=>{undoLastAction=fn},cleanExpiredTrash:fn=>{cleanExpiredTrash=fn},exportBackup:fn=>{exportBackup=fn},
+      validateBackup:fn=>{validateBackup=fn},confirmDeleteCategory:fn=>{confirmDeleteCategory=fn},requestDeleteCategory:fn=>{requestDeleteCategory=fn},
+      migrateLegacyPlanWorkCategory:fn=>{migrateLegacyPlanWorkCategory=fn},requestNotificationPermission:fn=>{requestNotificationPermission=fn}
+    };
     const __plannerTraceTargets=[
       ['load'],['loadModuleState'],['save'],['switchModule'],['commitState',args=>args[1]?.undoLabel||'commitState'],
       ['quickAddPlan'],['openDialog'],['closeDialog'],['deletePlan'],['archivePlan'],['removePlans'],
       ['clearCurrentTab'],['clearCompletedInCurrentTab'],['trashPlans',args=>args[0]?.length>1?'batchTrashPlans':'trashPlans'],
       ['restoreTrashItem'],['undoLastAction'],['cleanExpiredTrash'],['exportBackup'],['validateBackup'],
-      ['confirmDeleteCategory'],['requestDeleteCategory'],['migrateLegacyPlanWorkCategory'],
-      ['requestNotificationPermission']
+      ['confirmDeleteCategory'],['requestDeleteCategory'],['migrateLegacyPlanWorkCategory'],['requestNotificationPermission']
     ];
     for(const [name,resolveName] of __plannerTraceTargets){
-      if(typeof window[name]==='function')continue;
-      if(typeof eval==='undefined')continue;
-      try{const original=({load,loadModuleState,save,switchModule,commitState,quickAddPlan,openDialog,closeDialog,deletePlan,archivePlan,removePlans,clearCurrentTab,clearCompletedInCurrentTab,trashPlans,restoreTrashItem,undoLastAction,cleanExpiredTrash,exportBackup,validateBackup,confirmDeleteCategory,requestDeleteCategory,migrateLegacyPlanWorkCategory,requestNotificationPermission})[name];if(typeof original==='function')({load,loadModuleState,save,switchModule,commitState,quickAddPlan,openDialog,closeDialog,deletePlan,archivePlan,removePlans,clearCurrentTab,clearCompletedInCurrentTab,trashPlans,restoreTrashItem,undoLastAction,cleanExpiredTrash,exportBackup,validateBackup,confirmDeleteCategory,requestDeleteCategory,migrateLegacyPlanWorkCategory,requestNotificationPermission})[name]=__plannerTraceWrap(name,original,resolveName)}catch(_){}
+      const original=__plannerTraceOriginals[name],setter=__plannerTraceSetters[name];
+      if(typeof original==='function'&&setter)setter(__plannerTraceWrap(name,original,resolveName));
     }
 
     $('notice-undo').addEventListener('click',undoLastAction);
