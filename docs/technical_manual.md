@@ -1,3 +1,12 @@
+# V10.23 黑白主题与周期颜色
+
+- 默认主题为深色，HTML 根节点使用 `data-theme="dark"`；启动时优先读取独立偏好键 `personal-planner:theme:v1`，仅接受 `dark` 或 `light`。
+- 主题切换通过根节点主题属性和 CSS 变量实现。浅色主题沿用既有样式；深色主题覆盖页面、卡片、表单控件、对话框、模块导航及主要状态色。
+- 主题偏好不写入四模块业务对象，不参与 JSON 备份或 Supabase 同步。
+- 周期颜色仅根据既有 `data-period` 标识进行样式区分：普通周期蓝色，随机周期橙色；不修改 `PERIODS`、`RANDOM_BASE` 或周期处理逻辑。
+- APP_VERSION：`V10.23_dark_theme_period_colors`；Service Worker cache：`daily-weekly-planner-v10-23-dark-theme-period-colors`。
+- 验收清单见 `docs/acceptance_V10.23_dark_theme_period_colors.md`。
+
 # V10.19 数据与云端专项追踪、系统健康检查（Phase 4）
 
 - Supabase `supabaseRequest()` 记录 START / END SUCCESS / END FAILED；仅记录路径、HTTP 方法、HTTP 状态，不记录请求体、用户名、密码、apikey 或会话信息。

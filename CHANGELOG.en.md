@@ -1,3 +1,11 @@
+## V10.23 · Dark Theme and Period Colors — 2026-11-05
+
+- Distinguished Plan periods by color: Daily, Weekly, Monthly and Yearly use blue; Daily Random, Weekly Random and Monthly Random use orange. Period order, navigation behavior and business data remain unchanged.
+- Added a global black/white theme switch. Dark theme is the default; the light theme preserves the existing appearance. Dark mode adjusts the main backgrounds, text, cards, dialogs, inputs, buttons, borders and module navigation.
+- The theme switch is available in the shared top area across all four modules. The selection is stored separately under `personal-planner:theme:v1` and restored on the next visit.
+- Updated Chinese, English and Japanese labels, the Service Worker cache and static acceptance checks.
+- No changes to the four business storage keys, `schemaVersion`, plan data structure, JSON backup format or Supabase RPC/database schema.
+
 ## V10.22 · Global Search — 2026-11-05
 
 - Upgraded search to a global search across Plan, Work, Foreign Language Learning and Organize, available from any module.
