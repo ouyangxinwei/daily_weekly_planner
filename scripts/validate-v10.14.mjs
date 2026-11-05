@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-22-global-search']
+  ['service worker cache version', 'daily-weekly-planner-v10-23-dark-theme-period-colors']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -57,7 +57,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.22_global_search'"]
+  ['runtime log app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -78,7 +78,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.22_global_search'"]
+  ['move app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
@@ -100,7 +100,7 @@ const globalSearchRequired = [
   ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
   ['clear category filter after match', "$('category-filter').value='all'"],
   ['first match highlighting', 'priority-target-highlight'],
-  ['global search app version', "APP_VERSION='V10.22_global_search'"]
+  ['global search app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
 ];
 for (const [label, needle] of globalSearchRequired) {
   if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);
@@ -110,4 +110,16 @@ for (const term of ['全局检索','全局检索：名称、备注或参考网�
 }
 if (!changelog.includes('## V10.22 · global_search')) throw new Error('Missing V10.22 changelog');
 
-console.log('V10.14 four-module, V10.18 operation tracing, V10.21 one-way move and V10.22 global search static contract checks passed.');
+
+const themeRequired = [
+ ['default dark theme','<html lang="zh-CN" data-theme="dark">'],
+ ['theme preference key',"THEME_KEY='personal-planner:theme:v1'"],
+ ['shared theme switch','id="theme-toggle"'],
+ ['theme persistence','localStorage.setItem(THEME_KEY,next)'],
+ ['blue ordinary periods','.period-tab[data-period="daily"],.period-tab[data-period="weekly"],.period-tab[data-period="monthly"],.period-tab[data-period="yearly"]'],
+ ['orange random periods','.period-tab[data-period="daily_random"],.period-tab[data-period="weekly_random"],.period-tab[data-period="monthly_random"]']
+];
+for (const [label,needle] of themeRequired) if(!html.includes(needle)) throw new Error('Missing V10.23 theme contract: '+label);
+for (const term of ['切换到白色主题','切换到黑色主题']) if(!i18n.includes(JSON.stringify(term))) throw new Error('Missing theme i18n source term: '+term);
+if(!changelog.includes('## V10.23 · dark_theme_and_period_colors')) throw new Error('Missing V10.23 changelog');
+console.log('V10.14 four-module, V10.18 operation tracing, V10.21 move, V10.22 global search and V10.23 theme/period-color checks passed.');
