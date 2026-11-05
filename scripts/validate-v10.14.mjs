@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-19-data-cloud-health-check']
+  ['service worker cache version', 'daily-weekly-planner-v10-21-plan-to-module-move']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -57,7 +57,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.19_data_cloud_health_check'"]
+  ['runtime log app version', "APP_VERSION='V10.21_plan_to_module_move'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -67,4 +67,24 @@ for (const needle of ['AppLogger.list', 'executionId', 'application/json', 'text
   if (!viewer.includes(needle)) throw new Error('Missing runtime log viewer capability: ' + needle);
 }
 
-console.log('V10.14 four-module and V10.18 four-module operation tracing static contract checks passed.');
+const moveRequired = [
+  ['move UI exists only in plan edit dialog', 'id="plan-move-field"'],
+  ['move destination selector', 'id="plan-move-target"'],
+  ['move action button', 'id="plan-move-button"'],
+  ['one-way destination allowlist', "const allowed=['work','organize','language']"],
+  ['move only from plan', "if(activeModule!=='plan'||!editingId||!allowed.includes(targetModule))return"],
+  ['destination pending status', "status:'待处理'"],
+  ['destination has no reminder', "dueAt:''"],
+  ['source completion removed', 'delete next.completions[completionKey(moving)]'],
+  ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
+  ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
+  ['move app version', "APP_VERSION='V10.21_plan_to_module_move'"]
+];
+for (const [label, needle] of moveRequired) {
+  if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
+}
+for (const term of ['移动到其他模块','工作模块','整理模块','外语学习模块','移动到所选模块']) {
+  if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing move i18n source term: ' + term);
+}
+
+console.log('V10.14 four-module, V10.18 operation tracing and V10.21 one-way move static contract checks passed.');
