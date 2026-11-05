@@ -298,7 +298,7 @@
           }finally{DEFAULT_CATEGORIES=previousDefaults}
         }
         const movedId=crypto.randomUUID?crypto.randomUUID():`moved-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-        destination.plans.push({id:movedId,title,note:$('plan-note').value.trim(),referenceUrl:$('plan-reference-url').value.trim().slice(0,2048),period:'daily',category:destination.categories[0]||MODULE_CATEGORIES[targetModule][0],status:'待处理',priority:validPriority(sourcePlan.priority),dueAt:'',notifiedFor:'',createdAt:sourcePlan.createdAt||now,updatedAt:now});
+        destination.plans.push({id:movedId,title,note:$('plan-note').value.trim(),referenceUrl:$('plan-reference-url').value.trim().slice(0,2048),period:'daily',category:destination.categories[0]||MODULE_CATEGORIES[targetModule][0],status:'待处理',priority:validPriority(selectedPriority),dueAt:'',notifiedFor:'',createdAt:sourcePlan.createdAt||now,updatedAt:now});
         localStorage.setItem(targetKey,JSON.stringify(destination));
       }catch(error){showStorageError(error.message||'目标模块保存失败，原计划保持不变。');return}
       const ok=commitState(next=>{
