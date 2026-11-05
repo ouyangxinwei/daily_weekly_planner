@@ -1,3 +1,12 @@
+## V10.21 · Plan-to-Module Move — 2026-11-05
+
+- Added a one-way move action when editing an existing item in Plan. Items can move to Work, Organize or Foreign Language Learning.
+- After a successful move, the original Plan record is removed and a new item is created in the destination module. Title, notes, reference URL and priority are retained.
+- The destination item starts incomplete / pending and uses the destination module's default category. Plan period, reminder date, temporary-cycle metadata and completion state are not carried over.
+- Only Plan → one of the other three modules is supported. No reverse-move action is exposed in Work, Organize or Foreign Language Learning.
+- Cross-module persistence writes the destination first and then removes the source. If source persistence fails, the destination write is rolled back to avoid losing the original plan on an ordinary save failure.
+- Updated Chinese, English and Japanese UI text, static acceptance checks and the Service Worker cache. No business storage keys, schemaVersion, JSON backup format or Supabase database schema changed.
+
 ## V10.20 · Full JSON Backup and Module Colors — 2026-11-04
 
 - Added a single full JSON export for Plan, Work, Foreign Language Learning and Organize, including all business data supported by each module's existing backup format: categories, records, completion state, archives and Trash.
