@@ -74,6 +74,15 @@ html[data-theme="dark"] .notice{background:#30394a;color:#fff}html[data-theme="d
 html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field textarea:focus,html[data-theme="dark"] .field select:focus,html[data-theme="dark"] .list-tools input:focus,html[data-theme="dark"] .list-tools select:focus,html[data-theme="dark"] .quick-add input:focus{border-color:#9588f3;box-shadow:0 0 0 3px #9588f333}
 html[data-theme="dark"] :focus-visible{outline-color:#b2a8ff}
 </style>
+<style>
+html[data-theme="dark"] .progress-track{background:#303a49}
+html[data-theme="dark"] .runtime-log-row{background:#202733;color:var(--ink);border-color:#303947}
+html[data-theme="dark"] .runtime-log-row:hover{background:#2b3544}
+html[data-theme="dark"] .runtime-log-pre{background:#252e3b;color:#dbe2ef}
+html[data-theme="dark"] .storage-note{color:#8994a6}
+html[data-theme="dark"] .due-at{color:#e6bd69}
+html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[data-theme="dark"] .clear-scope{color:#a6afbf}
+</style>
 </head>
 <body>
   <section class="access-gate" id="access-gate" aria-label="账号登录"><form class="access-card" id="access-form"><div class="language-switch language-control-gate"><select id="language-select-gate" data-language-select aria-label="语言"><option value="zh">中文</option><option value="en">English</option><option value="ja">日本語</option></select></div><h1>慢慢计划</h1><p>使用数据库账号登录。请通过部署后的 HTTPS 地址打开；本地 file:// 可能无法连接 Supabase。</p><label for="gate-url">Supabase 项目 URL</label><input id="gate-url" type="url" value="https://kopvznygsqsheibsjjvv.supabase.co" autocomplete="url" required><label for="gate-key">Publishable / anon key</label><input id="gate-key" type="password" autocomplete="off" placeholder="公开客户端 key" required><label for="gate-username">用户名</label><input id="gate-username" type="text" value="oooo" autocomplete="username" required><label for="gate-password">密码</label><input id="gate-password" type="password" autocomplete="current-password" required><button class="primary" type="submit">登录并进入</button><p class="access-error" id="access-error" role="alert" aria-live="polite"></p><small class="field-hint">登录密码由 Supabase 校验。连续输错 5 次会暂停登录 10 分钟。</small></form></section>
