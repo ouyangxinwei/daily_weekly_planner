@@ -29,7 +29,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-21-plan-to-module-move']
+  ['service worker cache version', 'daily-weekly-planner-v10-22-global-search']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -57,7 +57,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.21_plan_to_module_move'"]
+  ['runtime log app version', "APP_VERSION='V10.22_global_search'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -78,7 +78,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.21_plan_to_module_move'"]
+  ['move app version', "APP_VERSION='V10.22_global_search'"]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
@@ -87,4 +87,27 @@ for (const term of ['移动到其他模块','工作模块','整理模块','外�
   if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing move i18n source term: ' + term);
 }
 
-console.log('V10.14 four-module, V10.18 operation tracing and V10.21 one-way move static contract checks passed.');
+const globalSearchRequired = [
+  ['seven Plan period priority order', "GLOBAL_SEARCH_PERIODS=['daily','daily_random','weekly','weekly_random','monthly','monthly_random','yearly']"],
+  ['global search entry point', 'function globalSearch()'],
+  ['search ordering helper', 'function orderedGlobalSearchPlans'],
+  ['global search button', "$('global-search-button').addEventListener('click',globalSearch)"],
+  ['search Enter handler', "event.key==='Enter'"],
+  ['search title field', "plan.title||''"],
+  ['search note field', "plan.note||''"],
+  ['search reference URL field', "plan.referenceUrl||''"],
+  ['exclude archived records', '!plan.archivedAt'],
+  ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
+  ['clear category filter after match', "$('category-filter').value='all'"],
+  ['first match highlighting', 'priority-target-highlight'],
+  ['global search app version', "APP_VERSION='V10.22_global_search'"]
+];
+for (const [label, needle] of globalSearchRequired) {
+  if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);
+}
+for (const term of ['全局检索','全局检索：名称、备注或参考网站','请输入检索关键词。','没有找到符合条件的内容。']) {
+  if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing global search i18n source term: ' + term);
+}
+if (!changelog.includes('## V10.22 · global_search')) throw new Error('Missing V10.22 changelog');
+
+console.log('V10.14 four-module, V10.18 operation tracing, V10.21 one-way move and V10.22 global search static contract checks passed.');

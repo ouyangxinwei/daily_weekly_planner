@@ -1,3 +1,12 @@
+## V10.22 · Global Search — 2026-11-05
+
+- Upgraded search to a global search across Plan, Work, Foreign Language Learning and Organize, available from any module.
+- Plan search order is Daily → Daily Random → Weekly → Weekly Random → Monthly → Monthly Random → Yearly, followed by Work, Foreign Language Learning and Organize.
+- Searches item titles, notes and reference websites. Completed items are included; archived and Trash items are excluded. The current category filter does not restrict global search.
+- On a match, switches to the target module and plan period, then scrolls to and briefly highlights the first match according to the current sort order. No result list or previous/next navigation is added.
+- Search runs with Enter or the Search button. If no item matches, a message is shown and the current page position is retained. Updated Chinese, English and Japanese text and the Service Worker cache.
+- No business LocalStorage keys, schemaVersion, JSON backup format, Supabase RPC or database schema changes.
+
 ## V10.21 · Plan-to-Module Move — 2026-11-05
 
 - Added a one-way move action when editing an existing item in Plan. Items can move to Work, Organize or Foreign Language Learning.
