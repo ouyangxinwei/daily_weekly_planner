@@ -48,7 +48,7 @@ if (html.includes('挪威语')) throw new Error('Norwegian category must not be 
 for (const term of ['外语学习','英语','德语','俄语','日语','工作记录','会议','待处理','进行中']) {
   if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing i18n source term: ' + term);
 }
-if (!changelog.includes('## V10.24 · results_and_future_modules')) throw new Error('Missing V10.14 changelog');
+if (!changelog.includes('# V10.24 成绩与未来双模块')) throw new Error('Missing V10.14 changelog');
 
 const loggingRequired = [
   ['runtime log entry', 'id="open-runtime-logs"'],
