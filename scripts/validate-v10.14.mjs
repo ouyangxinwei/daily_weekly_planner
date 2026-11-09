@@ -35,10 +35,10 @@ const required = [
   ['typed JSON backup', 'moduleType:activeModule'],
   ['module backup guard', 'raw?.moduleType!==activeModule'],
   ['legacy organizer partition', "organize:'organizer'"],
-  ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
-  ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
+  ['cloud partition merge', 'payload[CLOUD_PARTITIONS[module]]=localState'],
+  ['cloud partition download', 'data[CLOUD_PARTITIONS[module]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-24-results-future-modules']
+  ['service worker cache version', 'daily-weekly-planner-v10-25-sync-overwrite-protection']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -48,7 +48,7 @@ if (html.includes('挪威语')) throw new Error('Norwegian category must not be 
 for (const term of ['外语学习','英语','德语','俄语','日语','工作记录','会议','待处理','进行中']) {
   if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing i18n source term: ' + term);
 }
-if (!changelog.includes('# V10.24 成绩与未来双模块')) throw new Error('Missing V10.14 changelog');
+if (!changelog.includes('V10.24 成绩与未来双模块')) throw new Error('Missing V10.14 changelog');
 
 const loggingRequired = [
   ['runtime log entry', 'id="open-runtime-logs"'],
@@ -66,7 +66,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.24_results_future_modules'"]
+  ['runtime log app version', "APP_VERSION='V10.25_sync_overwrite_protection'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
