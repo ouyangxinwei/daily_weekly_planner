@@ -28,4 +28,6 @@ jobs:
       - name: Test legacy Plan category migration and data preservation
         run: node scripts/test-plan-migration.mjs
       - name: Verify V10.25 sync overwrite protection
-        run: node scripts/validate-v10.25.mjs
+        run: |
+          node scripts/validate-v10.25.mjs
+          node scripts/validate-v10.26.mjs
