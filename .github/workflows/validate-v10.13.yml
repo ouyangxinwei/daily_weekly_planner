@@ -2,7 +2,7 @@ name: Validate JavaScript and V10.14 four-module boundaries
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/v10.25-sync-overwrite-protection]
   pull_request:
 
 jobs:
