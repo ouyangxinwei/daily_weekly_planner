@@ -5,7 +5,7 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const i18n = fs.readFileSync(new URL('../i18n.js', import.meta.url), 'utf8');
 const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 
-assert.match(html, /APP_VERSION='V10\.25_sync_overwrite_protection'/);
+assert.match(html, /APP_VERSION='V10\.26_clear_sync_status_on_cancel'/);
 assert.match(html, /SYNC_META_KEY='personal-planner:sync-meta:v1'/);
 for (const name of ['uploadCloudState', 'downloadCloudState', 'uploadAllCloudState', 'downloadAllCloudState']) {
   const start = html.indexOf('async function ' + name + '(');
