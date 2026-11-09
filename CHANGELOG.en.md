@@ -1,5 +1,13 @@
-# V10.24 · results_and_future_modules — 2026-11-09
+# V10.25 · Cloud Sync Overwrite Protection — 2026-11-09
 
+- Added pre-sync timestamp checks to single-module and six-module uploads/downloads. The confirmation prompt shows the latest local and cloud timestamps and which side is newer.
+- Upload/download proceeds only after explicit confirmation. Cancelling leaves business data unchanged; missing timestamps are clearly reported as inconclusive.
+- Re-fetches the cloud snapshot after confirmation. If cloud data changed while the prompt was open, the operation is cancelled and the user is asked to review the latest timestamps.
+- Added a separate local sync metadata key, `personal-planner:sync-meta:v1`. Cloud metadata is stored in the snapshot's reserved `_syncMeta` field; `planner_get_data` returns the database update time and per-module timestamps.
+- Preserves all six business storage keys, `schemaVersion: 1`, JSON backup formats, module partitions, and existing RPC parameters. The database update replaces only the existing `planner_get_data` function; no table schema changes.
+- Updated Chinese, English, and Japanese text, the Service Worker cache, and V10.25 acceptance documentation.
+
+## V10.24
 - Added **Results** and **Future** after the original Plan, Work, Language Learning, and Organize modules. The six-module order is fixed.
 - Both modules reuse the existing record-management features: quick add, edit, completion status, priority, search, filtering, sorting, category management, archive, trash, undo, PDF export, and independent JSON backup/restore.
 - Results categories: Exam Results, Certifications, Learning Achievements, Other. Future categories: Short-term Goals, Mid-term Goals, Long-term Goals, Life Aspirations, Other. Categories remain user-manageable.
