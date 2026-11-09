@@ -87,7 +87,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.24_results_future_modules'"]
+  ['move app version', "APP_VERSION='V10.25_sync_overwrite_protection'"]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
@@ -109,7 +109,7 @@ const globalSearchRequired = [
   ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
   ['clear category filter after match', "$('category-filter').value='all'"],
   ['first match highlighting', 'priority-target-highlight'],
-  ['global search app version', "APP_VERSION='V10.24_results_future_modules'"]
+  ['global search app version', "APP_VERSION='V10.25_sync_overwrite_protection'"]
 ];
 for (const [label, needle] of globalSearchRequired) {
   if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);
