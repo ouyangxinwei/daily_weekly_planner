@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-24-results-future-modules';
+const CACHE_NAME = 'daily-weekly-planner-v10-25-sync-overwrite-protection';
 const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './runtime-logs.js', './health-check.js', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
