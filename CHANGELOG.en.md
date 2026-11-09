@@ -7,7 +7,7 @@
 - Preserves all six business storage keys, `schemaVersion: 1`, JSON backup formats, module partitions, and existing RPC parameters. The database update replaces only the existing `planner_get_data` function; no table schema changes.
 - Updated Chinese, English, and Japanese text, the Service Worker cache, and V10.25 acceptance documentation.
 
-## V10.24
+## V10.24 · results_and_future_modules — 2026-11-09
 - Added **Results** and **Future** after the original Plan, Work, Language Learning, and Organize modules. The six-module order is fixed.
 - Both modules reuse the existing record-management features: quick add, edit, completion status, priority, search, filtering, sorting, category management, archive, trash, undo, PDF export, and independent JSON backup/restore.
 - Results categories: Exam Results, Certifications, Learning Achievements, Other. Future categories: Short-term Goals, Mid-term Goals, Long-term Goals, Life Aspirations, Other. Categories remain user-manageable.
