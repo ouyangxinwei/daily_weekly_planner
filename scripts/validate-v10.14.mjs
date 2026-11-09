@@ -10,6 +10,15 @@ const required = [
   ['work module button', 'id="module-work"'],
   ['language module button', 'id="module-language"'],
   ['organize module button', 'id="module-organize"'],
+  ['results module button', 'id="module-results"'],
+  ['future module button', 'id="module-future"'],
+  ['results local key', "RESULTS_KEY='personal-results:v1'"],
+  ['future local key', "FUTURE_KEY='personal-future:v1'"],
+  ['results defaults', "RESULTS_DEFAULT_CATEGORIES=['考试成绩','资格证书','学习成果','其他']"],
+  ['future defaults', "FUTURE_DEFAULT_CATEGORIES=['短期目标','中期目标','长期目标','人生愿望','其他']"],
+  ['six modules', "const ALL_MODULES=['plan','work','language','organize','results','future']"],
+  ['results cloud partition', "results:'results'"],
+  ['future cloud partition', "future:'future'"],
   ['work local key', "WORK_KEY='personal-work:v1'"],
   ['language local key', "LANGUAGE_KEY='personal-language:v1'"],
   ['plan defaults preserve order', "PLAN_DEFAULT_CATEGORIES=['学习','生活','健康','财务','兴趣','未分类']"],
@@ -29,7 +38,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[activeModule]]=state'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[activeModule]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-23-dark-theme-period-colors']
+  ['service worker cache version', 'daily-weekly-planner-v10-24-results-future-modules']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -39,7 +48,7 @@ if (html.includes('挪威语')) throw new Error('Norwegian category must not be 
 for (const term of ['外语学习','英语','德语','俄语','日语','工作记录','会议','待处理','进行中']) {
   if (!i18n.includes(JSON.stringify(term))) throw new Error('Missing i18n source term: ' + term);
 }
-if (!changelog.includes('## V10.14 · four_module_management')) throw new Error('Missing V10.14 changelog');
+if (!changelog.includes('# V10.24 成绩与未来双模块')) throw new Error('Missing V10.14 changelog');
 
 const loggingRequired = [
   ['runtime log entry', 'id="open-runtime-logs"'],
@@ -57,7 +66,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
+  ['runtime log app version', "APP_VERSION='V10.24_results_future_modules'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -78,7 +87,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
+  ['move app version', "APP_VERSION='V10.24_results_future_modules'"]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
@@ -100,7 +109,7 @@ const globalSearchRequired = [
   ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
   ['clear category filter after match', "$('category-filter').value='all'"],
   ['first match highlighting', 'priority-target-highlight'],
-  ['global search app version', "APP_VERSION='V10.23_dark_theme_period_colors'"]
+  ['global search app version', "APP_VERSION='V10.24_results_future_modules'"]
 ];
 for (const [label, needle] of globalSearchRequired) {
   if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);

@@ -1,3 +1,13 @@
+# V10.24 · results_and_future_modules — 2026-11-09
+
+- Added **Results** and **Future** after the original Plan, Work, Language Learning, and Organize modules. The six-module order is fixed.
+- Both modules reuse the existing record-management features: quick add, edit, completion status, priority, search, filtering, sorting, category management, archive, trash, undo, PDF export, and independent JSON backup/restore.
+- Results categories: Exam Results, Certifications, Learning Achievements, Other. Future categories: Short-term Goals, Mid-term Goals, Long-term Goals, Life Aspirations, Other. Categories remain user-manageable.
+- Added independent local storage keys `personal-results:v1` and `personal-future:v1`. Existing four keys, `schemaVersion: 1`, existing module data, and backup formats remain unchanged.
+- Added `results` and `future` Supabase partitions. Whole-cloud sync now covers six modules. Legacy four-module cloud snapshots remain downloadable; absent new partitions initialize as empty data without overwriting other modules.
+- Global search now includes all six modules. Added Chinese, English, and Japanese UI text and coordinated module colors. Updated the Service Worker cache.
+- No SQL migration is required. Validate local isolation, backup isolation, cloud partition compatibility, and responsive navigation before deployment.
+
 ## V10.23 · Dark Theme and Period Colors — 2026-11-05
 
 - Distinguished Plan periods by color: Daily, Weekly, Monthly and Yearly use blue; Daily Random, Weekly Random and Monthly Random use orange. Period order, navigation behavior and business data remain unchanged.

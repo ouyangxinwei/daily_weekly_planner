@@ -1,3 +1,15 @@
+# V10.24 成绩与未来双模块技术实现
+
+- 模块顺序：`plan`、`work`、`language`、`organize`、`results`、`future`；原四模块顺序不变。
+- 独立 LocalStorage：`personal-results:v1`、`personal-future:v1`。模块状态仍为 `schemaVersion: 1`，结构复用 `categories`、`plans`、`completions`、`trash`。
+- 成绩默认分类为考试成绩、资格证书、学习成果、其他；未来默认分类为短期目标、中期目标、长期目标、人生愿望。分类可通过既有分类管理界面维护。
+- 两个模块均为无周期的单列表，沿用工作／外语学习／整理的 CRUD、快速添加、完成状态、优先级、搜索、分类、归档、回收站、撤销、PDF 和模块专属 JSON 备份。
+- 单模块 Supabase 分区分别使用 `results`、`future`；上传保留其他所有分区，下载只恢复当前模块。整体同步按六个模块读写。旧云端快照缺少 `results` 或 `future` 时，整体下载将对应模块初始化为空状态；原四个分区仍要求存在且有效。
+- 全局检索顺序为计划周期顺序，其后工作、外语学习、整理、成绩、未来。
+- 不修改原四模块存储键、原数据、计划周期、`schemaVersion`、既有 JSON 单模块备份格式或 Supabase RPC。无需 SQL 迁移。
+- 成绩模块配色为青绿色，未来模块配色为柔和玫瑰粉；均支持深色／浅色主题。中英日文案同步更新。
+- Service Worker cache：`daily-weekly-planner-v10-24-results-future-modules`。
+
 # V10.23 黑白主题与周期颜色
 
 - 默认主题为深色，HTML 根节点使用 `data-theme="dark"`；启动时优先读取独立偏好键 `personal-planner:theme:v1`，仅接受 `dark` 或 `light`。
