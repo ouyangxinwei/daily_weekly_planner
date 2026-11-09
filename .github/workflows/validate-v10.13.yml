@@ -2,7 +2,7 @@ name: Validate JavaScript and V10.14 four-module boundaries
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/v10.25-sync-overwrite-protection]
   pull_request:
 
 jobs:
@@ -27,3 +27,5 @@ jobs:
         run: node scripts/validate-v10.14.mjs
       - name: Test legacy Plan category migration and data preservation
         run: node scripts/test-plan-migration.mjs
+      - name: Verify V10.25 sync overwrite protection
+        run: node scripts/validate-v10.25.mjs
