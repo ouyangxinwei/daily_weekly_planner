@@ -1,0 +1,28 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const i18n=fs.readFileSync(new URL('../i18n.js',import.meta.url),'utf8');
+const sw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
+const zh=fs.readFileSync(new URL('../CHANGELOG.md',import.meta.url),'utf8');
+const en=fs.readFileSync(new URL('../CHANGELOG.en.md',import.meta.url),'utf8');
+const ja=fs.readFileSync(new URL('../CHANGELOG.ja.md',import.meta.url),'utf8');
+
+assert.ok(html.includes("APP_VERSION='V10.27_move_plan_to_results_future'"));
+assert.ok(html.includes('<option value="results">成绩模块</option>'));
+assert.ok(html.includes('<option value="future">未来模块</option>'));
+assert.ok(html.includes("const allowed=['work','organize','language','results','future'];"));
+assert.ok(html.includes("MODULE_KEYS[targetModule]"),'destination uses its independent module storage key');
+assert.ok(html.includes("MODULE_CATEGORIES[targetModule]"),'destination uses its own category set');
+assert.ok(html.includes("status:'待处理'"),'moved record starts incomplete');
+assert.ok(html.includes("next.plans.splice(index,1)"),'source plan is removed after successful destination save');
+assert.ok(html.includes("if(!ok){"),'destination write is rolled back if source deletion fails');
+assert.ok(i18n.includes('"成绩模块":"Results module"'));
+assert.ok(i18n.includes('"未来模块":"Future module"'));
+assert.ok(i18n.includes('"成绩模块":"成績モジュール"'));
+assert.ok(i18n.includes('"未来模块":"未来モジュール"'));
+assert.ok(sw.includes('daily-weekly-planner-v10-27-move-plan-to-results-future'));
+assert.ok(zh.startsWith('# V10.27'));
+assert.ok(en.startsWith('# V10.27'));
+assert.ok(ja.startsWith('# V10.27'));
+console.log('V10.27 plan move destination checks passed.');

@@ -149,7 +149,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       <div class="field"><label for="plan-due-at">日期与提醒时间 <span style="font-weight:400;color:#85899e">（选填）</span></label><input id="plan-due-at" name="dueAt" type="datetime-local"><small class="field-hint">到时会发送浏览器通知；需要允许通知并保持计划页面打开。</small></div>
       <div class="field"><label for="plan-reference-url">参考网站 <span style="font-weight:400;color:#85899e">（选填）</span></label><input id="plan-reference-url" name="referenceUrl" type="text" maxlength="2048" inputmode="url" autocomplete="url" placeholder="https://example.com"><small class="field-hint">可输入完整网址或域名；保存后会在备注上方显示为新标签页链接。</small></div>
       <div class="field"><label for="plan-note">备注 <span style="font-weight:400;color:#85899e">（选填）</span></label><textarea id="plan-note" name="note" maxlength="500" placeholder="补充一点说明"></textarea></div>
-      <div class="field" id="plan-move-field" hidden><label for="plan-move-target">移动到其他模块</label><div class="move-plan-controls"><select id="plan-move-target"><option value="work">工作模块</option><option value="organize">整理模块</option><option value="language">外语学习模块</option></select><button type="button" class="secondary" id="plan-move-button">移动到所选模块</button></div><small class="field-hint">仅可从计划移动到工作、整理或外语学习；移动后原计划会删除，目标事项默认未完成。</small></div>
+      <div class="field" id="plan-move-field" hidden><label for="plan-move-target">移动到其他模块</label><div class="move-plan-controls"><select id="plan-move-target"><option value="work">工作模块</option><option value="organize">整理模块</option><option value="language">外语学习模块</option><option value="results">成绩模块</option><option value="future">未来模块</option></select><button type="button" class="secondary" id="plan-move-button">移动到所选模块</button></div><small class="field-hint">仅可从计划移动到工作、整理、外语学习、成绩或未来；移动后原计划会删除，目标事项默认未完成。</small></div>
       <div class="dialog-actions"><button type="button" class="secondary" id="cancel-dialog">取消</button><button class="primary" type="submit">保存计划</button></div>
     </form>
   </dialog>
@@ -193,7 +193,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <script>
   (()=>{
     'use strict';
-    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',RESULTS_KEY='personal-results:v1',FUTURE_KEY='personal-future:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',THEME_KEY='personal-planner:theme:v1',SYNC_META_KEY='personal-planner:sync-meta:v1',APP_VERSION='V10.26_clear_sync_status_on_cancel',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
+    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',RESULTS_KEY='personal-results:v1',FUTURE_KEY='personal-future:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',THEME_KEY='personal-planner:theme:v1',SYNC_META_KEY='personal-planner:sync-meta:v1',APP_VERSION='V10.27_move_plan_to_results_future',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
     const PERIODS={daily:{label:'每日',progress:'今日进度'},daily_random:{label:'每日随机',progress:'今日临时安排'},weekly:{label:'每周',progress:'本周进度'},weekly_random:{label:'每周随机',progress:'本周临时安排'},monthly:{label:'每月',progress:'本月进度'},monthly_random:{label:'每月随机',progress:'本月临时安排'},yearly:{label:'每年',progress:'今年进度'}};
     const RANDOM_BASE={daily_random:'daily',weekly_random:'weekly',monthly_random:'monthly'};
     const GLOBAL_SEARCH_PERIODS=['daily','daily_random','weekly','weekly_random','monthly','monthly_random','yearly'];
@@ -347,7 +347,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
     function openDialog(plan=null){editingId=plan?.id??null;form.reset();$('plan-move-field').hidden=!(activeModule==='plan'&&Boolean(plan));$('plan-move-target').value='work';const noun=moduleNoun();$('dialog-title').textContent=plan?'编辑'+noun:'新建'+noun;$('plan-title').value=plan?.title??'';$('plan-reference-url').value=plan?.referenceUrl??'';$('plan-note').value=plan?.note??'';$('plan-due-at').value=validDueAt(plan?.dueAt)?plan.dueAt:'';$('plan-period').value=plan?.period??activePeriod;$('plan-category').value=plan?.category??state.categories[0];$('plan-status').value=plan?.status||'待处理';setPriority(plan?.priority??1);$('title-error').textContent='';dialog.showModal();requestAnimationFrame(()=>$('plan-title').focus())}
     function closeDialog(){dialog.close();editingId=null}
     function movePlanToModule(targetModule){
-      const allowed=['work','organize','language'];
+      const allowed=['work','organize','language','results','future'];
       if(activeModule!=='plan'||!editingId||!allowed.includes(targetModule))return;
       const sourcePlan=state.plans.find(plan=>plan.id===editingId);
       if(!sourcePlan){showStorageError('要移动的计划已不存在，请刷新后重试。');return}
