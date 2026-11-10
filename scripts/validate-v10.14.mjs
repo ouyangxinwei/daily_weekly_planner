@@ -38,7 +38,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[module]]=localState'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[module]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-26-clear-sync-status-on-cancel']
+  ['service worker cache version', 'daily-weekly-planner-v10-27-move-plan-to-results-future']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -66,7 +66,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.26_clear_sync_status_on_cancel'"]
+  ['runtime log app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
@@ -87,7 +87,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.26_clear_sync_status_on_cancel'"]
+  ['move app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
@@ -109,7 +109,7 @@ const globalSearchRequired = [
   ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
   ['clear category filter after match', "$('category-filter').value='all'"],
   ['first match highlighting', 'priority-target-highlight'],
-  ['global search app version', "APP_VERSION='V10.26_clear_sync_status_on_cancel'"]
+  ['global search app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
 ];
 for (const [label, needle] of globalSearchRequired) {
   if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);
