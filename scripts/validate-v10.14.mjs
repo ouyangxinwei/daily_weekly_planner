@@ -80,7 +80,7 @@ const moveRequired = [
   ['move UI exists only in plan edit dialog', 'id="plan-move-field"'],
   ['move destination selector', 'id="plan-move-target"'],
   ['move action button', 'id="plan-move-button"'],
-  ['one-way destination allowlist', "const allowed=['work','organize','language']"],
+  ['one-way destination allowlist', "const allowed=['work','organize','language','results','future']"],
   ['move only from plan', "if(activeModule!=='plan'||!editingId||!allowed.includes(targetModule))return"],
   ['destination pending status', "status:'待处理'"],
   ['destination has no reminder', "dueAt:''"],
