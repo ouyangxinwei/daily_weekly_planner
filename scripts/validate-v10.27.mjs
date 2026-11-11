@@ -24,6 +24,7 @@ assert.ok(i18n.includes('"未来模块":"未来モジュール"'));
 assert.ok(sw.includes('daily-weekly-planner-v10-28-pagination-pdf-export'));
 assert.ok(html.includes('const PAGE_SIZE=10'));
 assert.ok(html.includes('const rows=getCurrentListData().plans;'),'PDF export includes all filtered records, not only the current page');
+assert.ok(html.includes('function render(){renderStarSummary();const {allPeriodPlans,plans}=getCurrentListData();'),'list rendering uses the shared filter/sort result');
 assert.ok(html.includes('rows.map((plan,index)=>'),'PDF export maps full plan records');
 assert.ok(html.includes('id="pagination-controls"'));
 assert.ok(html.includes('renderPagination(page,plans.length,pageCount,pageKey)'));
