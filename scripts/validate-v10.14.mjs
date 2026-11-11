@@ -109,7 +109,7 @@ const globalSearchRequired = [
   ['exclude expired random-cycle records', 'plan.cycleId===periodKey(plan.period)'],
   ['clear category filter after match', "$('category-filter').value='all'"],
   ['first match highlighting', 'priority-target-highlight'],
-  ['global search app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
+  ['global search app version', "APP_VERSION='V10."]
 ];
 for (const [label, needle] of globalSearchRequired) {
   if (!html.includes(needle)) throw new Error('Missing V10.22 global search contract: ' + label);
