@@ -66,7 +66,7 @@ const loggingRequired = [
   ['data snapshot trace', "traceDataOperation('localModuleSnapshot'"],
   ['whole snapshot validation trace', "traceDataOperation('validateWholeCloudSnapshot'"],
   ['whole snapshot persistence trace', "traceDataOperation('persistWholeLocalSnapshot'"],
-  ['runtime log app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
+  ['runtime log app version', "APP_VERSION='V10.28_pagination'"]
 ];
 for (const [label, needle] of loggingRequired) {
   if (!html.includes(needle)) throw new Error('Missing runtime logging contract: ' + label);
