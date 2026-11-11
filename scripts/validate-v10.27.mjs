@@ -28,7 +28,7 @@ assert.ok(html.includes('renderPagination(page,plans.length,pageCount,pageKey)')
 assert.ok(html.includes('const visiblePlans=plans.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE)'));
 assert.ok(html.includes("activeModule==='plan'?activePeriod:'list'"));
 assert.ok(i18n.includes('"上一页":"Previous"'));
-assert.ok(i18n.includes('"下一页":"前のページ"'));
+assert.ok(i18n.includes('"下一页":"次のページ"'));
 assert.ok(zh.startsWith('# V10.28'));
 assert.ok(en.startsWith('# V10.28'));
 assert.ok(ja.startsWith('# V10.28'));
