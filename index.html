@@ -299,7 +299,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       const sortLabel=$('sort-order').selectedOptions[0]?.textContent||window.PlannerI18n.t('默认顺序');
       const metadata=activeModule!=='plan'?[t(moduleNoun()+'数量：')+rows.length,t('导出时间：')+new Date().toLocaleString(locale),t('分类：')+(category==='all'?t('所有分类'):t(category)),t('排序：')+sortLabel]:[t('计划周期：')+periodLabel,t('计划数量：')+rows.length,t('导出时间：')+new Date().toLocaleString(locale),t('分类：')+(category==='all'?t('所有分类'):t(category)),t('排序：')+sortLabel];
       if(query)metadata.push(t('搜索关键词：')+query);
-      const records=rows.map((row,index)=>{
+      const records=rows.map((plan,index)=>{
         const title=plan.title||'（无标题）';
         const categoryText=plan.category||state.categories[0]||'未分类';
         const priority=String(validPriority(plan.priority));
