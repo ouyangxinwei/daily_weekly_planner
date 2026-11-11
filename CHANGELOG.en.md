@@ -1,3 +1,11 @@
+# V10.28 · Pagination Across All Modules — 2026-11-11
+
+- Added consistent pagination to all six modules: Plan, Work, Foreign Language Learning, Organize, Results, and Future.
+- Each page displays 10 records with Previous, Next, and numbered page controls. Up to five nearby page numbers are shown at a time.
+- Each Plan period (Daily, Daily Random, Weekly, Weekly Random, Monthly, Monthly Random, Yearly) keeps its own page position. Other modules keep page positions independently by category.
+- Search, category filtering, and sorting return the current view to page 1. Page numbers are automatically clamped when the result count decreases.
+- Progress statistics, search, filtering, sorting, PDF export, and existing data storage remain unchanged. Pagination only changes which records are rendered in the list.
+
 # V10.27 · Move Plans to Results and Future — 2026-11-10
 
 - Added **Results** and **Future** as destinations in “Move to another module”; existing Work, Organize, and Foreign Language Learning destinations remain unchanged.
