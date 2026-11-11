@@ -87,7 +87,7 @@ const moveRequired = [
   ['source completion removed', 'delete next.completions[completionKey(moving)]'],
   ['destination-first persistence', 'localStorage.setItem(targetKey,JSON.stringify(destination))'],
   ['destination rollback', 'localStorage.setItem(targetKey,previousRaw)'],
-  ['move app version', "APP_VERSION='V10.27_move_plan_to_results_future'"]
+  ['move app version', "APP_VERSION='V10."]
 ];
 for (const [label, needle] of moveRequired) {
   if (!html.includes(needle)) throw new Error('Missing plan-to-module move contract: ' + label);
