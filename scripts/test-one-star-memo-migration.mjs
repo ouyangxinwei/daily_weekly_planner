@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';
+const html=fs.readFileSync('index.html','utf8'),match=html.match(/function migrateOneStarAcrossModuleStates\(modules,sourceModules,completionKeyForSource\)\{[\s\S]*?\n    \}/);
+assert.ok(match,'Production migration transformer must exist');const migrate=vm.runInNewContext(`(${match[0].trim()})`);
+const rec=(id,priority,extra={})=>({id,title:id,note:'note '+id,referenceUrl:'https://example.com/'+id,period:'daily',category:'学习',status:'进行中',priority,...extra});
+const sources=['plan','work','language','organize','results','future'],mods={memo:{categories:['待整理'],plans:[],completions:{},trash:[]}};
+for(const m of sources)mods[m]={categories:['学习'],plans:[],completions:{},trash:[]};
+mods.plan.plans=[rec('p1',1,{period:'weekly'}),rec('p2',1,{archivedAt:'arch'}),rec('p5',5)];mods.plan.completions={'p1|weekly|wk':true};
+mods.work.plans=[rec('w1',1),rec('w2',2)];mods.work.completions={'w1|work':true};
+mods.language.plans=[rec('l1',1)];mods.organize.plans=[rec('o1',1)];mods.results.plans=[rec('r1',1)];mods.future.plans=[rec('f1',1)];
+mods.plan.trash=[{plan:rec('trash',1),deletedAt:'2026-11-01',completions:{}}];
+const before=JSON.stringify(mods),key=(m,p)=>m==='plan'||m==='organize'?`${p.id}|${p.period}|wk`:`${p.id}|${m}`;
+const result=migrate(mods,sources,key);assert.equal(result.movedCount,7);assert.equal(result.modules.memo.plans.length,7);
+assert.equal(result.modules.plan.plans.length,1);assert.equal(result.modules.work.plans.length,1);
+const archived=result.modules.memo.plans.find(p=>p.id==='p2');assert.equal(archived.archivedAt,'arch');assert.equal(archived.memoSourcePeriod,'weekly');
+assert.equal(result.modules.memo.completions['p1|memo'],true);assert.equal(result.modules.memo.completions['w1|memo'],true);
+assert.equal(result.modules.plan.trash.length,1);assert.equal(JSON.stringify(mods),before);
+assert.equal(migrate(result.modules,sources,key).movedCount,0);console.log('Memo migration regression passed.');
