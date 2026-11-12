@@ -1,3 +1,11 @@
+# V10.29 · Memo Module and Automatic One-Star Migration — 2026-11-12
+
+- Added an independent Memo module with its own categories, local storage, pagination, search/filter/sort, archive, trash, JSON backup, PDF export, and Supabase sync.
+- On first upgrade, all 1-star records in the six existing modules are moved automatically to Memo, including archived records. Titles, notes, reference URLs, priority, reminders, completion state, archive state, categories, and source module are preserved. Original Plan periods are retained as source metadata.
+- Successfully moved records and their completion entries are removed from the source modules. 2–5-star records remain unchanged. Trash items are neither restored nor migrated. Local and cloud migration markers prevent repeated moves.
+- Existing cloud JSON snapshots are migrated automatically after sign-in through the existing Supabase RPC. No SQL table or RPC schema changes are required. Full backup and seven-module sync now include Memo.
+- Added migration regression tests and updated Chinese, English, Japanese copy and the Service Worker cache.
+
 # V10.28 · Pagination Across All Modules — 2026-11-11
 
 - Added consistent pagination to all six modules: Plan, Work, Foreign Language Learning, Organize, Results, and Future.
