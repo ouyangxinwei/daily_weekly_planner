@@ -16,7 +16,7 @@ const required = [
   ['future local key', "FUTURE_KEY='personal-future:v1'"],
   ['results defaults', "RESULTS_DEFAULT_CATEGORIES=['考试成绩','资格证书','学习成果','其他']"],
   ['future defaults', "FUTURE_DEFAULT_CATEGORIES=['短期目标','中期目标','长期目标','人生愿望','其他']"],
-  ['six modules', "const ALL_MODULES=['plan','work','language','organize','results','future']"],
+  ['six legacy modules plus Memo', "const SOURCE_MODULES=['plan','work','language','organize','results','future'];const ALL_MODULES=[...SOURCE_MODULES,'memo']"],
   ['results cloud partition', "results:'results'"],
   ['future cloud partition', "future:'future'"],
   ['work local key', "WORK_KEY='personal-work:v1'"],
@@ -38,7 +38,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[module]]=localState'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[module]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-28-pagination-pdf-export']
+  ['service worker cache version', 'daily-weekly-planner-v10-29-memo-migration']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -80,7 +80,7 @@ const moveRequired = [
   ['move UI exists only in plan edit dialog', 'id="plan-move-field"'],
   ['move destination selector', 'id="plan-move-target"'],
   ['move action button', 'id="plan-move-button"'],
-  ['one-way destination allowlist', "const allowed=['work','organize','language','results','future']"],
+  ['one-way destination allowlist', "const allowed=['work','organize','language','results','future','memo']"],
   ['move only from plan', "if(activeModule!=='plan'||!editingId||!allowed.includes(targetModule))return"],
   ['destination pending status', "status:'待处理'"],
   ['destination has no reminder', "dueAt:''"],
