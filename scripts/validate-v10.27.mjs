@@ -32,7 +32,7 @@ assert.ok(html.includes('const visiblePlans=plans.slice((page-1)*PAGE_SIZE,page*
 assert.ok(html.includes("activeModule==='plan'?activePeriod:'list'"));
 assert.ok(i18n.includes('"上一页":"Previous"'));
 assert.ok(i18n.includes('"下一页":"次のページ"'));
-assert.ok(zh.startsWith('# V10.28'));
-assert.ok(en.startsWith('# V10.28'));
-assert.ok(ja.startsWith('# V10.28'));
+assert.ok(zh.startsWith('# V10.29'));
+assert.ok(en.startsWith('# V10.29'));
+assert.ok(ja.startsWith('# V10.29'));
 console.log('V10.27 plan move destination checks passed.');
