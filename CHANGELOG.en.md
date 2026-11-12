@@ -1,3 +1,10 @@
+# V10.30 · Star Statistics for Five Modules — 2026-11-12
+
+- Added independent one-to-five-star statistics to Work, Foreign Language Learning, Organize, Results, and Future. Each module shows task counts and each priority's share of that module's open tasks.
+- Selecting a star clears the current search and category filters, adjusts pagination, and locates a matching open task within the same module. Statistics never mix records across modules.
+- Statistics refresh after task creation, deletion, priority changes, completion, and archiving. The existing Plan statistics remain unchanged; completed, archived, and Trash records are excluded; Memo has no star statistics.
+- Updated multilingual copy, static acceptance checks, app version, and Service Worker cache. No business data structure, LocalStorage key, JSON backup format, or Supabase database schema changed.
+
 # V10.29 · Memo Module and Automatic One-Star Migration — 2026-11-12
 
 - Added an independent Memo module with its own categories, local storage, pagination, search/filter/sort, archive, trash, JSON backup, PDF export, and Supabase sync.
