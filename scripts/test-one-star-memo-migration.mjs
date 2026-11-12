@@ -4,7 +4,7 @@ assert.ok(match,'Production migration transformer must exist');const migrate=vm.
 const rec=(id,priority,extra={})=>({id,title:id,note:'note '+id,referenceUrl:'https://example.com/'+id,period:'daily',category:'学习',status:'进行中',priority,...extra});
 const sources=['plan','work','language','organize','results','future'],mods={memo:{categories:['待整理'],plans:[],completions:{},trash:[]}};
 for(const m of sources)mods[m]={categories:['学习'],plans:[],completions:{},trash:[]};
-mods.plan.plans=[rec('p1',1,{period:'weekly'}),rec('p2',1,{archivedAt:'arch'}),rec('p5',5)];mods.plan.completions={'p1|weekly|wk':true};
+mods.plan.plans=[rec('p1',1,{period:'weekly'}),rec('p2',1,{period:'weekly',archivedAt:'arch'}),rec('p5',5)];mods.plan.completions={'p1|weekly|wk':true};
 mods.work.plans=[rec('w1',1),rec('w2',2)];mods.work.completions={'w1|work':true};
 mods.language.plans=[rec('l1',1)];mods.organize.plans=[rec('o1',1)];mods.results.plans=[rec('r1',1)];mods.future.plans=[rec('f1',1)];
 mods.plan.trash=[{plan:rec('trash',1),deletedAt:'2026-11-01',completions:{}}];
