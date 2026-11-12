@@ -1,3 +1,11 @@
+# V10.31 · Plan Star Navigation Order Fix — 2026-11-12
+
+- Plan star statistics now include all seven periods: Daily, Daily Random, Weekly, Weekly Random, Monthly, Monthly Random, and Yearly.
+- Selecting a star searches periods strictly in that order. Within the first period containing a matching open task, it selects the first match according to the current sort order; it does not choose randomly.
+- Search and category filters are cleared, the matching period and page are opened, and the target task is highlighted. A clear notice appears if no match is found.
+- Star statistics and navigation in the other five modules remain unchanged. No business data, LocalStorage keys, JSON backup format, or Supabase database schema is changed.
+- Updated Chinese, English, and Japanese changelogs, regression tests, app version, and Service Worker cache.
+
 # V10.30 · Star Statistics for Five Modules — 2026-11-12
 
 - Added independent one-to-five-star statistics to Work, Foreign Language Learning, Organize, Results, and Future. Each module shows task counts and each priority's share of that module's open tasks.
