@@ -21,7 +21,7 @@ assert.ok(i18n.includes('"成绩模块":"Results module"'));
 assert.ok(i18n.includes('"未来模块":"Future module"'));
 assert.ok(i18n.includes('"成绩模块":"成績モジュール"'));
 assert.ok(i18n.includes('"未来模块":"未来モジュール"'));
-assert.ok(sw.includes('daily-weekly-planner-v10-30-module-star-statistics'));
+assert.ok(sw.includes('daily-weekly-planner-v10-31-plan-star-search-order'));
 assert.ok(html.includes('const PAGE_SIZE=10'));
 assert.ok(html.includes('const rows=getCurrentListData().plans;'),'PDF export includes all filtered records, not only the current page');
 assert.ok(html.includes('function render(){renderStarSummary();const {allPeriodPlans,plans}=getCurrentListData();'),'list rendering uses the shared filter/sort result');
