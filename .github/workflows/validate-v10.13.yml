@@ -1,4 +1,4 @@
-name: Validate JavaScript and V10.29 Memo migration
+name: Validate JavaScript, Memo migration, and Module Star Statistics
 
 on:
   push:
