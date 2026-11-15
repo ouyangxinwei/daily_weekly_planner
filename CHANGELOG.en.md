@@ -1,3 +1,10 @@
+# V10.32 · More Editing Space for Plan Notes — 2026-11-15
+
+- Moved the optional Notes field between Plan Name and Plan Period, matching the workflow where the plan structure is stable and its internal content is updated over time.
+- The note editor now starts at approximately 10 lines and has more vertical space. Longer forms can scroll within the dialog, and the textarea remains manually resizable.
+- Preserved the existing note field, 500-character limit, save/load behavior, synchronization, and backup compatibility. No business data structure, LocalStorage key, or Supabase database schema changes.
+- Updated Chinese, English, and Japanese changelogs, static acceptance checks, app version, and Service Worker cache.
+
 # V10.31 · Plan Star Navigation Order Fix — 2026-11-12
 
 - Plan star statistics now include all seven periods: Daily, Daily Random, Weekly, Weekly Random, Monthly, Monthly Random, and Yearly.
