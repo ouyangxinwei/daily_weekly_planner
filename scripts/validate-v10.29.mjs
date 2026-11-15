@@ -13,15 +13,15 @@ const summary=buildPrioritySummary([{id:'a',priority:5},{id:'b',priority:3},{id:
 assert.equal(summary.total,4,'completed and archived tasks are excluded from open-task statistics');
 assert.deepEqual(JSON.parse(JSON.stringify(summary.counts)),{'1':0,'2':1,'3':1,'4':1,'5':1});
 assert.ok(h.includes("const supportedModules=['work','language','organize','results','future']"));
-assert.ok(h.includes("APP_VERSION='V10.32_plan_note_workspace'"));
+assert.ok(h.includes("APP_VERSION='V10.33_plan_note_workspace'"));
 assert.ok(h.includes("share.textContent=percent+'%'"));
 assert.ok(h.includes("activePages[paginationKey()]=Math.floor(target.index/PAGE_SIZE)+1")&&h.includes("activePages[paginationKey()]=Math.floor(targetIndex/PAGE_SIZE)+1"));
 assert.ok(h.includes(".memo-mode #star-summary{display:none!important}"));
 for(const mode of ['work','language','organize','results','future'])assert.ok(!h.includes('.'+mode+'-mode #star-summary'),'star summary remains visible in '+mode);
 assert.ok(i.includes('"未完成任务 · 星级分布":"Open Tasks · Priority Distribution"'));
-assert.ok(fs.readFileSync('CHANGELOG.md','utf8').startsWith('# V10.32'));
-assert.ok(fs.readFileSync('CHANGELOG.en.md','utf8').startsWith('# V10.32'));
-assert.ok(fs.readFileSync('CHANGELOG.ja.md','utf8').startsWith('# V10.32'));
+assert.ok(fs.readFileSync('CHANGELOG.md','utf8').startsWith('# V10.33'));
+assert.ok(fs.readFileSync('CHANGELOG.en.md','utf8').startsWith('# V10.33'));
+assert.ok(fs.readFileSync('CHANGELOG.ja.md','utf8').startsWith('# V10.33'));
 
 
 assert.ok(h.includes("summary.eligible.filter(plan=>GLOBAL_SEARCH_PERIODS.includes(plan.period))"));
