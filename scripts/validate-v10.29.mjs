@@ -20,8 +20,8 @@ assert.ok(h.includes(".memo-mode #star-summary{display:none!important}"));
 for(const mode of ['work','language','organize','results','future'])assert.ok(!h.includes('.'+mode+'-mode #star-summary'),'star summary remains visible in '+mode);
 assert.ok(i.includes('"未完成任务 · 星级分布":"Open Tasks · Priority Distribution"'));
 assert.ok(fs.readFileSync('CHANGELOG.md','utf8').startsWith('# V10.32'));
-assert.ok(fs.readFileSync('CHANGELOG.en.md','utf8').startsWith('# V10.31'));
-assert.ok(fs.readFileSync('CHANGELOG.ja.md','utf8').startsWith('# V10.31'));
+assert.ok(fs.readFileSync('CHANGELOG.en.md','utf8').startsWith('# V10.32'));
+assert.ok(fs.readFileSync('CHANGELOG.ja.md','utf8').startsWith('# V10.32'));
 
 
 assert.ok(h.includes("summary.eligible.filter(plan=>GLOBAL_SEARCH_PERIODS.includes(plan.period))"));
