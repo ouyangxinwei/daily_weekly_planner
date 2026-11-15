@@ -10,8 +10,8 @@ test('nightly 90-minute module navigation and LocalStorage soak test @stability'
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
-  const startedAt = new Date();
-  const startedMs = Date.now();
+  let startedAt = new Date();
+  let startedMs = Date.now();
   let cycles = 0;
   let navigationChecks = 0;
   let storageAudits = 0;
@@ -23,6 +23,9 @@ test('nightly 90-minute module navigation and LocalStorage soak test @stability'
       await addLocalTestRecord(page, module, `soak-fixture-${module.id}`);
     }
 
+    // Start the full requested soak period after the browser and fixtures are ready.
+    startedAt = new Date();
+    startedMs = Date.now();
     const deadline = startedMs + durationMinutes * 60 * 1000;
     while (Date.now() < deadline) {
       for (const module of MODULES) {
