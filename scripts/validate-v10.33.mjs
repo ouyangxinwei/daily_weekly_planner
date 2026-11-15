@@ -9,7 +9,7 @@ assert.ok(move.includes("activeModule!=='plan'")&&move.includes("!allowed.includ
 const x=h.indexOf('id="plan-move-field"'),y=h.indexOf('<div class="dialog-actions"',x),dialog=h.slice(x,y);
 for(const target of ['work','organize','language','results','future'])assert.ok(dialog.includes('value="'+target+'"'));
 assert.ok(!dialog.includes('value="memo"'));
-assert.ok(!h.includes('await migrateCloudOneStarTasks();'));
+assert.ok(!h.includes('await migrateCloudOneStarTasks();'),'cloud sync never triggers Memo migration');
 assert.ok(!h.includes('migrateCloudOneStarTasks().then('));
 assert.ok(!h.includes('if(migrateLocalOneStarTasks())'));
 const c=h.indexOf('async function downloadAllCloudState()'),d=h.indexOf('function validPriority',c),whole=h.slice(c,d);
