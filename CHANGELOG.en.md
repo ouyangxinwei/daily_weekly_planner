@@ -1,3 +1,12 @@
+# V10.33 · Module Isolation and Memo Migration Stop — 2026-11-15
+
+- Disabled automatic migration of one-star tasks into Memo during application startup. Data already in Memo remains untouched; nothing is deleted or moved back.
+- Disabled automatic migration during login, single-module cloud synchronization, and whole-cloud synchronization. Whole-cloud downloads now restore each of the seven module partitions as-is.
+- The Plan editor can move plans only to Work, Language, Organize, Results, and Future. Memo is no longer a selectable target, and the underlying move function rejects it as well.
+- All other modules remain independent, with no cross-module move entry points. Global search, in-module management, backup, and synchronization remain available.
+- No business data structure, LocalStorage key, JSON backup format, or Supabase database schema changes. Existing migration markers and source metadata are left intact.
+- Updated all three changelogs, module-isolation validation, app version, and Service Worker cache.
+
 # V10.32 · More Editing Space for Plan Notes — 2026-11-15
 
 - Moved the optional Notes field between Plan Name and Plan Period, matching the workflow where the plan structure is stable and its internal content is updated over time.
