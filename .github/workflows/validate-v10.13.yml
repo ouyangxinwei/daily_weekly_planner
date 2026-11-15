@@ -33,4 +33,5 @@ jobs:
           node scripts/validate-v10.26.mjs
           node scripts/validate-v10.27.mjs
           node scripts/validate-v10.29.mjs
+          node scripts/validate-v10.33.mjs
           node scripts/test-one-star-memo-migration.mjs
