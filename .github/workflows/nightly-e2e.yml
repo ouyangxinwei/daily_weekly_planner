@@ -1,0 +1,68 @@
+name: Nightly Playwright E2E and Stability
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 1 * * *'
+      timezone: 'Asia/Tokyo'
+  workflow_dispatch:
+    inputs:
+      stability_minutes:
+        description: 'Stability test duration in minutes'
+        required: false
+        default: '90'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-e2e-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CI: true
+      STABILITY_DURATION_MINUTES: ${{ github.event_name == 'schedule' && '90' || (github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes || '1') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install Playwright
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser regression and stability tests
+        run: npm run test:e2e
+
+      - name: Add stability summary to workflow report
+        if: always()
+        run: |
+          if [ -f test-results/nightly-stability-summary.json ]; then
+            echo '## Nightly browser stability summary' >> "$GITHUB_STEP_SUMMARY"
+            cat test-results/nightly-stability-summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Playwright reports and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-playwright-report-${{ github.run_number }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 30
