@@ -38,7 +38,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[module]]=localState'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[module]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-32-plan-note-workspace']
+  ['service worker cache version', 'daily-weekly-planner-v10-33-module-isolation-disable-memo-migration']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;
@@ -80,7 +80,7 @@ const moveRequired = [
   ['move UI exists only in plan edit dialog', 'id="plan-move-field"'],
   ['move destination selector', 'id="plan-move-target"'],
   ['move action button', 'id="plan-move-button"'],
-  ['one-way destination allowlist', "const allowed=['work','organize','language','results','future','memo']"],
+  ['one-way destination allowlist', "const allowed=['work','organize','language','results','future']"],
   ['move only from plan', "if(activeModule!=='plan'||!editingId||!allowed.includes(targetModule))return"],
   ['destination pending status', "status:'待处理'"],
   ['destination has no reminder', "dueAt:''"],
