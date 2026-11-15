@@ -13,7 +13,8 @@ assert.ok(!h.includes('await migrateCloudOneStarTasks();'),'cloud sync never tri
 assert.ok(!h.includes('migrateCloudOneStarTasks().then('));
 assert.ok(!h.includes('if(migrateLocalOneStarTasks())'));
 assert.ok(h.includes("for(const m of Object.keys(MODULE_KEYS))$('module-'+m).addEventListener('click',()=>switchModule(m))"),'all module navigation click handlers remain active');
-assert.ok(h.includes('// Automatic one-star migration is disabled; Memo remains independent.\\n    if(activeModule')||h.includes('// Automatic one-star migration is disabled; Memo remains independent.\\n    if(activeModule'),'startup migration comment must not swallow app initialization');
+const migrationComment=h.indexOf('// Automatic one-star migration is disabled; Memo remains independent.');
+assert.ok(migrationComment>=0&&h.slice(migrationComment,migrationComment+100).includes('\n    if(activeModule'),'startup migration comment must not swallow app initialization');
 const c=h.indexOf('async function downloadAllCloudState()'),d=h.indexOf('function validPriority',c),whole=h.slice(c,d);
 assert.ok(whole.includes('persistWholeLocalSnapshot(latestModules,latestMeta)'));
 assert.ok(!whole.includes('migrateOneStarAcrossModuleStates'));
