@@ -66,3 +66,23 @@ test('Plan completion state is persisted locally after refresh', async ({ page }
   const restoredTask = page.locator('#task-list .task').filter({ hasText: title });
   await expect(restoredTask).toHaveClass(/done/);
 });
+
+test('automation testing panel explains the nightly suite and links to its latest run', async ({ page }) => {
+  await page.route('https://api.github.com/repos/ouyangxinwei/daily_weekly_planner/actions/workflows/nightly-e2e.yml/runs?per_page=5', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ workflow_runs: [{
+      id: 12345, run_number: 8, status: 'completed', conclusion: 'success',
+      created_at: '2026-11-15T01:00:00Z', run_started_at: '2026-11-15T01:00:00Z',
+      updated_at: '2026-11-15T02:30:00Z', head_sha: 'abcdef1234567890',
+      html_url: 'https://github.com/ouyangxinwei/daily_weekly_planner/actions/runs/12345'
+    }] })
+  }));
+  await page.locator('#open-automation-tests').click();
+  await expect(page.locator('#automation-dialog')).toBeVisible();
+  await expect(page.locator('#automation-title')).toHaveText('自动化测试');
+  await expect(page.locator('#automation-last-text')).toHaveText('测试通过');
+  await expect(page.locator('#automation-last-run')).toHaveAttribute('href', /actions\/runs\/12345$/);
+  await expect(page.locator('#automation-dialog')).toContainText('90 分钟稳定性测试');
+  await expect(page.locator('#automation-dialog')).toContainText('不会读取、上传、下载或修改真实用户云端数据');
+});
