@@ -19,6 +19,6 @@ const c=h.indexOf('async function downloadAllCloudState()'),d=h.indexOf('functio
 assert.ok(whole.includes('persistWholeLocalSnapshot(latestModules,latestMeta)'));
 assert.ok(!whole.includes('migrateOneStarAcrossModuleStates'));
 assert.ok(h.includes("MEMO_KEY='personal-memo:v1'"));
-assert.ok(sw.includes('daily-weekly-planner-v10-33-module-isolation-disable-memo-migration'));
+assert.ok(sw.includes('daily-weekly-planner-v10-34-language-learning-workspace'));
 assert.ok(zh.startsWith('# V10.33')&&en.startsWith('# V10.33')&&ja.startsWith('# V10.33'));
 console.log('V10.33 module isolation and disabled Memo migration validation passed.');
