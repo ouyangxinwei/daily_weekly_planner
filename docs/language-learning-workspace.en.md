@@ -8,7 +8,7 @@ An independent language-learning workspace inside Daily Weekly Planner. It borro
 Select the existing Language module to enter. Sections: Dashboard, Content, Practice, Mistakes, Learning Records, and Data Management. Selecting another module returns to its original interface.
 
 ## Included
-- Create and edit content in English, Japanese, German, Russian, or Other.
+- Create, edit, and delete content in English, Japanese, German, Russian, or Other; deleting content preserves learning history.
 - Types: Vocabulary, Grammar, Reading, Listening, Questions, and Other.
 - Search and filter by language/type.
 - Random practice from items not marked mastered; reveal/hide answer and notes.
