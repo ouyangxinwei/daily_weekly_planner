@@ -3,7 +3,7 @@
 - Upgraded the existing Language entry into an independent learning workspace, replacing the planner content area while preserving the shared toolbar and module switching.
 - Added Dashboard, Content, Practice, Mistakes, Learning Records, and Data Management.
 - Supports English, Japanese, German, Russian, and Other; content types include vocabulary, grammar, reading, listening, questions, and other.
-- Added create/edit, search, language/type filters, answer reveal, mastered/mistake marking, and learning records.
+- Added create/edit/delete, search, language/type filters, answer reveal, mastered/mistake marking, and learning records. Deleting content preserves its learning history.
 - Uses dedicated LocalStorage key personal-language-study-workspace:v1. It does not read legacy Language module data, access Supabase, or modify other modules.
 - Added independent JSON import/export and Chinese/English/Japanese maintenance documentation. Imports are validated and confirmed, with a 5 MB limit.
 - Added dedicated workspace JS/CSS and updated app version and Service Worker cache. TOEIC Study System is a design reference only; its code and data model are not reused.
