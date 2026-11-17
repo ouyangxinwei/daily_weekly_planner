@@ -2,6 +2,8 @@
 
 An independent language-learning workspace inside Daily Weekly Planner. It borrows interaction ideas from TOEIC Study System without reusing its source code, database, or data model.
 
+- Create, edit, and delete learning content; deleting content preserves existing learning records.
+
 ## Navigation
 Select the existing Language module to enter. Sections: Dashboard, Content, Practice, Mistakes, Learning Records, and Data Management. Selecting another module returns to its original interface.
 
