@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const html=fs.readFileSync('index.html','utf8');
+const js=fs.readFileSync('language-workspace.js','utf8');
+const css=fs.readFileSync('language-workspace.css','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+const zh=fs.readFileSync('CHANGELOG.md','utf8');
+const en=fs.readFileSync('CHANGELOG.en.md','utf8');
+const ja=fs.readFileSync('CHANGELOG.ja.md','utf8');
+const docs=['docs/language-learning-workspace.md','docs/language-learning-workspace.en.md','docs/language-learning-workspace.ja.md'];
+assert.match(html,/APP_VERSION='V10\.34_language_learning_workspace'/);
+assert.ok(html.includes('type="module" src="./language-workspace.js?v=1.0.0"'));
+assert.ok(html.includes('id="module-language"'));
+assert.ok(js.includes("personal-language-study-workspace:v1"));
+assert.ok(js.includes("personal-language:v1")===false,'new workspace must not reference legacy language storage');
+assert.ok(js.includes('function importBackup')&&js.includes('function exportBackup'));
+assert.ok(js.includes("tab='content';data.settings.activeTab='content'"));
+assert.ok(css.includes('#app-shell.language-workspace-active>.top~*:not(#language-workspace-root):not(dialog)'));
+assert.ok(sw.includes('daily-weekly-planner-v10-34-language-learning-workspace'));
+assert.ok(sw.includes('./language-workspace.js')&&sw.includes('./language-workspace.css'));
+for(const file of docs)assert.ok(fs.existsSync(file),file+' must exist');
+assert.ok(zh.startsWith('# V10.34')&&en.startsWith('# V10.34')&&ja.startsWith('# V10.34'));
+console.log('V10.34 language workspace contract validation passed.');
