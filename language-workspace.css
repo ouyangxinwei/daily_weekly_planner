@@ -1,4 +1,4 @@
-#app-shell.language-workspace-active>.shell:not(.top){display:none!important}
+#app-shell.language-workspace-active>.top~*:not(#language-workspace-root):not(dialog){display:none!important}
 #language-workspace-root{padding:0 0 30px;color:var(--ink)}#language-workspace-root[hidden]{display:none!important}
 .lw-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:6px 0 22px}.lw-heading h2{font-size:28px;margin:5px 0 4px}.lw-heading p,.lw-panel-head p,.lw-quick p{font-size:13px;color:var(--muted);margin:0;line-height:1.6}.lw-eyebrow{font-size:10px;letter-spacing:.14em;font-weight:800;color:#8877d8}
 .lw-primary,.lw-secondary{border-radius:10px;padding:10px 14px;font-size:13px;font-weight:650}.lw-primary{border:1px solid #6658d3;background:#6658d3;color:#fff}.lw-primary:hover{background:#5547c2}.lw-secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}
