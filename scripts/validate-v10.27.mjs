@@ -22,7 +22,7 @@ assert.ok(i18n.includes('"成绩模块":"Results module"'));
 assert.ok(i18n.includes('"未来模块":"Future module"'));
 assert.ok(i18n.includes('"成绩模块":"成績モジュール"'));
 assert.ok(i18n.includes('"未来模块":"未来モジュール"'));
-assert.ok(sw.includes('daily-weekly-planner-v10-33-module-isolation-disable-memo-migration'));
+assert.ok(sw.includes('daily-weekly-planner-v10-34-language-learning-workspace'));
 assert.ok(html.includes('const PAGE_SIZE=10'));
 const noteIndex=html.indexOf('id=\"plan-note\"');
 assert.ok(noteIndex>html.indexOf('id=\"plan-title\"')&&noteIndex<html.indexOf('id=\"plan-period\"'),'plan notes appear between title and period');
