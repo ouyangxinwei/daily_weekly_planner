@@ -41,8 +41,13 @@ test('nightly 90-minute module navigation and LocalStorage soak test @stability'
             const raw = localStorage.getItem(key);
             try {
               const parsed = raw ? JSON.parse(raw) : null;
-              if (parsed && (!Array.isArray(parsed.plans) || parsed.schemaVersion !== 1)) invalid.push(id);
-              counts[id] = parsed?.plans?.length || 0;
+              if (id === 'language') {
+                if (parsed && (parsed.schemaVersion !== 1 || !Array.isArray(parsed.items) || !Array.isArray(parsed.records))) invalid.push(id);
+                counts[id] = parsed?.items?.length || 0;
+              } else {
+                if (parsed && (!Array.isArray(parsed.plans) || parsed.schemaVersion !== 1)) invalid.push(id);
+                counts[id] = parsed?.plans?.length || 0;
+              }
             } catch {
               invalid.push(id);
             }

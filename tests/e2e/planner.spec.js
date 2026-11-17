@@ -27,7 +27,7 @@ test('each module saves only to its own LocalStorage partition and survives refr
     keys.map(({ id, key }) => {
       const raw = localStorage.getItem(key);
       const parsed = raw ? JSON.parse(raw) : null;
-      return [id, (parsed?.plans || []).map(item => item.title)];
+      return [id, (id === 'language' ? parsed?.items : parsed?.plans || []).map(item => item.title)];
     })
   ), MODULES);
 
@@ -43,7 +43,11 @@ test('each module saves only to its own LocalStorage partition and survives refr
 
   for (const module of MODULES) {
     await page.locator(`#module-${module.id}`).click();
-    await expect(page.locator('#task-list .task-title')).toHaveText(titles.get(module.id));
+    if (module.id === 'language') {
+      await expect(page.locator('#lw-card-list')).toContainText(titles.get(module.id));
+    } else {
+      await expect(page.locator('#task-list .task-title')).toHaveText(titles.get(module.id));
+    }
   }
 });
 

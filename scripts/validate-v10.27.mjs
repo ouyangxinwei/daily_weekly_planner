@@ -8,7 +8,7 @@ const zh=fs.readFileSync(new URL('../CHANGELOG.md',import.meta.url),'utf8');
 const en=fs.readFileSync(new URL('../CHANGELOG.en.md',import.meta.url),'utf8');
 const ja=fs.readFileSync(new URL('../CHANGELOG.ja.md',import.meta.url),'utf8');
 
-assert.ok(html.includes("APP_VERSION='V10.33_module_isolation_disable_memo_migration'"));
+assert.ok(html.includes("APP_VERSION='V10.34_language_learning_workspace'"));
 assert.ok(html.includes('<option value="results">成绩模块</option>'));
 assert.ok(html.includes('<option value="future">未来模块</option>'));
 assert.ok(html.includes("const allowed=['work','organize','language','results','future'];"));
@@ -22,7 +22,7 @@ assert.ok(i18n.includes('"成绩模块":"Results module"'));
 assert.ok(i18n.includes('"未来模块":"Future module"'));
 assert.ok(i18n.includes('"成绩模块":"成績モジュール"'));
 assert.ok(i18n.includes('"未来模块":"未来モジュール"'));
-assert.ok(sw.includes('daily-weekly-planner-v10-33-module-isolation-disable-memo-migration'));
+assert.ok(sw.includes('daily-weekly-planner-v10-34-language-learning-workspace'));
 assert.ok(html.includes('const PAGE_SIZE=10'));
 const noteIndex=html.indexOf('id=\"plan-note\"');
 assert.ok(noteIndex>html.indexOf('id=\"plan-title\"')&&noteIndex<html.indexOf('id=\"plan-period\"'),'plan notes appear between title and period');
