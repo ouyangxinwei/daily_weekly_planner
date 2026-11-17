@@ -8,7 +8,7 @@ const zh=fs.readFileSync(new URL('../CHANGELOG.md',import.meta.url),'utf8');
 const en=fs.readFileSync(new URL('../CHANGELOG.en.md',import.meta.url),'utf8');
 const ja=fs.readFileSync(new URL('../CHANGELOG.ja.md',import.meta.url),'utf8');
 
-assert.ok(html.includes("APP_VERSION='V10.33_module_isolation_disable_memo_migration'"));
+assert.ok(html.includes("APP_VERSION='V10.34_language_learning_workspace'"));
 assert.ok(html.includes('<option value="results">成绩模块</option>'));
 assert.ok(html.includes('<option value="future">未来模块</option>'));
 assert.ok(html.includes("const allowed=['work','organize','language','results','future'];"));
