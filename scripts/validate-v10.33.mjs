@@ -1,7 +1,7 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
 const h=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
 const zh=fs.readFileSync('CHANGELOG.md','utf8'),en=fs.readFileSync('CHANGELOG.en.md','utf8'),ja=fs.readFileSync('CHANGELOG.ja.md','utf8');
-assert.ok(h.includes("APP_VERSION='V10.35_language_workspace_v2'"));
+assert.ok(h.includes("APP_VERSION='V10.36_sync_time_memo_fix'"));
 assert.ok(h.includes("const allowed=['work','organize','language','results','future']"));
 const a=h.indexOf('function movePlanToModule('),b=h.indexOf('\n    function deletePlan',a);
 assert.ok(a>=0&&b>a);const move=h.slice(a,b);
@@ -19,6 +19,6 @@ const c=h.indexOf('async function downloadAllCloudState()'),d=h.indexOf('functio
 assert.ok(whole.includes('persistWholeLocalSnapshot(latestModules,latestMeta)'));
 assert.ok(!whole.includes('migrateOneStarAcrossModuleStates'));
 assert.ok(h.includes("MEMO_KEY='personal-memo:v1'"));
-assert.ok(sw.includes('daily-weekly-planner-v10-35-language-workspace-v2'));
+assert.ok(sw.includes('daily-weekly-planner-v10-36-sync-time-memo-fix'));
 assert.ok(zh.includes('# V10.33')&&en.includes('# V10.33')&&ja.includes('# V10.33'));
 console.log('V10.33 module isolation and disabled Memo migration validation passed.');

@@ -12,11 +12,11 @@ const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
 // 版本与缓存
-assert.ok(html.includes("APP_VERSION='V10.35_language_workspace_v2'"));
+assert.match(html, /APP_VERSION='V10\.3[5-9]_[a-z0-9_]+'/);
 assert.ok(html.includes('type="module" src="./language-workspace.js?v=2.0.0"'));
-assert.ok(sw.includes('daily-weekly-planner-v10-35-language-workspace-v2'));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.35.0');
-assert.ok(zh.startsWith('# V10.35') && en.startsWith('# V10.35') && ja.startsWith('# V10.35'));
+assert.match(sw, /daily-weekly-planner-v10-3[5-9]-/);
+assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.3[5-9]\.\d+$/);
+assert.ok(zh.includes('# V10.35') && en.includes('# V10.35') && ja.includes('# V10.35'));
 
 // 工作区切换
 assert.ok(html.includes('id="workspace-plan"') && html.includes('id="workspace-language"'));

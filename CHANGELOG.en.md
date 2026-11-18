@@ -1,3 +1,10 @@
+# V10.36 · Sync Time Comparison Fix (Memo) — 2026-11-18
+
+- Fixed: after a successful whole upload, a whole download still reported "local newer, cloud older". The cloud function planner_get_data rebuilds sync times for six modules only and omits Memo (added in V10.29), so the cloud's latest time was underestimated.
+- Uploads (single module and whole) now also store all seven module times in the snapshot field _clientSyncMeta. Comparisons prefer server times and fall back to _clientSyncMeta, so Memo shows a time when synced on its own as well.
+- No changes to the database, RPCs, tables, LocalStorage keys, or data formats. Upload once after updating so the cloud stores the new time information.
+- Updated app version and Service Worker cache; added V10.36 validation.
+
 # V10.35 · Language Learning Workspace V2 — 2026-11-18
 
 - Added a Planner Workspace / Language Study Workspace switch in the top bar. The language workspace hides the module bar and planner area while keeping theme, interface language, account, and system tools. The last workspace is restored after refresh; switching never reloads module data, and Plan search, filters, and pagination are preserved.
