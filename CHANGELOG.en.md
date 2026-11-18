@@ -1,3 +1,11 @@
+# V10.37 · No Extra Refresh After Updates — 2026-11-18
+
+- Fixed: after a new release, the first page load still showed the old version and needed another refresh. The Service Worker was cache-first, serving the old cache before updating in the background.
+- The Service Worker is now network-first: while online it checks the server for changes every time (unchanged files return a small 304), and uses the cache only when offline. Offline navigation to an uncached page falls back to the home page.
+- Cross-origin requests such as Supabase no longer pass through the Service Worker; behavior is unchanged.
+- This update itself still needs one refresh (the old Service Worker serves its cache one last time); from the next release on, opening the app shows the latest version.
+- No changes to data, storage keys, or sync logic. Updated app version and Service Worker cache; added V10.37 validation.
+
 # V10.36 · Sync Time Comparison Fix (Memo) — 2026-11-18
 
 - Fixed: after a successful whole upload, a whole download still reported "local newer, cloud older". The cloud function planner_get_data rebuilds sync times for six modules only and omits Memo (added in V10.29), so the cloud's latest time was underestimated.

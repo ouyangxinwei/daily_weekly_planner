@@ -17,7 +17,7 @@ assert.ok(js.includes("personal-language:v1")===false,'new workspace must not re
 assert.ok(js.includes('function importBackup')&&js.includes('function exportBackup'));
 assert.ok(js.includes("data.settings.activeTab = 'content'"));
 assert.ok(html.includes('html[data-workspace="language"] #app-shell>.top~*:not(#language-workspace-root):not(dialog)')&&css.includes('.lw-nav'));
-assert.ok(sw.includes('daily-weekly-planner-v10-36-sync-time-memo-fix'));
+assert.ok(sw.includes('daily-weekly-planner-v10-37-sw-network-first'));
 assert.ok(sw.includes('./language-workspace.js')&&sw.includes('./language-workspace.css'));
 for(const file of docs)assert.ok(fs.existsSync(file),file+' must exist');
 assert.ok(zh.includes('# V10.34')&&en.includes('# V10.34')&&ja.includes('# V10.34'));

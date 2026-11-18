@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-36-sync-time-memo-fix';
+const CACHE_NAME = 'daily-weekly-planner-v10-37-sw-network-first';
 const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './runtime-logs.js', './health-check.js', './language-workspace.js', './language-workspace.css', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
@@ -8,13 +8,16 @@ self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))));
   self.clients.claim();
 });
+// 网络优先：在线时总是向服务器确认最新版本（未变化时只返回 304），离线时才使用缓存。
+// 跨域请求（Supabase 等）不经过 Service Worker。
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-    if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+  const request = event.request;
+  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  event.respondWith(fetch(new Request(request.url, { cache: 'no-cache', credentials: 'same-origin' })).then(response => {
+    if (response.ok) {
       const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(request, copy)));
     }
     return response;
-  }).catch(() => caches.match('./index.html'))));
+  }).catch(() => caches.match(request).then(cached => cached || (request.mode === 'navigate' ? caches.match('./index.html') : Response.error()))));
 });

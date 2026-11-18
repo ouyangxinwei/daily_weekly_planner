@@ -19,5 +19,5 @@ assert.match(html, /_syncMeta/, 'cloud module timestamps are carried in snapshot
 assert.match(html, /function save\(nextState=state\)[\s\S]*?writeLocalSyncMeta/, 'local saves update independent sync metadata');
 assert.match(i18n, /Pre-sync data check/);
 assert.match(i18n, /同期前のデータ確認/);
-assert.match(sw, /daily-weekly-planner-v10-36-sync-time-memo-fix/);
+assert.match(sw, /daily-weekly-planner-v10-37-sw-network-first/);
 console.log('V10.26 sync overwrite protection static checks passed.');
