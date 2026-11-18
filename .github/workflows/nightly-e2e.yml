@@ -5,15 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '0 1 * * *'
-      timezone: 'Asia/Tokyo'
   workflow_dispatch:
     inputs:
       stability_minutes:
         description: 'Stability test duration in minutes'
         required: false
-        default: '90'
+        default: '10'
         type: string
 
 permissions:
@@ -26,10 +23,10 @@ concurrency:
 jobs:
   browser-tests:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 60
     env:
       CI: true
-      STABILITY_DURATION_MINUTES: ${{ github.event_name == 'schedule' && '90' || (github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes || '1') }}
+      STABILITY_DURATION_MINUTES: ${{ github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes || '1' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -1,46 +1,50 @@
-# 外语学习工作区 V1.0.0
-
-- 新增、编辑、删除学习内容；删除内容不删除已产生的学习记录。
+# 外语学习工作区 V2.0.0（应用 V10.35）
 
 ## 定位
-在慢慢计划内部提供独立的外语学习工作区。参考 TOEIC Study System 的学习内容组织与练习交互，但不复用其源代码、数据库或数据结构。
+在慢慢计划内部提供独立的外语学习工作区。参考 TOEIC Study System 的学习内容组织与练习交互，但不复用其源代码、数据库或数据结构。需求、影响分析与验收见 `requirements_V10.35_language_workspace_v2.md`、`impact_analysis_V10.35_language_workspace_v2.md`、`acceptance_V10.35_language_workspace_v2.md`。
 
 ## 入口与导航
-- 点击顶部「外语学习」模块进入工作区，其他模块保持原有页面。
-- 包含学习首页、学习内容、练习中心、错题管理、学习记录和数据管理。
-- 点击其他模块返回原有界面；切换不会清除任一工作区数据。
+- 顶部「计划工作区 / 外语学习工作区」切换。外语学习工作区隐藏模块切换栏与计划区域；主题、界面语言、账号与系统工具保持可用。
+- 当前工作区保存在 `personal-planner:active-workspace:v1`（`plan` / `language`），刷新后恢复。`index.html` 头部的 `<script data-workspace-boot>` 提前设置 `html[data-workspace]`，避免计划列表闪现。
+- 工作区导航：学习首页、学习内容、练习中心、错题管理、学习记录、数据管理；点击卡片「学习」进入内容详情。
+- 计划工作区中的「外语任务」模块即原外语学习任务列表（`personal-language:v1`），与本工作区数据完全独立。
 
-## V1.0.0 已实现
-- 新增、编辑学习内容；支持英语、日语、德语、俄语及其他语言。
-- 内容类型：词汇、语法、阅读、听力、练习题及其他。
-- 内容列表支持关键词搜索、语言筛选和类型筛选。
-- 练习中心随机抽取未掌握内容，支持显示/隐藏答案与释义。
-- 可标记「我已掌握」或「需要复习」，并生成学习记录。
-- 错题管理集中显示需要复习的内容。
-- 独立 JSON 导出与导入，导入前校验并确认。
-- 独立 LocalStorage 键 personal-language-study-workspace:v1；不读写旧版外语学习分区，不访问 Supabase。
+## 学习状态
+| 内部值 | 显示 | 进入方式 |
+|---|---|---|
+| not_started | 未学习 | 新建内容 |
+| learning | 学习中 | 首次打开（start）、重新学习（relearn） |
+| completed | 已完成 | 完成本次学习（complete） |
+| review | 需要复习 | 需要复习（review） |
+| mastered | 已掌握 | 我已掌握（master） |
 
-## 数据模型
-保存 schemaVersion、items、records、settings。学习内容包括 id、title、language、type、category、prompt、answer、options、notes、status、createdAt、updatedAt。学习记录保存每次掌握/错题操作。
+状态只能通过学习操作改变，每次操作生成一条学习记录并更新 `lastStudiedAt`；编辑内容不改变状态。练习中心不抽取已掌握内容，需要复习的内容优先；错题管理显示需要复习的内容。
 
-## 安全与兼容
-- 不修改旧模块 LocalStorage 键、JSON 格式或 Supabase 分区。
-- 不删除旧版 personal-language:v1 数据；本工作区使用全新的存储键。
-- 学习数据仅保存在当前浏览器，可通过 JSON 备份迁移设备。
-- 导入限制 5 MB，校验 schemaVersion 和 items/records 数组。
+## 数据结构（schemaVersion 2）
+存储键 `personal-language-study-workspace:v1`：
+- `items`：id、title、language、type、category、unit、level、prompt、answer、options、notes（界面显示为「解析」）、status、lastStudiedAt、createdAt、updatedAt。
+- `records`：id、itemId、title、language、type、action、status、at（V1 记录保留原 `result` 字段）。
+- `notes`：id、itemId、text（≤ 3000 字）、createdAt、updatedAt。
+- `settings.activeTab`。
+
+删除学习内容时，相关学习记录和个人笔记保留在数据中。
+
+## V1 迁移
+- 读取到 schemaVersion 1 时自动迁移；迁移前把原始字符串写入 `personal-language-study-workspace:v1:pre-v2-backup`（已存在不覆盖）。
+- 状态映射：new→not_started，mistake→review，mastered→mastered；记录 result：mastered→master，mistake→review。
+- 数据无法识别或无法写入时以只读方式打开，显示提示，不写回存储；「数据管理」可导出原始数据。
+
+## 导入导出
+- 导出 schemaVersion 2，包含 `moduleType: "language-workspace"`。
+- 导入支持 V1 与 V2，上限 5 MB，校验后确认；失败时原数据不变。
+- 工作区不参与云同步和整体备份，不发起任何网络请求。
+
+## 回滚
+V10.34 无法识别 V2 数据，并会在任意操作后以空数据覆盖。回滚前先在 V10.35 导出 JSON；回滚后可从 `...:pre-v2-backup` 或导出文件恢复（V10.34 只能导入 V1 格式）。
 
 ## 已知边界
-- 当前练习是内容卡片式自测，不是完整模拟考试引擎。
-- 选项以文本展示；自动评分、套卷、音频文件上传、间隔重复算法和云端同步暂未实现。
-- 当前界面文案以中文为主，尚未接入应用的三语翻译目录。
+单词与词汇、语法学习、学习统计、学习时长、间隔重复、音频、云同步、三语界面尚未实现（计划于 V10.36 以后）。工作区界面文案以中文为主。
 
-## 手工验收
-1. 进入「外语学习」，确认主计划列表被工作区替换。
-2. 新增英语词汇、日语语法各一条，刷新后确认仍存在。
-3. 搜索并筛选语言、类型。
-4. 练习中心显示答案，分别标记掌握和需要复习。
-5. 错题管理显示错题；学习记录显示两次操作。
-6. 编辑内容，确认状态与记录保留。
-7. 导出 JSON，再导入备份。
-8. 切换计划/工作/整理等模块，再返回外语学习，确认数据独立。
-9. 在手机宽度下检查导航、卡片和编辑对话框。
+## 测试
+- `npm run test:validate:language`：V10.34 / V10.35 静态契约与迁移单元校验。
+- `tests/e2e/language-workspace.spec.js`：工作区切换、外语任务、迁移、只读保护、状态、练习、筛选分页、笔记、导入导出。

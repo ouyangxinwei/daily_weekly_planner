@@ -1,34 +1,27 @@
-# Language Learning Workspace V1.0.0
+# Language Learning Workspace V2.0.0 (app V10.35)
 
-An independent language-learning workspace inside Daily Weekly Planner. It borrows interaction ideas from TOEIC Study System without reusing its source code, database, or data model.
-
-- Create, edit, and delete learning content; deleting content preserves existing learning records.
+An independent language-learning workspace inside Daily Weekly Planner. It borrows interaction ideas from TOEIC Study System without reusing its source code, database, or data model. See the V10.35 requirements, impact analysis, and acceptance documents in this folder (Chinese).
 
 ## Navigation
-Select the existing Language module to enter. Sections: Dashboard, Content, Practice, Mistakes, Learning Records, and Data Management. Selecting another module returns to its original interface.
+- Use the Planner Workspace / Language Study Workspace switch in the top bar. The language workspace hides the module bar and planner area; theme, interface language, account, and system tools stay available.
+- The active workspace is stored in `personal-planner:active-workspace:v1` and restored after refresh. A small `<script data-workspace-boot>` in `index.html` sets `html[data-workspace]` early to avoid a flash of planner content.
+- Sections: Dashboard, Content, Practice, Mistakes, Learning Records, Data Management. "Study" on a card opens the detail view.
+- The "Language Tasks" module in the Planner Workspace is the original language task list (`personal-language:v1`) and is fully separate from this workspace.
 
-## Included
-- Create, edit, and delete content in English, Japanese, German, Russian, or Other; deleting content preserves learning history.
-- Types: Vocabulary, Grammar, Reading, Listening, Questions, and Other.
-- Search and filter by language/type.
-- Random practice from items not marked mastered; reveal/hide answer and notes.
-- Mark mastered or needing review; each action creates a learning record.
-- Dedicated mistake list and JSON export/import with validation and confirmation.
-- Separate LocalStorage key; no access to legacy language data or Supabase.
+## Learning status
+Not started → (open) Learning → Completed / Needs review / Mastered; Mastered → (relearn) Learning. Status changes only through study actions, each creating a learning record and updating `lastStudiedAt`. Editing keeps the status. Practice skips mastered items and prefers items needing review.
 
-## Data and safety
-The key personal-language-study-workspace:v1 stores schemaVersion, items, records, and settings. Existing module keys, backups, and Supabase partitions are unchanged. Legacy personal-language:v1 data is not deleted. V1 data stays in the current browser; use JSON backup to move devices. Import limit: 5 MB.
+## Data (schemaVersion 2)
+Key `personal-language-study-workspace:v1` holds `items` (with unit, level, status, lastStudiedAt), `records` (action, resulting status), `notes` (personal notes, ≤ 3000 chars), and `settings`. Deleting content keeps its records and notes.
+
+## V1 migration
+V1 data is migrated automatically; the original string is first saved to `personal-language-study-workspace:v1:pre-v2-backup` (never overwritten). Status mapping: new→not_started, mistake→review, mastered→mastered. Unreadable data opens read-only and is never written back; its raw data can be exported from Data Management.
+
+## Import / export
+Exports schemaVersion 2 with `moduleType: "language-workspace"`. Imports accept V1 and V2 (5 MB limit, validated and confirmed). The workspace makes no network requests and is not part of cloud sync.
+
+## Rollback
+V10.34 cannot read V2 data and overwrites it with empty data after any action. Export JSON before rolling back; restore from the pre-v2 backup key or the export afterwards.
 
 ## Limitations
-This is flashcard/self-review, not a full mock-exam engine. Automatic scoring, test sets, audio upload, spaced repetition, and cloud sync are not included. Workspace copy is primarily Chinese.
-
-## Manual acceptance
-1. Enter Language and verify planner content is replaced.
-2. Add English vocabulary and Japanese grammar; refresh and verify persistence.
-3. Search/filter content.
-4. Reveal answers and mark mastered / needing review.
-5. Verify Mistakes and Learning Records.
-6. Edit an item; verify status/history remain.
-7. Export and re-import JSON.
-8. Switch modules and back; verify isolation.
-9. Check mobile layout.
+Vocabulary and grammar pages, statistics, study time, spaced repetition, audio, cloud sync, and a fully translated workspace UI are planned for later versions.

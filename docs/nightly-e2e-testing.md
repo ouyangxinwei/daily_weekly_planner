@@ -47,14 +47,13 @@ STABILITY_DURATION_MINUTES=2 npm run test:stability
 
 ## GitHub Actions
 
-- Daily schedule: 01:00, Asia/Tokyo.
-- Scheduled stability duration: 90 minutes.
+- Daily schedule: removed in V10.35 to keep maintenance light for a personal project.
 - Push and pull-request validation: 1-minute stability smoke duration plus all functional tests.
-- Manual run: Actions → Nightly Playwright E2E and Stability → Run workflow; the duration can be changed.
-- Job timeout: 120 minutes.
+- Manual run: Actions → Nightly Playwright E2E and Stability → Run workflow; default stability duration 10 minutes, can be changed.
+- Job timeout: 60 minutes.
 - HTML report, JSON results, screenshots, traces, and stability summary are uploaded as an artifact for 30 days.
 
-The scheduled workflow runs from the repository's default branch. Merge this workflow into the default branch to activate nightly scheduling.
+There is no scheduled run. Re-add a `schedule` trigger to the workflow if nightly runs are needed again.
 
 ## Interpreting results
 

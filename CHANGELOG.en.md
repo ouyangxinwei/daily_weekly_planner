@@ -1,3 +1,16 @@
+# V10.35 · Language Learning Workspace V2 — 2026-11-18
+
+- Added a Planner Workspace / Language Study Workspace switch in the top bar. The language workspace hides the module bar and planner area while keeping theme, interface language, account, and system tools. The last workspace is restored after refresh; switching never reloads module data, and Plan search, filters, and pagination are preserved.
+- The Language module in the Planner Workspace shows its original task list again, renamed "Language Tasks", for planner tasks such as "study English for 30 minutes". Its data (personal-language:v1), categories, star statistics, move target, backups, and cloud partition are unchanged; during V10.34 the data was untouched but had no entry point.
+- Learning status now has five states: Not started, Learning, Completed, Needs review, Mastered. Status changes only through study actions (open, complete session, needs review, mastered, relearn), each creating a learning record; editing content keeps its status.
+- Added unit and level fields, unit/status filters, four sort orders, and 10-per-page pagination for Content, Mistakes, and Learning Records.
+- Added a content detail view showing prompt/source, options, answer/meaning, and explanation by content type, plus editable personal notes. The former "explanation and notes" field is now labelled "Explanation"; its content is unchanged.
+- Practice prefers items needing review and skips mastered items.
+- Workspace data is upgraded to schemaVersion 2 under the same key. Before the first upgrade the original data is saved to personal-language-study-workspace:v1:pre-v2-backup. Unreadable data opens read-only and is never overwritten. Imports accept V1 and V2 backups.
+- Rollback note: V10.34 cannot read V2 data and will overwrite it with empty data after any action. Export a JSON backup before rolling back.
+- Updated release notes and maintenance docs in three languages, app version, and Service Worker cache; added V10.35 validation and E2E tests.
+- GitHub automated tests no longer run the daily 90-minute stability test; they run functional tests with a 1-minute stability check on push to main or pull requests. Manual runs default to 10 minutes.
+
 # V10.34 · Independent Language Learning Workspace — 2026-11-18
 
 - Upgraded the existing Language entry into an independent learning workspace, replacing the planner content area while preserving the shared toolbar and module switching.
