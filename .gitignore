@@ -1,0 +1,8 @@
+# 依赖（本地 E2E 用，不提交）
+node_modules/
+
+# 托业题库：题目内容有版权，只在本地使用，不提交进公开仓库
+tools/input/
+tools/output/
+language-workspace-import.json
+language-study-backup-*.json

@@ -38,7 +38,7 @@ const required = [
   ['cloud partition merge', 'payload[CLOUD_PARTITIONS[module]]=localState'],
   ['cloud partition download', 'data[CLOUD_PARTITIONS[module]]'],
   ['active module persistence', 'ACTIVE_MODULE_KEY'],
-  ['service worker cache version', 'daily-weekly-planner-v10-37-sw-network-first']
+  ['service worker cache version', 'daily-weekly-planner-v10-38-toeic-question-bank']
 ];
 for (const [label, needle] of required) {
   const source = label === 'service worker cache version' ? sw : html;

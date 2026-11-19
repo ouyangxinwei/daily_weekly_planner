@@ -1,14 +1,14 @@
 (() => {
 'use strict';
 
-// 外语学习工作区 V2.0.0（应用 V10.35）
+// 外语学习工作区 V2.1.0（应用 V10.38，新增托业题库页）
 // 独立存储，不读写计划工作区七个模块的数据，不访问 Supabase。
 const KEY = 'personal-language-study-workspace:v1';
 const BACKUP_KEY = KEY + ':pre-v2-backup';
 const WORKSPACE_KEY = 'personal-planner:active-workspace:v1';
 const ROOT = 'language-workspace-root';
 const SCHEMA = 2;
-const WORKSPACE_VERSION = '2.0.0';
+const WORKSPACE_VERSION = '2.1.0';
 const PAGE_SIZE = 10;
 const NOTE_MAX = 3000;
 const IMPORT_MAX = 5 * 1024 * 1024;
@@ -27,7 +27,7 @@ const ACTIONS = {
 const V1_STATUS = { new: 'not_started', mistake: 'review', mastered: 'mastered' };
 const V1_RESULT_ACTION = { mastered: 'master', mistake: 'review' };
 const SORTS = [['studied', '最近学习'], ['updated', '最近更新'], ['created', '创建时间'], ['title', '名称']];
-const TABS = [['home', '学习首页', '⌂'], ['content', '学习内容', '▤'], ['practice', '练习中心', '✎'], ['mistakes', '错题管理', '↻'], ['records', '学习记录', '◷'], ['settings', '数据管理', '⚙']];
+const TABS = [['home', '学习首页', '⌂'], ['content', '学习内容', '▤'], ['toeic', '托业题库', '♪'], ['practice', '练习中心', '✎'], ['mistakes', '错题管理', '↻'], ['records', '学习记录', '◷'], ['settings', '数据管理', '⚙']];
 const TAB_IDS = TABS.map(t => t[0]);
 const NO_UNIT = '__none__';
 // 按内容类型决定详情页的区块标题
@@ -39,6 +39,14 @@ const TYPE_LABELS = {
   question: ['题干', '答案'],
   other: ['内容', '答案 / 释义']
 };
+// 托业题库：题目条目带有 exam 字段（套 / T / Part / 题号 / 题组），在「托业题库」页按层级浏览。
+// 正确答案写在条目的 answer 里，以 A–D 开头即可判对错，例如 "C" 或 "C) xxx"。
+const TOEIC_PARTS = { 1: '照片题', 2: '应答题', 3: '对话', 4: '独白' };
+const TOEIC_PAGE = { 1: 6, 2: 5 };          // Pt1、Pt2 每页题数；Pt3、Pt4 以 3 题一组为一页
+const TOEIC_GROUP_BASE = { 3: 32, 4: 71 };  // 题组起始题号，只用于没有 exam 字段的旧数据
+const SCRIPT_MARK = '【原文】';
+const QUESTION_MARK = '【题目】';
+const LETTERS = ['A', 'B', 'C', 'D'];
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -58,13 +66,40 @@ let detailId = null, detailFrom = 'content';
 let reveal = false, quizId = null, noteEditing = null, editing = null;
 const filters = { q: '', lang: '', type: '', unit: '', status: '', sort: 'studied' };
 const pages = { content: 1, mistakes: 1, records: 1 };
+const toeic = { set: null, test: null, part: null, page: 0 };  // 托业题库的当前位置（仅内存）
+const openScripts = new Set();   // 已展开原文的题组
+const shownAnswers = new Set();  // 已点「查看答案」的题目
 
 // ---------- 数据迁移与校验 ----------
+// 托业题的定位信息。旧版导入数据没有 exam 字段时，按 id（toeic-s06-t1-pt3-q044）推算；无法识别时返回 null，按普通内容处理
+function normalizeExam(x) {
+  const int = v => (Number.isInteger(v) && v > 0 ? v : 0);
+  const e = x.exam && typeof x.exam === 'object' ? x.exam : null;
+  let set, test, part, number, start = 0, end = 0;
+  if (e) {
+    set = int(e.set); test = int(e.test); part = int(e.part); number = int(e.number);
+    start = int(e.groupStart); end = int(e.groupEnd);
+  } else {
+    const m = /^toeic-s(\d+)-t(\d+)-pt(\d)-q(\d+)$/.exec(String(x.id));
+    if (!m) return null;
+    [set, test, part, number] = m.slice(1).map(Number);
+  }
+  if (!set || !test || !TOEIC_PARTS[part] || !number) return null;
+  const out = { set, test, part, number };
+  if (part >= 3) {
+    if (!start) { const base = TOEIC_GROUP_BASE[part]; start = base + Math.floor((number - base) / 3) * 3; }
+    if (!end) end = start + 2;
+    if (number < start || number > end) return null;
+    out.groupStart = start; out.groupEnd = end;
+  }
+  return out;
+}
+
 function normalizeItem(x) {
   if (!x || typeof x !== 'object' || !x.id) return null;
   const type = TYPES.some(t => t[0] === x.type) ? x.type : 'other';
   const status = STATUS[x.status] ? x.status : (V1_STATUS[x.status] || 'not_started');
-  return {
+  const item = {
     ...x,
     id: String(x.id),
     title: str(x.title, 160) || '未命名内容',
@@ -82,6 +117,9 @@ function normalizeItem(x) {
     createdAt: x.createdAt || stamp(),
     updatedAt: x.updatedAt || x.createdAt || stamp()
   };
+  const exam = normalizeExam(x);
+  if (exam) item.exam = exam; else delete item.exam;
+  return item;
 }
 
 function normalizeRecord(r) {
@@ -237,6 +275,216 @@ function paginate(list, key) {
 // ---------- 渲染 ----------
 function statusBadge(s) { return '<span class="lw-state ' + esc(s) + '">' + esc(STATUS[s] || STATUS.not_started) + '</span>'; }
 
+// ---------- 托业题库 ----------
+// 条目的 prompt 对 Pt3、Pt4 是「【原文】…【题目】…」，这里拆开显示，prompt 仍是唯一的数据来源
+function splitPrompt(prompt) {
+  const text = String(prompt ?? '');
+  const i = text.indexOf(QUESTION_MARK);
+  if (text.startsWith(SCRIPT_MARK) && i > 0) return { script: text.slice(SCRIPT_MARK.length, i).trim(), question: text.slice(i + QUESTION_MARK.length).trim() };
+  return { script: '', question: text };
+}
+
+const cardPreview = x => (x.exam ? splitPrompt(x.prompt).question : '') || x.prompt || x.answer || '';
+
+function parseOptions(item) {
+  return item.options.map((o, i) => {
+    const m = /^([A-D])\)\s*([\s\S]*)$/.exec(o);
+    const text = m ? m[2] : o;
+    return { letter: m ? m[1] : (LETTERS[i] || ''), text, missing: text.startsWith('[待补充') };
+  });
+}
+
+// 正确答案：answer 以 A–D 开头（后面是结尾或标点）才算，避免把 "A man is…" 当成选项 A
+function correctLetter(item) {
+  const m = /^\s*([A-D])\s*(?:$|[).．。:：、,，])/.exec(item.answer || '');
+  return m ? m[1] : '';
+}
+
+// 点选记录保存在 settings.toeic.picks（题目 id → 选项字母），随备份一起导出、导入
+function pickOf(id) {
+  const picks = data.settings.toeic && data.settings.toeic.picks;
+  const v = picks && typeof picks === 'object' ? picks[id] : '';
+  return LETTERS.includes(v) ? v : '';
+}
+
+function pickOption(id, letter) {
+  const item = findItem(id);
+  if (!item || !item.exam || !LETTERS.includes(letter)) return false;
+  const prev = data.settings.toeic;
+  const base = prev && prev.picks && typeof prev.picks === 'object' ? prev.picks : {};
+  data.settings.toeic = { ...(prev || {}), picks: { ...base, [id]: letter } };
+  if (!save()) { if (prev) data.settings.toeic = prev; else delete data.settings.toeic; return false; }
+  ensureStarted(item);
+  return true;
+}
+
+function clearPicks(ids) {
+  const prev = data.settings.toeic;
+  if (!prev || !prev.picks || typeof prev.picks !== 'object') return false;
+  const picks = { ...prev.picks };
+  ids.forEach(id => { delete picks[id]; });
+  data.settings.toeic = { ...prev, picks };
+  if (!save()) { data.settings.toeic = prev; return false; }
+  ids.forEach(id => shownAnswers.delete(id));
+  return true;
+}
+
+// 套 → T → Part → 题目（按题号排序）
+function toeicIndex() {
+  const idx = new Map();
+  for (const x of data.items) {
+    const e = x.exam;
+    if (!e) continue;
+    if (!idx.has(e.set)) idx.set(e.set, new Map());
+    const tests = idx.get(e.set);
+    if (!tests.has(e.test)) tests.set(e.test, new Map());
+    const parts = tests.get(e.test);
+    if (!parts.has(e.part)) parts.set(e.part, []);
+    parts.get(e.part).push(x);
+  }
+  idx.forEach(tests => tests.forEach(parts => parts.forEach(list => list.sort((a, b) => a.exam.number - b.exam.number))));
+  return idx;
+}
+const sortedKeys = m => [...m.keys()].sort((a, b) => a - b);
+
+// Pt3、Pt4 每个题组一页；Pt1、Pt2 按固定题数分页
+function toeicPages(list, part) {
+  const out = [];
+  if (part >= 3) {
+    const groups = new Map();
+    list.forEach(x => { const k = x.exam.groupStart; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); });
+    sortedKeys(groups).forEach(k => out.push({ items: groups.get(k) }));
+  } else {
+    const size = TOEIC_PAGE[part] || 5;
+    for (let i = 0; i < list.length; i += size) out.push({ items: list.slice(i, i + size) });
+  }
+  out.forEach(p => {
+    const a = p.items[0].exam.number, b = p.items[p.items.length - 1].exam.number;
+    p.label = a === b ? String(a) : a + '–' + b;
+  });
+  return out;
+}
+
+function progress(list) {
+  let done = 0, judged = 0, right = 0;
+  for (const x of list) {
+    const p = pickOf(x.id);
+    if (!p) continue;
+    done++;
+    const c = correctLetter(x);
+    if (c) { judged++; if (c === p) right++; }
+  }
+  return { done, total: list.length, judged, right };
+}
+
+function progressText(list) {
+  const p = progress(list);
+  return '已答 ' + p.done + '/' + p.total + (p.judged ? ' · 答对 ' + p.right + '/' + p.judged : '');
+}
+
+const scriptKey = x => [x.exam.set, x.exam.test, x.exam.part, x.exam.groupStart].join('-');
+
+// 题组原文：默认折叠，先做题再看原文
+function toeicScript(item) {
+  if (!item.exam || item.exam.part < 3) return '';
+  const { script } = splitPrompt(item.prompt);
+  if (!script) return '';
+  const key = scriptKey(item), open = openScripts.has(key);
+  const lines = script.split(/\r?\n/).filter(l => l.trim());
+  return '<div class="lw-script' + (open ? ' open' : '') + '"><button type="button" class="lw-script-btn" data-act="toeic-script" data-key="' + esc(key) + '" aria-expanded="' + open + '">' +
+    (open ? '▾ 收起原文' : '▸ 显示原文（先做题，再看原文）') + '</button>' +
+    (open ? '<div class="lw-script-body">' + lines.map((l, i) => '<p' + (i === 0 ? ' class="lw-script-intro"' : '') + '>' + esc(l) + '</p>').join('') + '</div>' : '') + '</div>';
+}
+
+// 一道题：题干 + 可点选的选项 + 对错反馈
+function toeicQuestion(item) {
+  const e = item.exam;
+  const question = splitPrompt(item.prompt).question.replace(/^Number\s+\d+\.\s*/i, '');
+  const pick = pickOf(item.id), right = correctLetter(item), hasAnswer = Boolean((item.answer || '').trim());
+  const showAnswer = hasAnswer && (Boolean(pick) || shownAnswers.has(item.id));
+  const id = esc(item.id);
+  const options = parseOptions(item).map(o => {
+    if (!o.letter) return '<div class="lw-opt lw-opt-static"><span class="lw-opt-text">' + esc(o.text) + '</span></div>';
+    let cls = '', mark = '', note = '';
+    if (pick && right) {
+      if (o.letter === right) { cls = ' is-correct'; mark = '✓'; note = pick === right ? '你的选择，回答正确' : '正确答案'; }
+      else if (o.letter === pick) { cls = ' is-wrong'; mark = '✗'; note = '你的选择，回答错误'; }
+    } else if (pick === o.letter) { cls = ' is-picked'; mark = '●'; note = '你的选择'; }
+    if (o.missing) cls += ' is-missing';
+    return '<button type="button" class="lw-opt' + cls + '" data-act="toeic-pick" data-id="' + id + '" data-letter="' + o.letter + '" aria-pressed="' + (pick === o.letter) + '"><b>' + o.letter + '</b><span class="lw-opt-text">' + esc(o.text) + '</span>' +
+      (mark ? '<i aria-hidden="true">' + mark + '</i><span class="sr-only">' + note + '</span>' : '') + '</button>';
+  }).join('');
+  let feedback = '';
+  if (pick && right) feedback = pick === right ? '<span class="lw-fb ok">✓ 回答正确</span>' : '<span class="lw-fb bad">✗ 回答错误，正确答案是 ' + right + '</span>';
+  else if (pick) feedback = '<span class="lw-fb">已记录你的选择 ' + pick + (hasAnswer ? '' : '（尚未填写正确答案）') + '</span>';
+  const answerBtn = hasAnswer && !pick ? '<button type="button" class="lw-link" data-act="toeic-answer" data-id="' + id + '">' + (shownAnswers.has(item.id) ? '隐藏答案' : '查看答案') + '</button>' : '';
+  const detailBtn = detailId !== item.id ? '<button type="button" class="lw-link" data-act="detail" data-id="' + id + '">详情与笔记</button>' : '';
+  return '<section class="lw-exq" data-qid="' + id + '"><div class="lw-exq-head"><span class="lw-exq-no">Q' + e.number + '</span>' +
+    (/look at the graphic/i.test(question) ? '<span class="lw-exq-tag">需看图表（题库未含图片）</span>' : '') +
+    '<span class="lw-exq-state">' + statusBadge(item.status) + '</span></div>' +
+    (question ? '<p class="lw-exq-text">' + esc(question) + '</p>' : '') +
+    (options ? '<div class="lw-opts" role="group" aria-label="第 ' + e.number + ' 题选项">' + options + '</div>' : '') +
+    '<div class="lw-exq-foot">' + feedback + answerBtn + detailBtn + '</div>' +
+    (showAnswer ? '<div class="lw-answer visible"><strong>答案</strong><p>' + esc(item.answer) + '</p>' + (item.notes ? '<strong>解析</strong><p>' + esc(item.notes) + '</p>' : '') + '</div>' : '') + '</section>';
+}
+
+function crumbsHtml(trail) {
+  return '<nav class="lw-crumbs" aria-label="题库位置">' + trail.map((t, i) => i === trail.length - 1
+    ? '<span aria-current="page">' + esc(t.label) + '</span>'
+    : '<button type="button" class="lw-link" data-act="toeic-nav" data-level="' + t.level + '">' + esc(t.label) + '</button><i aria-hidden="true">›</i>').join('') + '</nav>';
+}
+
+function toeicSetsHtml(idx) {
+  const sets = sortedKeys(idx);
+  return '<div class="lw-panel"><div class="lw-panel-head"><div><h3>托业题库</h3><p>按「套 → T → Part」浏览。Pt3、Pt4 的同一题组放在一页，原文可折叠，选项可直接点选。</p></div><span class="lw-count">' + sets.length + ' 套</span></div>' +
+    '<div class="lw-sets">' + sets.map(s => {
+      const tests = idx.get(s);
+      return '<article class="lw-set"><h4>第 ' + s + ' 套</h4><div class="lw-set-tests">' + sortedKeys(tests).map(t =>
+        '<button type="button" class="lw-set-test" data-act="toeic-open" data-set="' + s + '" data-test="' + t + '"><strong>T' + t + '</strong><small>' + esc(progressText([...tests.get(t).values()].flat())) + '</small></button>'
+      ).join('') + '</div></article>';
+    }).join('') + '</div></div>';
+}
+
+function toeicPartsHtml(parts, trail) {
+  return '<div class="lw-panel">' + crumbsHtml(trail) +
+    '<div class="lw-panel-head"><div><h3>第 ' + toeic.set + ' 套 T' + toeic.test + '</h3><p>选择要练习的 Part。</p></div><span class="lw-count">' + esc(progressText([...parts.values()].flat())) + '</span></div>' +
+    '<div class="lw-parts">' + [1, 2, 3, 4].map(p => {
+      const list = parts.get(p) || [];
+      const name = 'Pt' + p + ' ' + TOEIC_PARTS[p];
+      if (!list.length) return '<div class="lw-part is-empty"><strong>' + name + '</strong><small>暂无题目</small></div>';
+      const pr = progress(list);
+      return '<button type="button" class="lw-part" data-act="toeic-part" data-part="' + p + '"><strong>' + name + '</strong><small>' + list.length + ' 题 · ' + toeicPages(list, p).length + (p >= 3 ? ' 组' : ' 页') + '</small>' +
+        '<span class="lw-bar"><i style="width:' + Math.round(pr.done / list.length * 100) + '%"></i></span><small>' + esc(progressText(list)) + '</small></button>';
+    }).join('') + '</div></div>';
+}
+
+function toeicPageHtml(list, trail) {
+  const part = toeic.part, word = part >= 3 ? '组' : '页';
+  const pageList = toeicPages(list, part);
+  toeic.page = Math.min(Math.max(0, toeic.page), pageList.length - 1);
+  const pg = pageList[toeic.page], last = toeic.page === pageList.length - 1;
+  const chips = pageList.length > 1 ? '<div class="lw-chips" role="group" aria-label="切换' + word + '">' + pageList.map((p, i) =>
+    '<button type="button" class="lw-chip' + (i === toeic.page ? ' current' : '') + (p.items.every(x => pickOf(x.id)) ? ' done' : '') + '" data-act="toeic-page" data-page="' + i + '"' + (i === toeic.page ? ' aria-current="true"' : '') + '>' + p.label + '</button>').join('') + '</div>' : '';
+  return '<div class="lw-panel lw-exam">' + crumbsHtml([...trail, { label: 'Pt' + part + ' ' + TOEIC_PARTS[part] }]) +
+    '<div class="lw-panel-head"><div><h3>第 ' + toeic.set + ' 套 T' + toeic.test + ' · Pt' + part + ' ' + TOEIC_PARTS[part] + '</h3><p>第 ' + (toeic.page + 1) + ' / ' + pageList.length + ' ' + word + ' · Q' + pg.label + '</p></div><span class="lw-count">' + esc(progressText(list)) + '</span></div>' +
+    chips + toeicScript(pg.items[0]) + pg.items.map(toeicQuestion).join('') +
+    '<div class="lw-exam-foot"><button type="button" class="lw-secondary" data-act="toeic-page" data-page="' + (toeic.page - 1) + '"' + (toeic.page === 0 ? ' disabled' : '') + '>← 上一' + word + '</button>' +
+    (pg.items.some(x => pickOf(x.id)) ? '<button type="button" class="lw-link" data-act="toeic-clear">清除本' + (part >= 3 ? '组' : '页') + '选择</button>' : '') +
+    (last ? '<button type="button" class="lw-primary" data-act="toeic-nav" data-level="test">完成，返回 Part 列表</button>' : '<button type="button" class="lw-primary" data-act="toeic-page" data-page="' + (toeic.page + 1) + '">下一' + word + ' →</button>') + '</div></div>';
+}
+
+function toeicTabHtml() {
+  const idx = toeicIndex();
+  if (!idx.size) return '<div class="lw-panel"><div class="lw-panel-head"><div><h3>托业题库</h3><p>按「套 → T → Part」浏览，Pt3、Pt4 同一题组放在一页。</p></div></div><div class="lw-empty">还没有托业题。<br>请先在「数据管理」导入托业题库的 JSON 文件。<br><button type="button" class="lw-primary" data-act="tab" data-tab="settings">前往数据管理</button></div></div>';
+  // 当前位置失效（数据被删除或替换）时退回上一层
+  const parts = idx.get(toeic.set)?.get(toeic.test);
+  if (!parts) { toeic.set = toeic.test = toeic.part = null; return toeicSetsHtml(idx); }
+  if (toeic.part && !parts.has(toeic.part)) toeic.part = null;
+  const trail = [{ label: '托业题库', level: 'root' }, { label: '第 ' + toeic.set + ' 套 T' + toeic.test, level: 'test' }];
+  // Part 列表页里「第 N 套 T」是当前位置，不再做成链接
+  return toeic.part ? toeicPageHtml(parts.get(toeic.part), trail) : toeicPartsHtml(parts, [trail[0], { label: trail[1].label }]);
+}
+
 function cards(list, emptyText) {
   if (!list.length) return '<div class="lw-empty">' + (emptyText || '这里还没有内容。点击「新增学习内容」开始建立自己的学习资料。') + '</div>';
   return '<div class="lw-cards">' + list.map(x =>
@@ -244,7 +492,7 @@ function cards(list, emptyText) {
       '<div class="lw-item-top"><span class="lw-pill">' + esc(x.language) + ' · ' + labelType(x.type) + '</span>' + statusBadge(x.status) + '</div>' +
       '<h4>' + esc(x.title) + '</h4>' +
       ((x.unit || x.level) ? '<div class="lw-tags">' + (x.unit ? '<span>单元：' + esc(x.unit) + '</span>' : '') + (x.level ? '<span>难度：' + esc(x.level) + '</span>' : '') + '</div>' : '') +
-      '<p>' + esc((x.prompt || x.answer || '').slice(0, 160)) + '</p>' +
+      '<p>' + esc(cardPreview(x).slice(0, 160)) + '</p>' +
       '<div class="lw-item-foot"><small>' + esc(x.category || '未分类') + ' · ' + (x.lastStudiedAt ? '最近学习 ' + fmtDate(x.lastStudiedAt) : '尚未学习') + '</small>' +
       '<div><button type="button" class="lw-link" data-act="detail" data-id="' + esc(x.id) + '">学习</button><button type="button" class="lw-link" data-act="edit" data-id="' + esc(x.id) + '">编辑</button><button type="button" class="lw-link" data-act="delete" data-id="' + esc(x.id) + '">删除</button></div></div>' +
     '</article>').join('') + '</div>';
@@ -258,6 +506,8 @@ function statusActions(item) {
 }
 
 function studyBody(item) {
+  // 托业题：原文折叠、选项可点选，与「托业题库」页一致
+  if (item.exam) return toeicScript(item) + toeicQuestion(item) + '<div class="lw-quiz-actions">' + statusActions(item) + '</div>';
   const [promptLabel, answerLabel] = TYPE_LABELS[item.type] || TYPE_LABELS.other;
   return '<div class="lw-section-label">' + promptLabel + '</div>' +
     '<div class="lw-question">' + esc(item.prompt || '（尚未填写学习内容）') + '</div>' +
@@ -344,6 +594,7 @@ function renderTab() {
         '<select data-filter="sort" aria-label="排序">' + SORTS.map(s => opt(s[0], '排序：' + s[1], filters.sort)).join('') + '</select>' +
       '</div><div id="lw-card-list">' + contentListHtml() + '</div></div>';
   }
+  if (tab === 'toeic') return toeicTabHtml();
   if (tab === 'practice') return '<div class="lw-panel"><div class="lw-panel-head"><div><h3>练习中心</h3><p>从未掌握的内容中抽取，需要复习的内容优先。</p></div></div>' + practiceHtml() + '</div>';
   if (tab === 'mistakes') {
     const review = sortList(list.filter(x => x.status === 'review'));
@@ -540,6 +791,13 @@ function openDetail(id) {
   $(ROOT)?.scrollIntoView({ block: 'start' });
 }
 
+const scrollToTop = () => $(ROOT)?.scrollIntoView({ block: 'start' });
+// 整页重绘后把键盘焦点放回原来的按钮
+function focusAfterRender(selector) {
+  const n = document.querySelector('#' + ROOT + ' ' + selector);
+  if (n) n.focus({ preventScroll: true });
+}
+
 function onClick(e) {
   const el = e.target.closest('[data-act]');
   if (!el || !$(ROOT).contains(el)) return;
@@ -559,6 +817,27 @@ function onClick(e) {
         if (!detailId) { quizId = null; reveal = false; }
         render();
       }
+      break;
+    }
+    case 'toeic-open': toeic.set = Number(el.dataset.set); toeic.test = Number(el.dataset.test); toeic.part = null; toeic.page = 0; render(); scrollToTop(); break;
+    case 'toeic-part': toeic.part = Number(el.dataset.part); toeic.page = 0; render(); scrollToTop(); break;
+    case 'toeic-nav':
+      if (el.dataset.level === 'root') toeic.set = toeic.test = toeic.part = null; else toeic.part = null;
+      render(); scrollToTop(); break;
+    case 'toeic-page': toeic.page = Number(el.dataset.page) || 0; render(); scrollToTop(); break;
+    case 'toeic-pick': if (pickOption(id, el.dataset.letter)) { render(); focusAfterRender('[data-act="toeic-pick"][data-id="' + CSS.escape(id) + '"][data-letter="' + el.dataset.letter + '"]'); } break;
+    case 'toeic-script': {
+      const key = el.dataset.key;
+      if (openScripts.has(key)) openScripts.delete(key); else openScripts.add(key);
+      render(); focusAfterRender('[data-act="toeic-script"][data-key="' + CSS.escape(key) + '"]'); break;
+    }
+    case 'toeic-answer': if (shownAnswers.has(id)) shownAnswers.delete(id); else shownAnswers.add(id); render(); break;
+    case 'toeic-clear': {
+      const list = toeicIndex().get(toeic.set)?.get(toeic.test)?.get(toeic.part);
+      if (!list) break;
+      const pageList = toeicPages(list, toeic.part);
+      const pg = pageList[Math.min(Math.max(0, toeic.page), pageList.length - 1)];
+      if (clearPicks(pg.items.map(x => x.id))) render();
       break;
     }
     case 'page': pages[el.dataset.list] = Number(el.dataset.page) || 1; if (el.dataset.list === 'content') refreshContentList(); else render(); break;

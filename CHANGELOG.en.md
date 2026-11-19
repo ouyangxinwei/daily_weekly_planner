@@ -1,3 +1,14 @@
+# V10.38 · Language Workspace: TOEIC Question Bank — 2026-11-19
+
+- Added a "TOEIC question bank" page to the language workspace, browsed as Set → Test → Part with breadcrumbs at each level, plus answered and correct counts and progress bars.
+- Each Pt3/Pt4 group (3 questions) is shown on one page, with group chips and previous/next buttons; Pt1 shows 6 questions per page and Pt2 shows 5.
+- Conversation and talk scripts are collapsed by default (answer first, then read the script), and the question is shown separately; content-card previews show only the question.
+- Options can be picked directly. When a correct answer is filled in (starting with A–D, e.g. "C" or "C) …"), right and wrong are marked and the explanation is shown; without an answer, only the pick is recorded. Picks are stored in settings.toeic.picks and travel with JSON export and import; picks for the current group or page can be cleared. The first pick sets the item to "Learning".
+- Placeholder options "[待补充 …]" are shown in a muted style, and questions that need a graphic are flagged. TOEIC items use the same layout on the detail page and in the practice centre.
+- Items gain an optional exam field (set, test, part, number, group). Older data without it is recognised from the id (e.g. toeic-s06-t1-pt3-q044); anything else stays a plain item. The storage key and schemaVersion 2 are unchanged.
+- Added tools/toeic_tool.py, which turns listening-test text into importable JSON (Pt1–Pt4 only) with a to-do list and a validation report. Question content is copyrighted, so import data stays local and is excluded in .gitignore.
+- Language workspace is now V2.1.0. Updated app version and Service Worker cache; added V10.38 validation and TOEIC E2E tests; fixed an E2E selector that matched two buttons.
+
 # V10.37 · No Extra Refresh After Updates — 2026-11-18
 
 - Fixed: after a new release, the first page load still showed the old version and needed another refresh. The Service Worker was cache-first, serving the old cache before updating in the background.

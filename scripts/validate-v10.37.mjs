@@ -8,10 +8,10 @@ const zh = fs.readFileSync('CHANGELOG.md', 'utf8');
 const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
-assert.ok(html.includes("APP_VERSION='V10.37_sw_network_first'"));
-assert.ok(sw.includes("const CACHE_NAME = 'daily-weekly-planner-v10-37-sw-network-first'"));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.37.0');
-assert.ok(zh.startsWith('# V10.37') && en.startsWith('# V10.37') && ja.startsWith('# V10.37'));
+assert.match(html, /APP_VERSION='V10\.(3[7-9]|[4-9]\d)_[a-z0-9_]+'/);
+assert.match(sw, /const CACHE_NAME = 'daily-weekly-planner-v10-(3[7-9]|[4-9]\d)-[a-z0-9-]+'/);
+assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.(3[7-9]|[4-9]\d)\.\d+$/);
+assert.ok(zh.includes('# V10.37') && en.includes('# V10.37') && ja.includes('# V10.37'));
 
 // 在沙箱中执行 sw.js，模拟在线、离线与跨域请求
 const ORIGIN = 'https://example.test';

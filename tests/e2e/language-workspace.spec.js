@@ -68,7 +68,7 @@ test('V1 workspace data is migrated with a backup and status mapping', async ({ 
   expect(await page.evaluate(k => localStorage.getItem(k), BACKUP_KEY)).toBe(raw);
 
   await openLanguageWorkspace(page);
-  await page.locator('[data-act="tab"][data-tab="mistakes"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="mistakes"]').click();
   await expect(page.locator('#language-workspace-root')).toContainText('Old mistake item');
 
   // 再次加载不覆盖升级前备份
@@ -83,7 +83,7 @@ test('unreadable workspace data opens read-only and is never overwritten', async
   await loginToLocalTestApp(page);
   await openLanguageWorkspace(page);
   await expect(page.locator('.lw-alert')).toBeVisible();
-  await page.locator('[data-act="tab"][data-tab="content"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="content"]').click();
   expect(await page.evaluate(k => localStorage.getItem(k), WORKSPACE_KEY)).toBe('{"schemaVersion":9,"items":"broken"}');
 });
 
@@ -118,7 +118,7 @@ test('study actions drive the five learning states and create records', async ({
   stored = await readWorkspace(page);
   expect(stored.items[0].status).toBe('learning');
 
-  await page.locator('[data-act="tab"][data-tab="records"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="records"]').click();
   await expect(page.locator('.lw-records')).toContainText('重新学习');
 });
 
@@ -177,7 +177,7 @@ test('content list filters by unit and status and paginates at 10 items', async 
   await expect(cards).toHaveCount(4);
   await expect(page.locator('#lw-search')).toBeFocused();
 
-  await page.locator('[data-act="tab"][data-tab="mistakes"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="mistakes"]').click();
   await expect(page.locator('#language-workspace-root .lw-item')).toHaveCount(3);
 });
 
@@ -211,7 +211,7 @@ test('personal notes can be added, edited and deleted and survive refresh', asyn
 test('exports V2 backup and imports both V1 and V2 backups', async ({ page }) => {
   await openLanguageWorkspace(page);
   await addLanguageItem(page, { title: 'E2E export record' });
-  await page.locator('[data-act="tab"][data-tab="settings"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="settings"]').click();
   const downloadPromise = page.waitForEvent('download');
   await page.locator('[data-act="export"]').click();
   const download = await downloadPromise;
@@ -227,12 +227,12 @@ test('exports V2 backup and imports both V1 and V2 backups', async ({ page }) =>
   await expect.poll(async () => (await readWorkspace(page)).items.map(x => x.title)).toEqual(['Imported V1']);
   expect((await readWorkspace(page)).items[0].status).toBe('review');
 
-  await page.locator('[data-act="tab"][data-tab="settings"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="settings"]').click();
   await page.locator('#lw-import-file').setInputFiles({ name: 'v2.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
   await expect.poll(async () => (await readWorkspace(page)).items.map(x => x.title)).toEqual(['E2E export record']);
 
   const before = JSON.stringify(await readWorkspace(page));
-  await page.locator('[data-act="tab"][data-tab="settings"]').click();
+  await page.locator('.lw-nav [data-act="tab"][data-tab="settings"]').click();
   await page.locator('#lw-import-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"schemaVersion":1}') });
   await expect(page.locator('#lw-toast')).toContainText('格式不正确');
   expect(JSON.stringify(await readWorkspace(page))).toBe(before);
