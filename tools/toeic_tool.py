@@ -33,7 +33,8 @@ SCRIPT_KINDS = ('会話', 'トーク')
 HEADER_RE = re.compile(r'^=====\s*(.*?)\s*=====\s*$')
 QHEAD_RE = re.compile(
     r'^(\d{3}) CD(\d+) (\d+) T(\d+) Pt(\d+) Q(\d+)(?:-(\d+))?(?: (会話|問題|トーク))?\.mp3$')
-OPT_RE = re.compile(r'^([A-D])\)\s*(.*)$')
+# 选项写法：「A) …」或「A. …」（第 7 套起两种混用），输出统一为「A) …」
+OPT_RE = re.compile(r'^([A-D])[).]\s+(.*)$')
 NUM_RE = re.compile(r'^Number\s+(\d+)\.\s*(.*)$')
 INTRO_RE = re.compile(r'^Questions\s+(\d+)\s*(?:through|-|–)\s*(\d+)\s+refer to', re.I)
 FILENAME_RE = re.compile(r'(\d+)_T(\d+)\.txt$', re.I)
@@ -163,7 +164,7 @@ def parse_file(path: Path, set_no: int, t_no: int):
 
 # ---------------------------------------------------------------- 校验
 def check_units(units, set_no, t_no):
-    problems = []
+    problems, notes = [], []
     seen = {pt: [] for pt in PART_NAMES}
     for u in units:
         pt = u['pt']
@@ -191,7 +192,10 @@ def check_units(units, set_no, t_no):
                 problems.append(f'{tag} 原文为空')
             else:
                 im = INTRO_RE.match(u['script'][0])
-                if not im or (int(im.group(1)), int(im.group(2))) != (q1, q2):
+                if not im:
+                    # 部分源文件的原文没有开头的「Questions … refer to …」，不影响导入，只提示
+                    notes.append(f'{tag} 原文没有开头的 Questions … refer to … 句（源文件如此）')
+                elif (int(im.group(1)), int(im.group(2))) != (q1, q2):
                     problems.append(f'{tag} 原文第一行的题号范围与标题不一致')
     for pt, (lo, hi) in EXPECT.items():
         got = seen[pt]
@@ -204,7 +208,7 @@ def check_units(units, set_no, t_no):
             problems.append(f'Pt{pt} 缺少题号: {missing}')
         if extra:
             problems.append(f'Pt{pt} 出现范围外题号: {extra}')
-    return problems, {pt: len(v) for pt, v in seen.items()}
+    return problems, notes, {pt: len(v) for pt, v in seen.items()}
 
 
 # ---------------------------------------------------------------- 输出：文本
@@ -368,7 +372,7 @@ def main():
             sys.exit(f'文件名需要形如 6_T1.txt：{path.name}')
         set_no, t_no = int(fm.group(1)), int(fm.group(2))
         units, probs, skipped, removed = parse_file(path, set_no, t_no)
-        more, counts = check_units(units, set_no, t_no)
+        more, notes, counts = check_units(units, set_no, t_no)
         probs += more
 
         text = render_text(set_no, t_no, units)
@@ -387,6 +391,8 @@ def main():
                    f'生成条目数：{len(items)}',
                    '去掉的固定句子：' + (', '.join(f'{k} ×{v}' for k, v in removed.items()) or '无'),
                    f'跳过的块（说明、Test 标题、Pt5 以上）：{len(skipped)} 个', '']
+        if notes:
+            report += ['提示：'] + [f'- {x}' for x in notes] + ['']
         if probs:
             any_problem = True
             report += ['**发现问题：**'] + [f'- {x}' for x in probs] + ['']
