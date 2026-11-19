@@ -31,12 +31,15 @@ OPT_LETTERS = {1: 'ABCD', 2: 'ABC', 3: 'ABCD', 4: 'ABCD'}
 SCRIPT_KINDS = ('会話', 'トーク')
 
 HEADER_RE = re.compile(r'^=====\s*(.*?)\s*=====\s*$')
+# 标题写法：第 9–10 套带「CD1 11」，第 11 套起没有；第 12 套写成「Part 1」；题目块叫「問題」或「設問」
 QHEAD_RE = re.compile(
-    r'^(\d{3}) CD(\d+) (\d+) T(\d+) Pt(\d+) Q(\d+)(?:-(\d+))?(?: (会話|問題|トーク))?\.mp3$')
+    r'^(\d{3})(?: CD(\d+) (\d+))? T(\d+) (?:Pt|Part )(\d+) Q(\d+)(?:-(\d+))?(?: (会話|問題|設問|トーク))?\.mp3$')
+QUESTION_KINDS = ('問題', '設問')
 # 选项写法：「A) …」或「A. …」（第 7 套起两种混用），输出统一为「A) …」
 OPT_RE = re.compile(r'^([A-D])[).]\s+(.*)$')
 NUM_RE = re.compile(r'^Number\s+(\d+)\.\s*(.*)$')
-INTRO_RE = re.compile(r'^Questions\s+(\d+)\s*(?:through|-|–)\s*(\d+)\s+refer to', re.I)
+# 第 9 套起也有「Question 62-64, refer …」「The question's 38-40, refer …」等写法
+INTRO_RE = re.compile(r"^(?:The\s+)?Question(?:s|'s)?\s+(\d+)\s*(?:through|-|–)\s*(\d+),?\s+refer", re.I)
 FILENAME_RE = re.compile(r'(\d+)_T(\d+)\.txt$', re.I)
 
 
@@ -51,6 +54,78 @@ NOISE = {
     norm('This is the end of the listening test. Turn to Part 5 in your test book.'),
     norm('End of recording.'),
 }
+
+
+# ---------------------------------------------------------------- 单行格式（第 9 套起）
+# 第 9–12 套是语音识别稿：一道题的题干和选项写在同一行，选项字母常被识别成
+# 「Hey / Be / See」或错写成别的字母（如两个 D）。这里按出现顺序重新编号为 A、B、C、D。
+INLINE_OPT_RE = re.compile(
+    r'(?:^|(?<=\s))(?:[A-D][.),](?=\s)|Hey\b[.,!]?|Be[.,](?=\s)|See[.,?!](?=\s))')
+INLINE_NOISE_RE = re.compile(
+    r'\s*\b(?:Go\s+on|Along|On)\s+to the next page\.?|\s*This is the end of the listening test\..*$',
+    re.I | re.S)
+STEM_NUM_RE = re.compile(r'^(?:The\s+)?(?:Number\s*(?:\d+|[A-Za-z-]+)|#\s*\d+|\d+)\s*[.,?—–-]?\s*', re.I)
+SENT_SPLIT_RE = re.compile(r'(?<=[.?!])\s+(?=[-"“A-Z0-9])')
+
+
+def strip_inline_noise(text: str, removed: Counter) -> str:
+    def drop(m):
+        removed[m.group(0).strip()[:40]] += 1
+        return ''
+    return INLINE_NOISE_RE.sub(drop, text).strip()
+
+
+# 严格规则找不到正确数量的选项时，再用宽松规则试一次（字母后无标点、「be a …」等）
+INLINE_OPT_LOOSE_RE = re.compile(
+    r'(?:^|(?<=\s))(?:[A-D][.),]?(?=\s+[A-Z0-9])|Hey\b[.,!]?|[Bb]e\b[.,]?|See\b[.,?!]?)')
+
+
+def split_inline_options(text: str, want: int = 0):
+    marks = list(INLINE_OPT_RE.finditer(text))
+    if want and len(marks) != want:
+        loose = list(INLINE_OPT_LOOSE_RE.finditer(text))
+        if len(loose) == want:
+            marks = loose
+    if not marks:
+        return text.strip(), []
+    stem = text[:marks[0].start()].strip()
+    opts = []
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+        opts.append(text[m.end():end].strip())
+    return stem, opts
+
+
+def split_inline_questions(text: str, nums, notes, tag):
+    """按已知题号把「Number 32. … Number 33. …」切开；题号缺失时在问号处拆分。"""
+    found, start = [], 0
+    for n in nums:
+        m = (re.compile(rf'(?:Number|#|For)\s*{n}\b[\s.,?:—–-]*', re.I).search(text, start)
+             or re.compile(rf'(?<![\d$.])\b{n}\b[\s.,?:—–-]*').search(text, start))
+        found.append((n, m))
+        if m:
+            start = m.end()
+    segs = {}
+    for i, (n, m) in enumerate(found):
+        if m is None:
+            continue
+        nxt = next((mm.start() for _, mm in found[i + 1:] if mm), len(text))
+        segs[n] = text[m.end():nxt].strip()
+    for i, (n, m) in enumerate(found):
+        if m is not None:
+            continue
+        prev = nums[i - 1] if i else None
+        if prev:
+            src = segs.get(prev, '')
+        else:
+            src = text[:next((mm.start() for _, mm in found if mm), len(text))]
+        cut = src.find('? ')
+        if prev and cut >= 0:
+            segs[prev], segs[n] = src[:cut + 1].strip(), src[cut + 2:].strip()
+        else:
+            segs[n] = src.strip()
+        notes.append(f'{tag} 题目里找不到 Q{n} 的编号，已在问号处拆分，请核对')
+    return [(n, segs.get(n, '')) for n in nums]
 
 
 def placeholder(set_no: int, t_no: int, pt: int, num: int, letter: str) -> str:
@@ -87,8 +162,9 @@ def clean_body(lines, removed: Counter):
 def parse_file(path: Path, set_no: int, t_no: int):
     text = path.read_text(encoding='utf-8-sig')
     blocks = split_blocks(text)
-    units, problems, skipped = [], [], []
+    units, problems, skipped, notes = [], [], [], []
     removed = Counter()
+    inline_blocks = 0
     pending = {}  # (pt, q1, q2) -> group（等待配对的 会話/トーク）
 
     for header, body_raw in blocks:
@@ -111,17 +187,29 @@ def parse_file(path: Path, set_no: int, t_no: int):
                 problems.append(f'[{header}] Pt{pt} 不应带范围或类型')
                 continue
             stem, opts = [], []
-            for ln in body:
-                om = OPT_RE.match(ln)
-                if om:
-                    opts.append((om.group(1), om.group(2).strip()))
-                elif opts:
-                    problems.append(f'[{header}] 选项后出现多余行: {ln[:40]}')
-                else:
-                    stem.append(ln)
-            nm = NUM_RE.match(stem[0]) if stem else None
-            if not nm or int(nm.group(1)) != q1:
-                problems.append(f'[{header}] 题干编号与标题 Q{q1} 不一致')
+            if body and not any(OPT_RE.match(ln) for ln in body):
+                # 单行格式：题干和选项在同一行
+                inline_blocks += 1
+                text = strip_inline_noise(' '.join(body), removed)
+                want = len(OPT_LETTERS[pt])
+                raw_stem, raw_opts = split_inline_options(text, want)
+                if len(raw_opts) != want:
+                    notes.append(f'Pt{pt} Q{q1} 识别出 {len(raw_opts)} 个选项（应为 {want} 个），请核对')
+                opts = [(OPT_LETTERS[pt][i] if i < want else '?', t) for i, t in enumerate(raw_opts)]
+                rest = STEM_NUM_RE.sub('', raw_stem, count=1).strip()
+                stem = [f'Number {q1}. {rest}'.rstrip()]
+            else:
+                for ln in body:
+                    om = OPT_RE.match(ln)
+                    if om:
+                        opts.append((om.group(1), om.group(2).strip()))
+                    elif opts:
+                        problems.append(f'[{header}] 选项后出现多余行: {ln[:40]}')
+                    else:
+                        stem.append(ln)
+                nm = NUM_RE.match(stem[0]) if stem else None
+                if not nm or int(nm.group(1)) != q1:
+                    problems.append(f'[{header}] 题干编号与标题 Q{q1} 不一致')
             units.append({
                 'kind': 'single', 'pt': pt, 'num': q1, 'header': header,
                 'stem': ' '.join(stem), 'options': opts,
@@ -134,17 +222,27 @@ def parse_file(path: Path, set_no: int, t_no: int):
             continue
         key = (pt, q1, q2)
         if kind in SCRIPT_KINDS:
+            if len(body) == 1:
+                # 单行格式：按句子分行，方便阅读
+                inline_blocks += 1
+                body = [x for x in SENT_SPLIT_RE.split(strip_inline_noise(body[0], removed)) if x]
             g = {'kind': 'group', 'pt': pt, 'q1': q1, 'q2': q2,
                  'script_header': header, 'script': body,
                  'q_header': None, 'questions': None}
             pending[key] = g
             units.append(g)
-        elif kind == '問題':
+        elif kind in QUESTION_KINDS:
             g = pending.get(key)
             if g is None:
                 problems.append(f'[{header}] 找不到对应的 会話/トーク')
                 continue
             qs, cur = [], None
+            if len(body) == 1 and len(re.findall(r'(?:Number|#)\s*\d+', body[0], re.I)) != 1:
+                inline_blocks += 1
+                text = strip_inline_noise(body[0], removed)
+                g['q_header'] = header
+                g['questions'] = split_inline_questions(text, list(range(q1, q2 + 1)), notes, f'Pt{pt} Q{q1}-{q2}')
+                continue
             for ln in body:
                 nm = NUM_RE.match(ln)
                 if nm:
@@ -159,7 +257,10 @@ def parse_file(path: Path, set_no: int, t_no: int):
         else:
             problems.append(f'[{header}] Pt{pt} 缺少 会話/トーク/問題 标记')
 
-    return units, problems, skipped, removed
+    if inline_blocks:
+        notes.insert(0, f'单行格式（疑似语音识别稿）{inline_blocks} 块：选项字母已按出现顺序重排为 A–D，'
+                        '识别错误的单词无法自动修正，请对照原书检查')
+    return units, problems, skipped, removed, notes
 
 
 # ---------------------------------------------------------------- 校验
@@ -196,7 +297,7 @@ def check_units(units, set_no, t_no):
                     # 部分源文件的原文没有开头的「Questions … refer to …」，不影响导入，只提示
                     notes.append(f'{tag} 原文没有开头的 Questions … refer to … 句（源文件如此）')
                 elif (int(im.group(1)), int(im.group(2))) != (q1, q2):
-                    problems.append(f'{tag} 原文第一行的题号范围与标题不一致')
+                    notes.append(f'{tag} 原文第一行的题号范围与标题不一致（以标题为准）')
     for pt, (lo, hi) in EXPECT.items():
         got = seen[pt]
         dup = sorted(n for n, c in Counter(got).items() if c > 1)
@@ -371,9 +472,10 @@ def main():
         if not fm:
             sys.exit(f'文件名需要形如 6_T1.txt：{path.name}')
         set_no, t_no = int(fm.group(1)), int(fm.group(2))
-        units, probs, skipped, removed = parse_file(path, set_no, t_no)
-        more, notes, counts = check_units(units, set_no, t_no)
+        units, probs, skipped, removed, notes = parse_file(path, set_no, t_no)
+        more, more_notes, counts = check_units(units, set_no, t_no)
         probs += more
+        notes += more_notes
 
         text = render_text(set_no, t_no, units)
         (out / f'{set_no}_T{t_no}.txt').write_text(text, encoding='utf-8')
