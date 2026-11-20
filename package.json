@@ -1,13 +1,14 @@
 {
   "name": "daily-weekly-planner",
   "private": true,
-  "version": "10.49.0",
+  "version": "10.50.0",
   "type": "module",
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test --grep-invert @stability",
     "test:stability": "playwright test --grep @stability",
-    "test:validate:language": "node scripts/validate-v10.34.mjs && node scripts/validate-v10.35.mjs && node scripts/validate-v10.38.mjs && node scripts/validate-v10.39.mjs"
+    "test:validate:language": "node scripts/validate-v10.34.mjs && node scripts/validate-v10.35.mjs && node scripts/validate-v10.38.mjs && node scripts/validate-v10.39.mjs",
+    "test:validate:company-due-date": "node scripts/validate-v10.50.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1"
