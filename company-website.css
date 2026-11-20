@@ -16,6 +16,7 @@ html[data-workspace="company"] #app-shell>.top .top-actions>:not(.language-contr
 .cw-stat span{display:block;color:var(--muted);font-size:11px;margin-bottom:7px}
 .cw-stat strong{display:block;font-size:19px;overflow-wrap:anywhere}
 .cw-panel{padding:18px 18px 12px;border:1px solid var(--line);border-radius:17px;background:var(--surface);box-shadow:0 10px 30px #20243a08}
+.cw-panel .secondary,.cw-dialog .secondary{background:var(--surface);color:var(--ink)}
 .cw-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 140px 140px auto;gap:8px;margin-bottom:14px}
 .cw-search{display:flex;gap:7px;min-width:0}
 .cw-search input,.cw-toolbar select{min-width:0;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--surface);color:var(--ink);font:inherit;font-size:12px}
@@ -36,7 +37,7 @@ html[data-workspace="company"] #app-shell>.top .top-actions>:not(.language-contr
 .cw-empty h3{font-size:15px;color:var(--ink);margin:0 0 7px}.cw-empty p{font-size:12px;margin:0 0 14px}
 .cw-pagination{display:flex;justify-content:center;align-items:center;gap:12px;padding:16px 0 3px;font-size:12px;color:var(--muted)}.cw-pagination button{font-size:11px;padding:7px 10px}
 .cw-footnote{font-size:11px;color:var(--muted);text-align:center;margin:14px 0 0}
-.cw-dialog{width:min(100% - 26px,620px);max-height:90vh}.cw-editor-form{padding:23px;max-height:90vh;overflow:auto}
+.cw-dialog{width:min(100% - 26px,620px);max-height:90vh;background:var(--surface);color:var(--ink)}.cw-editor-form{padding:23px;max-height:90vh;overflow:auto}
 .cw-dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.cw-dialog-head h2{font-size:19px;margin:4px 0 0}
 .cw-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.cw-field-wide{grid-column:1/-1}
 .cw-field input,.cw-field select,.cw-field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px}
@@ -47,6 +48,7 @@ html[data-theme="dark"] .cw-session.warning{background:#3a3020;border-color:#695
 html[data-theme="dark"] .cw-status.status-active{background:#1d382d;color:#a8dfc1}
 html[data-theme="dark"] .cw-status.status-prospect{background:#3a3020;color:#e9cc8b}
 html[data-theme="dark"] .cw-status.status-inactive{background:#303541;color:#b8bfcd}
+html[data-theme="dark"] .cw-dialog .close-btn{background:#303541;color:#b8bfcd}
 html[data-theme="dark"] .cw-delete{background:#2b242b;border-color:#63404a}html[data-theme="dark"] .cw-delete:hover{background:#402a32}
 @media(max-width:700px){.cw-toolbar{grid-template-columns:1fr 1fr}.cw-search{grid-column:1/-1}.cw-toolbar #cw-new{grid-column:1/-1}.cw-customer{grid-template-columns:minmax(0,1fr) auto}.cw-customer-details{grid-column:1/-1;grid-row:2}.cw-card-actions{grid-column:2;grid-row:1}.cw-customer-main{grid-column:1;grid-row:1}}
 @media(max-width:560px){.workspace-switch button{font-size:10px;padding:7px 6px}}
