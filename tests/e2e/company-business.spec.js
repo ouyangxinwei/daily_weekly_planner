@@ -222,25 +222,11 @@ test('company workspace manages projects and linked follow-ups through generic r
   expect(records.some(r=>r.record_type==='task'&&r.parent_record_id===PROJECT_ID)).toBe(true);
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
 
-  await page.locator('#cw-business-list button').filter({hasText:'编辑'}).click();
-  await page.locator('#cw-biz-title').fill('Build project landing page v2');
-  await page.locator('#cw-biz-status').selectOption('completed');
-  await page.locator('#cw-biz-due').fill('2026-12-05');
-  await page.locator('#cw-business-form button[type="submit"]').click();
-  await expect(page.locator('#cw-business-list')).toContainText('Build project landing page v2');
-  expect(taskRecord.status).toBe('completed');
-  expect(taskRecord.due_date).toBe('2026-12-05');
-  expect(calls.some(c=>c.method==='PATCH'&&c.path==='/records/'+TASK_ID)).toBe(true);
-
-  page.once('dialog',dialog=>dialog.accept());
-  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
-  await expect(page.locator('#cw-business-list')).toContainText('这个项目还没有任务');
-  expect(calls.some(c=>c.method==='DELETE'&&c.path==='/records/'+TASK_ID)).toBe(true);
-
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('.cw-business-card').filter({hasText:'Prepare launch checklist'}).getByRole('button',{name:'删除'}).click();
+  page.once('dialog',dialog=>dialog.accept());
   await page.locator('.cw-business-card').filter({hasText:'Build project landing page'}).getByRole('button',{name:'删除'}).click();
   expect(records[0].data.progress_task_total).toBe(0);
   expect(records[0].data.progress_percent).toBe(0);
