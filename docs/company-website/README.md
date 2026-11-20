@@ -4,11 +4,11 @@
 
 ## 当前状态
 
-- 当前应用版本基线：V10.44.0。
+- 当前应用版本基线：V10.45.0。
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改。
 - 业务数据：使用主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB。
 - 认证：沿用慢慢计划现有自定义账号认证；Edge Function 在服务端再次验证请求身份。
-- API：当前生产环境 `company-api` 为 v3；阶段 1-G 将扩展项目任务端点并部署 v4，保留现有认证、CORS、请求校验和 IP 限流。
+- API：当前生产环境 `company-api` 为 v4；阶段 1-H 增加项目进度模式与 API 参数校验，计划部署 v5；数据库通过触发器同步自动进度。
 - 阶段 1-A：设计基线已完成。
 - 阶段 1-B：数据库迁移已应用，表、权限、错误密码及基础 CRUD/约束完成最小验证。
 - 阶段 1-C：Edge Function 已部署 v3。
@@ -27,6 +27,7 @@
 - [阶段 1-E：项目管理与业务跟进](./phase-1e-project-follow-up.md)
 - [阶段 1-F：项目详情与进度管理](./phase-1f-project-details-progress.md)
 - [阶段 1-G：项目任务管理](./phase-1g-project-task-management.md)
+- [阶段 1-H：项目任务与进度联动](./phase-1h-project-task-progress.md)
 
 ## 维护规则
 
