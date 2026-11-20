@@ -1,3 +1,12 @@
+# V10.51 Company workspace: business overview dashboard — 2026-11-20
+
+- Add a business overview entry with customer, active project, open task, and pending follow-up KPIs.
+- Show overdue tasks, tasks due today, tasks due within the next 7 calendar days, and overdue pending follow-ups; each item opens the corresponding filtered workspace.
+- Show recently updated projects, recent tasks, and recent customer follow-ups with shortcuts to project details or record editing.
+- Read all four record types through paginated API requests and verify stable totals and complete page counts. Failed or incomplete reads show an error instead of misleading zero values.
+- Add Simplified Chinese, English, Japanese, and responsive layouts while preserving existing CRUD, project progress linkage, and cross-module navigation.
+- Reuse company-api v5 and existing company_records. No database, RLS, Edge Function, or production business-data changes.
+
 # V10.50 Company workspace: task due-date quick filters — 2026-11-20
 
 - Add quick task filters for overdue, due today, the next 7 calendar days (including today), and tasks without a due date.
