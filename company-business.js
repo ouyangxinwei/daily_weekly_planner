@@ -188,8 +188,8 @@ import { getBusinessOverviewMetrics, getRecentBusinessRecords } from './company-
     cards.forEach(([key,value,action])=>{const card=button('', 'cw-overview-kpi',action);card.append(node('span','',t(key)),node('strong','',String(value)));kpis.append(card);});
     const alerts=[
       ['overdueTasksCount',metrics.overdueTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='overdue';state.taskOffset=0;switchTab('tasks');}],
-      ['dueTodayCount',metrics.dueTodayTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='today';state.taskOffset=0;switchTab('tasks');}],
-      ['dueNext7Count',metrics.next7Tasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='next7';state.taskOffset=0;switchTab('tasks');}],
+      ['dueTodayCount',metrics.dueTodayTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='__open__';state.taskDueFilter='today';state.taskOffset=0;switchTab('tasks');}],
+      ['dueNext7Count',metrics.next7Tasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='__open__';state.taskDueFilter='next7';state.taskOffset=0;switchTab('tasks');}],
       ['overdueFollowups',metrics.overdueFollowups,()=>{state.followupQuery='';state.followupCustomerFilter='';state.followupProjectFilter='';state.followupStatus='pending';state.followupDueFilter='overdue';state.followupOffset=0;switchTab('followups');}]
     ];
     alerts.forEach(([key,value,action])=>{const card=button('', 'cw-overview-alert',action);card.append(node('span','',t(key)),node('strong','',String(value)));attention.append(card);});
