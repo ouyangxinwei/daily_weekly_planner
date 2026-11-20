@@ -178,7 +178,6 @@
     window.addEventListener('planner-auth-change',()=>{state.verifiedFor='';if(document.documentElement.dataset.workspace==='company')loadCustomers();else if(!authContext())setSessionMessage('请先在计划工作区登录。','warning')});
     window.addEventListener('planner-language-change',()=>{if(document.documentElement.dataset.workspace==='company')renderCustomers()});
     window.addEventListener('planner-workspace-change',onWorkspaceChange);
-    $('workspace-company')?.addEventListener('click',()=>{window.PlannerWorkspace?.set('company');window.dispatchEvent(new CustomEvent('planner-workspace-change'))});
     if(document.documentElement.dataset.workspace==='company')loadCustomers();else setSessionMessage('选择「个人公司网站」工作区即可开始管理客户。');
   }
   window.CompanyWebsite=Object.freeze({version:'1.0.0',refresh:loadCustomers});
