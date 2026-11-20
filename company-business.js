@@ -79,6 +79,8 @@
   async function loadCustomers() {
     const result = await api('/customers?limit=100&offset=0');
     state.customers = Array.isArray(result?.items) ? result.items : [];
+    const projects = await api('/records?record_type=project&limit=100&offset=0');
+    state.projects = Array.isArray(projects?.items) ? projects.items : [];
   }
   async function loadActive() {
     if (state.busy || state.tab === 'customers') return;
@@ -188,7 +190,7 @@
       payload = { record_type:'follow_up', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:projectId || customerId, related_record_ids:projectId ? [customerId] : [], record_date:when ? new Date(when).toISOString() : new Date().toISOString(), data:{ customer_id:customerId, project_id:projectId, project_title:projectId ? state.projects.find(p=>p.id===projectId)?.title || '' : '', method:$('cw-biz-method').value, outcome:$('cw-biz-outcome').value.trim(), next_follow_up_date:$('cw-biz-next').value || null, notes:$('cw-biz-notes').value.trim() } };
     }
     const id = state.editing?.id;
-    try { if (id) await api('/records/'+encodeURIComponent(id),'PATCH',payload); else await api('/records','POST',payload); $('cw-business-editor').close(); state.editing=null; await loadActive(); }
+    try { if (id) { const patch = { ...payload }; delete patch.record_type; await api('/records/'+encodeURIComponent(id),'PATCH',patch); } else await api('/records','POST',payload); $('cw-business-editor').close(); state.editing=null; await loadActive(); }
     catch (error) { $('cw-business-error').textContent = error.message || t('failed'); }
   }
   async function removeRecord(record, project) {
