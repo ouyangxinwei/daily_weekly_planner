@@ -336,7 +336,7 @@ import { getBusinessOverviewMetrics, getRecentBusinessRecords } from './company-
         records = all.filter(record => {
           const data = record.data && typeof record.data === 'object' ? record.data : {};
           if (project && state.projectCustomerFilter) return record.parent_record_id === state.projectCustomerFilter;
-          if (state.followupCustomerFilter) return (data.customer_id || (record.related_record_ids || [])[0] || (state.customers.some(c=>c.id===record.parent_record_id) ? record.parent_record_id : '')) === state.followupCustomerFilter;
+          if (state.followupCustomerFilter && (data.customer_id || (record.related_record_ids || [])[0] || (state.customers.some(c=>c.id===record.parent_record_id) ? record.parent_record_id : '')) !== state.followupCustomerFilter) return false;
           if (state.followupProjectFilter && (data.project_id || (state.projects.some(p=>p.id===record.parent_record_id) ? record.parent_record_id : '')) !== state.followupProjectFilter) return false;
           if (state.followupDueFilter === 'overdue') return record.status === 'pending' && Boolean(data.next_follow_up_date) && String(data.next_follow_up_date).slice(0,10) < getLocalDateKey();
           return true;
