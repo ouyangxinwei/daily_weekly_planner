@@ -1,7 +1,7 @@
 {
   "name": "daily-weekly-planner",
   "private": true,
-  "version": "10.55.0",
+  "version": "10.56.0",
   "type": "module",
   "scripts": {
     "test:e2e": "playwright test",
@@ -12,7 +12,8 @@
     "test:validate:company-overview": "node scripts/validate-v10.51.mjs",
     "test:validate:company-todo": "node scripts/validate-v10.52.mjs",
     "test:validate:company-project-customer": "node scripts/validate-v10.53.mjs",
-    "test:validate:company-trends": "node scripts/validate-v10.54.mjs"
+    "test:validate:company-trends": "node scripts/validate-v10.54.mjs",
+    "test:validate:company-records": "node scripts/validate-v10.56.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1"

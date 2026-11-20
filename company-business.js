@@ -92,7 +92,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     $('cw-business-form').addEventListener('submit', saveEditor);
     $('cw-business-close').addEventListener('click', closeEditor); $('cw-business-cancel').addEventListener('click', closeEditor);
     dialog.addEventListener('click', e => { if (e.target === dialog) closeEditor(); });
-    window.addEventListener('planner-language-change', () => { $('cw-business-nav').querySelectorAll('button').forEach(b => { const labels={overview:'overview',todos:'todoCenter',projectCustomerOverview:'projectCustomerOverview',businessTrends:'businessTrends',customers:'customers',projects:'projects',tasks:'tasks',followups:'followups'}; b.textContent=t(labels[b.dataset.tab]||b.dataset.tab); }); if (state.tab === 'projectCustomerOverview') { updateProjectCustomerLabels(); loadProjectCustomerOverview(); } else if (state.tab === 'businessTrends') { updateBusinessTrendLabels(); if(state.trendData) renderBusinessTrends(state.trendData); } else if (state.tab === 'overview') { $('cw-overview-title').textContent=t('overviewTitle'); $('cw-overview-subtitle').textContent=t('overviewSubtitle'); $('cw-overview-refresh').textContent=t('refresh'); $('cw-overview-attention-title').textContent=t('needsAttention'); $('cw-overview-recent-title').textContent=t('recentProjects')+' · '+t('recentTasks')+' · '+t('recentFollowups'); loadOverview(); } else if (state.tab !== 'customers') { updateToolbar(); loadActive(); } });
+    window.addEventListener('planner-language-change', () => { $('cw-business-nav').querySelectorAll('button:not([data-company-extension])').forEach(b => { const labels={overview:'overview',todos:'todoCenter',projectCustomerOverview:'projectCustomerOverview',businessTrends:'businessTrends',customers:'customers',projects:'projects',tasks:'tasks',followups:'followups'}; b.textContent=t(labels[b.dataset.tab]||b.dataset.tab); }); if (state.tab === 'projectCustomerOverview') { updateProjectCustomerLabels(); loadProjectCustomerOverview(); } else if (state.tab === 'businessTrends') { updateBusinessTrendLabels(); if(state.trendData) renderBusinessTrends(state.trendData); } else if (state.tab === 'overview') { $('cw-overview-title').textContent=t('overviewTitle'); $('cw-overview-subtitle').textContent=t('overviewSubtitle'); $('cw-overview-refresh').textContent=t('refresh'); $('cw-overview-attention-title').textContent=t('needsAttention'); $('cw-overview-recent-title').textContent=t('recentProjects')+' · '+t('recentTasks')+' · '+t('recentFollowups'); loadOverview(); } else if (state.tab !== 'customers') { updateToolbar(); loadActive(); } });
   }
   function switchTab(tab) {
     state.tab = tab;
@@ -103,6 +103,9 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     $('cw-business-project-customer').hidden = tab !== 'projectCustomerOverview';
     $('cw-business-trends').hidden = tab !== 'businessTrends';
     $('cw-business-nav').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
+    // V10.56: extension panels (transactions / documents) own their own loading.
+    window.dispatchEvent(new CustomEvent('company-business-tab-change', { detail: { tab } }));
+    if (document.querySelector('[data-company-extension][data-tab="' + tab + '"]')) return;
     if (tab === 'overview') loadOverview();
     else if (tab === 'todos') loadTodoCenter();
     else if (tab === 'projectCustomerOverview') loadProjectCustomerOverview();
@@ -271,6 +274,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     if(state.tab==='todos')return loadTodoCenter();
     if(state.tab==='projectCustomerOverview')return loadProjectCustomerOverview();
     if(state.tab==='businessTrends')return loadBusinessTrends();
+    if(document.querySelector('[data-company-extension][data-tab="'+state.tab+'"]'))return window.CompanyRecords?.reload?.();
     if(state.tab!=='customers')return loadActive();
   }
 
@@ -537,7 +541,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     state.projects = state.relationshipRecords?.projects ? [...new Map([...pageProjects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()] : pageProjects;
   }
   async function loadActive() {
-    if (state.tab === 'customers') return;
+    if (!['projects','tasks','followups'].includes(state.tab)) return;
     if (state.busy) { state.reloadPending = true; return; }
     state.busy = true; $('cw-business-feedback').textContent = t('loading');
     try {

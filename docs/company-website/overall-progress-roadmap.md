@@ -6,12 +6,13 @@
 
 - 所属应用：慢慢计划（daily_weekly_planner）。
 - 子系统：个人公司网站。
-- 当前整体阶段：**Phase 2——业务总览与工作台**。
+- 当前整体阶段：**Phase 3——财务与文档资料**（Phase 2 的 2-D 仍等待用户真实浏览器验收）。
 - Phase 1：当前定义的 13 个核心工作项均已完成并通过阶段验收，核心业务工作区目标达成。
-- 当前子阶段：**2-D——业务趋势与周期复盘（V10.54.0 已合并、已部署，等待用户真实浏览器验收）**。
+- Phase 2：2-A、2-B、2-C 已验收；**2-D 业务趋势与周期复盘（V10.54.0 已合并、已部署，等待用户真实浏览器验收）**。
+- 当前子阶段：**3-A——交易收支、业务文档与私有附件（V10.56.0 代码已完成并提交到 main；Storage 迁移与 company-api v6 尚未部署）**。
 - Phase 2 目标：从分散的业务记录管理，升级为统一的日常业务决策与执行工作台。
-- 当前 main 生产应用版本：**V10.54.0**。
-- 生产 API：Supabase Edge Function company-api v5。
+- 当前 main 应用版本：**V10.56.0**（Pages 是否已部署以 Actions 结果为准）。
+- 生产 API：Supabase Edge Function company-api v5；仓库中的 v6（附件端点及交易/文档校验）待部署。
 - 生产数据库：慢慢计划 Supabase 项目中的 public.company_records；Phase 2 沿用现有结构。
 
 ## 2. 阶段总览
@@ -31,6 +32,7 @@
 | 1-I-C | 关联筛选状态提示与快捷清除 | 已完成并验收 |
 | 1-I-D | 关联记录快捷打开与编辑 | 已完成并验收 |
 | 1-I-E | 任务截止日期快速筛选 | 已完成、已部署并通过用户验收 |
+| 3-A | 交易收支、业务文档与私有附件 | 代码已完成；Storage 迁移与 company-api v6 待部署；待验收 |
 
 截至 2026-11-20，当前定义的 **13 个阶段工作项（1-A 至 1-H、1-I-A 至 1-I-E）均已完成并通过各自阶段验收**。这意味着 Phase 1 核心业务工作区目标已达成，不代表整个公司网站产品或未来功能已经全部完成。
 
@@ -203,3 +205,20 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - Pages run `44750193594`：completed / success；build、deploy、report-build-status 均成功，V10.54.0 已部署。
 - Playwright 未取得通过结论，不记录为通过；不作为合并前提。
 - 用户真实浏览器验收：等待确认。
+
+## 14. Phase 3-A：交易收支、业务文档与私有附件（2026-11-21）
+
+- 详细设计、API、部署步骤与验收清单见 [阶段 3-A](./phase-3a-transactions-documents-files.md)。
+- 范围：补齐阶段 1-A 设计中未实施的 `transaction`、`document`、`file` 三种记录；新增私有 Bucket `company-documents` 与签名上传/下载。
+- 版本：V10.56.0；按用户要求直接在 `main` 上开发并提交，未经过功能分支和 PR。
+- 验证：`scripts/validate-v10.56.mjs` 与既有 20 个验证脚本全部通过；新增 Playwright 用例 `tests/e2e/company-records.spec.js`（模拟 API）。
+- 数据库：新增迁移 `20261121090000_company_documents_storage_stage_3a.sql`（仅创建 Storage Bucket，不改 `company_records` 结构）——**尚未执行**。
+- Edge Function：`company-api` v6——**尚未部署**；生产仍为 v5。v5 下交易/文档增删改查可用，附件不可用。
+- 用户真实浏览器验收：未进行。
+
+### 下一步
+
+1. 执行 Storage 迁移并部署 company-api v6。
+2. 按阶段 3-A 第 8 节完成真实浏览器验收。
+3. 2-D 仍等待用户真实浏览器验收确认。
+4. 后续候选（未排期）：在客户/项目/任务/跟进界面开放附件入口；按币种的月度收支趋势；状态变更历史（`completed_at`）。

@@ -3299,3 +3299,12 @@ There is no scheduled run. Re-add a `schedule` trigger to the workflow if nightl
 ## Interpreting results
 
 A green workflow means the browser scenarios and the configured soak duration completed without detected failures. It is not a proof that every possible application state is defect-free. A failed run should be inspected through the HTML report and any attached screenshot/trace.
+
+---
+
+## V10.56.0 · 阶段 3-A 交易收支、业务文档与私有附件（2026-11-21）
+
+- 需求：实现阶段 1-A 设计中未落地的 `transaction`、`document`、`file` 记录与私有 Storage 文件上传/下载。
+- 影响：新增前端模块 `company-records-rules.js`、`company-records-workspace.js`；`company-business.js` 仅增加标签切换事件和扩展标签保护；company-api 升级为 v6（新增 `/files` 端点、交易/文档校验、禁止经 `/records` 操作 file 记录）；新增 Storage Bucket 迁移；不修改 `company_records` 结构、计划模块数据、备份格式或登录流程。
+- 验证：`scripts/validate-v10.56.mjs` 与既有 20 个验证脚本通过；新增 `tests/e2e/company-records.spec.js`（模拟 API）在本地 Chrome 通过。既有 `company-business`、`company-navigation`、`company-task-due-date` 三个 E2E 用例在未修改的 V10.54.0 上同样失败，属既有问题，非本次回归。
+- 交付：按用户要求直接提交到 `main`；Storage 迁移和 company-api v6 尚未部署；未进行真实浏览器验收。详见 [阶段 3-A](company-website/phase-3a-transactions-documents-files.md)。

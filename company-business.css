@@ -196,3 +196,33 @@ html[data-theme="dark"] .cw-pc-fill{background:#9b8cff}
 .cw-trends-note{margin:16px 0 0;padding:10px 12px;border-left:3px solid var(--line);color:var(--muted);font-size:10px;line-height:1.6}
 @media(max-width:760px){.cw-trends-kpis,.cw-trends-review{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.cw-trends-heading{align-items:flex-start}.cw-trends-kpi{padding:10px}.cw-trends-kpi strong{font-size:19px}.cw-trends-controls{align-items:flex-start}.cw-trends-row{padding:9px}.cw-trends-bar-line{grid-template-columns:68px 22px minmax(60px,1fr)}}
+
+/* V10.55 Stage 3-A: transactions, business documents and private attachments */
+.cw-records-panel[hidden]{display:none!important}
+.cw-records-toolbar{display:grid;grid-template-columns:minmax(160px,1fr) repeat(4,minmax(100px,130px)) auto auto;gap:8px;margin-bottom:14px}
+.cw-records-toolbar select{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--surface);color:var(--ink);font:inherit;font-size:12px}
+.cw-records-toolbar select[hidden]{display:none!important}
+.cw-records-toolbar button{white-space:nowrap;font-size:12px;padding:9px 12px}
+.cw-records-summary{display:grid;gap:8px;margin:0 0 12px}
+.cw-records-summary[hidden]{display:none}
+.cw-records-summary-card{display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr));gap:10px;align-items:center;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.cw-records-summary-currency{font-weight:750;font-size:12px;color:var(--brand);padding:4px 8px;border-radius:999px;background:var(--brand-soft)}
+.cw-records-summary-item{display:grid;gap:4px;min-width:0}
+.cw-records-summary-item small{font-size:10px;color:var(--muted)}
+.cw-records-summary-item strong{font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cw-records-summary-note{margin:0;font-size:10px;color:var(--muted)}
+.cw-amount-income{color:var(--green)}.cw-amount-expense{color:var(--danger)}
+.cw-records-amount{font-size:15px;font-variant-numeric:tabular-nums}
+.cw-direction-income{background:#e9f6ef;color:#28704e}.cw-direction-expense{background:#fdecef;color:#a3394c}
+.cw-records-card .cw-business-details{display:grid;gap:4px;font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.cw-records-card .cw-business-details p{margin:2px 0 0;white-space:pre-wrap}
+.cw-files-upload{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.cw-files-upload input[type=file]{flex:1;min-width:0;font-size:12px}
+.cw-files-list{list-style:none;display:grid;gap:8px;margin:6px 0 0;padding:0}
+.cw-files-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.cw-files-text{display:grid;gap:3px;min-width:0}.cw-files-text strong{font-size:13px;overflow-wrap:anywhere}.cw-files-text small{font-size:11px;color:var(--muted)}
+.cw-files-empty{color:var(--muted);font-size:12px;padding:8px 0}
+html[data-theme="dark"] .cw-direction-income{background:#1d382d;color:#a8dfc1}
+html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
+@media(max-width:760px){.cw-records-toolbar{grid-template-columns:1fr 1fr}.cw-records-toolbar .cw-search{grid-column:1/-1}.cw-records-summary-card{grid-template-columns:1fr 1fr}.cw-records-summary-currency{grid-column:1/-1;justify-self:start}}
+@media(max-width:480px){.cw-files-item{flex-direction:column;align-items:stretch}.cw-records-summary-card{padding:10px}}

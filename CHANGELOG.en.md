@@ -1,3 +1,11 @@
+# V10.56 Company workspace: transactions, business documents and private attachments — 2026-11-21
+
+- Added Transactions: income/expense, amount, currency (JPY/CNY/USD), status, date and category, optionally linked to a customer and project. Totals are calculated per currency (completed income/expense, net, planned) with no exchange-rate conversion.
+- Added Business documents: quotes, contracts, invoices, orders and receipts with number, status, date and validity, optionally linked to a customer and project.
+- Transactions and documents can hold private attachments (up to 10 MB; PDF, images, TXT/CSV, Office files), uploaded and downloaded through short-lived signed URLs issued by company-api and stored in private Storage.
+- company-api v6 adds /files endpoints plus transaction/document validation; new migration for the private `company-documents` bucket. **Attachments work only after the migration and Edge Function are deployed.**
+- Chinese, English and Japanese labels with responsive layouts; existing customer, project, task, follow-up and Phase 2 views are unchanged.
+
 # V10.55 Magnificent Seven stock dashboard — 2026-11-21
 
 - Added a Magnificent Seven stock dashboard directly below the homepage weather section for AAPL, MSFT, NVDA, AMZN, GOOGL, META and TSLA.

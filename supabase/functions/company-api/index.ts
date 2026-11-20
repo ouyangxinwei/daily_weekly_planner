@@ -16,7 +16,34 @@ const RECORD_TYPES = new Set([
 const BUSINESS_TYPES = new Set(["trade", "software", "ecommerce"]);
 const CURRENCIES = new Set(["JPY", "CNY", "USD"]);
 const TASK_STATUSES = new Set(["todo", "in_progress", "blocked", "completed"]);
+const TRANSACTION_STATUSES = new Set(["planned", "completed", "cancelled"]);
+const TRANSACTION_DIRECTIONS = new Set(["income", "expense"]);
+const DOCUMENT_STATUSES = new Set(["draft", "issued", "completed", "void"]);
+const DOCUMENT_TYPES = new Set(["quote", "contract", "invoice", "order", "receipt", "other"]);
+const MAX_TRANSACTION_AMOUNT = 100_000_000_000_000; // numeric(20,6) upper bound
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+// Stage 3-A private attachments. Must match the bucket created by
+// supabase/migrations/20261121090000_company_documents_storage_stage_3a.sql.
+const FILE_BUCKET = "company-documents";
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const SIGNED_DOWNLOAD_SECONDS = 300;
+const ATTACHABLE_RECORD_TYPES = new Set(["customer", "project", "task", "follow_up", "transaction", "document"]);
+const ALLOWED_FILE_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "text/plain",
+  "text/csv",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+]);
+const FILE_PATH_RE = /^([0-9a-f-]{36})\/([0-9a-f-]{36})$/i;
 
 class ApiError extends Error {
   status: number;
@@ -389,11 +416,261 @@ function validateProjectProgressFields(body: JsonObject) {
   }
 }
 
+function optionalText(data: JsonObject, key: string, max: number) {
+  const value = data[key];
+  if (value !== undefined && value !== null && (typeof value !== "string" || value.length > max)) {
+    throw new ApiError(400, "VALIDATION_ERROR");
+  }
+}
+
+function validateTransactionFields(body: JsonObject, creating: boolean) {
+  if ((creating || body.status !== undefined) &&
+      (typeof body.status !== "string" || !TRANSACTION_STATUSES.has(body.status))) {
+    throw new ApiError(400, "INVALID_TRANSACTION_STATUS");
+  }
+  if (creating || body.amount !== undefined) {
+    const amount = Number(body.amount);
+    if (body.amount === null || !Number.isFinite(amount) || amount <= 0 || amount >= MAX_TRANSACTION_AMOUNT) {
+      throw new ApiError(400, "INVALID_TRANSACTION_AMOUNT");
+    }
+  }
+  if (creating || body.data !== undefined) {
+    const data = (body.data ?? {}) as JsonObject;
+    if (typeof data.direction !== "string" || !TRANSACTION_DIRECTIONS.has(data.direction)) {
+      throw new ApiError(400, "INVALID_TRANSACTION_DIRECTION");
+    }
+    optionalText(data, "category", 80);
+    optionalText(data, "notes", 5000);
+  }
+}
+
+function validateDocumentFields(body: JsonObject, creating: boolean) {
+  if ((creating || body.status !== undefined) &&
+      (typeof body.status !== "string" || !DOCUMENT_STATUSES.has(body.status))) {
+    throw new ApiError(400, "INVALID_DOCUMENT_STATUS");
+  }
+  if (creating || body.data !== undefined) {
+    const data = (body.data ?? {}) as JsonObject;
+    if (typeof data.document_type !== "string" || !DOCUMENT_TYPES.has(data.document_type)) {
+      throw new ApiError(400, "INVALID_DOCUMENT_TYPE");
+    }
+    optionalText(data, "document_number", 120);
+    optionalText(data, "notes", 5000);
+  }
+}
+
 function validateRecordCreate(body: JsonObject): JsonObject {
   validateCommonFields(body, true);
+  // File metadata is only created by POST /files after the object is verified in Storage.
+  if (body.record_type === "file") throw new ApiError(400, "FILE_ENDPOINT_REQUIRED");
   if (body.record_type === "task") validateTaskFields(body, true);
   if (body.record_type === "project") validateProjectProgressFields(body);
+  if (body.record_type === "transaction") validateTransactionFields(body, true);
+  if (body.record_type === "document") validateDocumentFields(body, true);
   return body;
+}
+
+// ---------------------------------------------------------------------------
+// Storage (service role only). The browser never receives the secret key; it
+// only receives short-lived signed URLs for a single object.
+// ---------------------------------------------------------------------------
+
+async function storageRequest(
+  method: string,
+  path: string,
+  requestId: string,
+  body?: unknown,
+): Promise<{ status: number; data: unknown }> {
+  const { url, secretKey } = getConfig();
+  const headers: Record<string, string> = { "apikey": secretKey, "Accept": "application/json" };
+  if (secretKey.startsWith("eyJ")) headers.Authorization = "Bearer " + secretKey;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  let response: Response;
+  try {
+    response = await fetch(url + "/storage/v1" + path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    console.error("company-api storage network failure", { requestId });
+    throw new ApiError(503, "STORAGE_UNAVAILABLE");
+  }
+  const raw = await response.text();
+  let data: unknown = null;
+  if (raw) {
+    try { data = JSON.parse(raw); } catch { data = null; }
+  }
+  return { status: response.status, data };
+}
+
+function encodeObjectPath(path: string): string {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+function fileNameIsValid(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length >= 1 && value.length <= 255 &&
+    !/[\\/\u0000-\u001f]/.test(value);
+}
+
+function validateFileDescriptor(body: JsonObject) {
+  if (typeof body.parent_record_id !== "string" || !UUID_RE.test(body.parent_record_id)) {
+    throw new ApiError(400, "VALIDATION_ERROR");
+  }
+  if (!fileNameIsValid(body.file_name)) throw new ApiError(400, "INVALID_FILE_NAME");
+  if (typeof body.mime_type !== "string" || !ALLOWED_FILE_MIME_TYPES.has(body.mime_type)) {
+    throw new ApiError(400, "FILE_TYPE_NOT_ALLOWED");
+  }
+  if (!Number.isInteger(body.file_size) || Number(body.file_size) < 1) {
+    throw new ApiError(400, "VALIDATION_ERROR");
+  }
+  if (Number(body.file_size) > MAX_FILE_BYTES) throw new ApiError(413, "FILE_TOO_LARGE");
+}
+
+async function assertAttachableParent(auth: JsonObject, parentId: string, requestId: string) {
+  const parent = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: parentId }, requestId);
+  if (!ATTACHABLE_RECORD_TYPES.has(String(parent.record_type))) throw new ApiError(400, "INVALID_FILE_PARENT");
+  return parent;
+}
+
+async function createSignedUpload(auth: JsonObject, body: JsonObject, requestId: string) {
+  assertAllowedKeys(body, ["parent_record_id", "file_name", "mime_type", "file_size"]);
+  validateFileDescriptor(body);
+  const parentId = String(body.parent_record_id);
+  await assertAttachableParent(auth, parentId, requestId);
+  // Server-generated, unpredictable object path. The original file name is metadata only.
+  const path = parentId.toLowerCase() + "/" + crypto.randomUUID();
+  const result = await storageRequest("POST", "/object/upload/sign/" + FILE_BUCKET + "/" + encodeObjectPath(path), requestId, {});
+  const signed = result.data && typeof result.data === "object" ? result.data as JsonObject : {};
+  if (result.status !== 200 || typeof signed.url !== "string") {
+    console.error("company-api signed upload failed", { status: result.status, requestId });
+    throw new ApiError(502, "STORAGE_SIGN_FAILED");
+  }
+  const { url } = getConfig();
+  return { path, upload_url: url + "/storage/v1" + signed.url, max_bytes: MAX_FILE_BYTES };
+}
+
+async function findStoredObject(path: string, requestId: string) {
+  const [folder, name] = path.split("/");
+  const result = await storageRequest("POST", "/object/list/" + FILE_BUCKET, requestId, {
+    prefix: folder, search: name, limit: 10, offset: 0,
+  });
+  if (result.status !== 200 || !Array.isArray(result.data)) throw new ApiError(502, "STORAGE_UNAVAILABLE");
+  const item = (result.data as JsonObject[]).find((entry) => entry.name === name);
+  if (!item) return null;
+  const metadata = item.metadata && typeof item.metadata === "object" ? item.metadata as JsonObject : {};
+  return { size: Number(metadata.size ?? metadata.contentLength ?? -1), mimeType: String(metadata.mimetype ?? "") };
+}
+
+async function removeStoredObject(path: string, requestId: string): Promise<boolean> {
+  // Bulk delete is idempotent: an already-missing object is not an error.
+  const result = await storageRequest("DELETE", "/object/" + FILE_BUCKET, requestId, { prefixes: [path] });
+  if (result.status !== 200) {
+    console.error("company-api storage delete failed", { status: result.status, requestId });
+    return false;
+  }
+  return true;
+}
+
+async function completeUpload(auth: JsonObject, body: JsonObject, requestId: string) {
+  assertAllowedKeys(body, ["parent_record_id", "path", "file_name", "mime_type", "file_size"]);
+  validateFileDescriptor(body);
+  const parentId = String(body.parent_record_id).toLowerCase();
+  const match = typeof body.path === "string" ? body.path.match(FILE_PATH_RE) : null;
+  if (!match || match[1].toLowerCase() !== parentId || !UUID_RE.test(match[2])) {
+    throw new ApiError(400, "INVALID_FILE_PATH");
+  }
+  const path = String(body.path);
+  const parent = await assertAttachableParent(auth, parentId, requestId);
+  const stored = await findStoredObject(path, requestId);
+  if (!stored) throw new ApiError(409, "FILE_NOT_UPLOADED");
+  if (stored.size !== Number(body.file_size) || (stored.mimeType && stored.mimeType !== body.mime_type)) {
+    await removeStoredObject(path, requestId);
+    throw new ApiError(400, "FILE_VERIFICATION_FAILED");
+  }
+  const fileName = String(body.file_name).trim();
+  try {
+    return await rpc("company_create_record", {
+      ...auth,
+      p_record: {
+        record_type: "file",
+        title: fileName.slice(0, 300),
+        business_type: parent.business_type ?? null,
+        status: "stored",
+        parent_record_id: parentId,
+        data: {
+          file: {
+            bucket: FILE_BUCKET,
+            path,
+            fileName,
+            mimeType: body.mime_type,
+            fileSize: Number(body.file_size),
+            uploadedAt: new Date().toISOString(),
+          },
+        },
+      },
+    }, requestId);
+  } catch (error) {
+    // Avoid orphaned objects when metadata cannot be saved.
+    await removeStoredObject(path, requestId);
+    throw error;
+  }
+}
+
+function storedFileInfo(record: Record<string, unknown>) {
+  if (record.record_type !== "file") throw new ApiError(404, "RECORD_NOT_FOUND");
+  const data = record.data && typeof record.data === "object" ? record.data as JsonObject : {};
+  const file = data.file && typeof data.file === "object" ? data.file as JsonObject : {};
+  if (file.bucket !== FILE_BUCKET || typeof file.path !== "string" || !FILE_PATH_RE.test(file.path)) {
+    throw new ApiError(409, "FILE_METADATA_INVALID");
+  }
+  return { path: file.path, fileName: typeof file.fileName === "string" ? file.fileName : String(record.title ?? "file") };
+}
+
+async function createSignedDownload(auth: JsonObject, id: string, requestId: string) {
+  const record = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+  const info = storedFileInfo(record);
+  const result = await storageRequest("POST", "/object/sign/" + FILE_BUCKET + "/" + encodeObjectPath(info.path), requestId, {
+    expiresIn: SIGNED_DOWNLOAD_SECONDS,
+  });
+  const signed = result.data && typeof result.data === "object" ? result.data as JsonObject : {};
+  if (result.status === 404 || result.status === 400) throw new ApiError(404, "FILE_OBJECT_MISSING");
+  if (result.status !== 200 || typeof signed.signedURL !== "string") throw new ApiError(502, "STORAGE_SIGN_FAILED");
+  const { url } = getConfig();
+  const separator = signed.signedURL.includes("?") ? "&" : "?";
+  return {
+    url: url + "/storage/v1" + signed.signedURL + separator + "download=" + encodeURIComponent(info.fileName),
+    expires_in: SIGNED_DOWNLOAD_SECONDS,
+    file_name: info.fileName,
+  };
+}
+
+async function deleteStoredFile(auth: JsonObject, id: string, requestId: string) {
+  const record = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+  const info = storedFileInfo(record);
+  // Storage first; if that fails keep the metadata so the user can retry.
+  if (!await removeStoredObject(info.path, requestId)) throw new ApiError(502, "STORAGE_DELETE_FAILED");
+  const deleted = await rpc("company_delete_record", { ...auth, p_record_id: id }, requestId);
+  return { deleted: deleted === true };
+}
+
+async function listRecordFiles(auth: JsonObject, parentId: string, requestId: string) {
+  const pageSize = 100;
+  let offset = 0, total = 0;
+  const items: Record<string, unknown>[] = [];
+  do {
+    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
+      ...auth, p_record_type: "file", p_business_type: null, p_status: null,
+      p_keyword: null, p_limit: pageSize, p_offset: offset,
+    }, requestId);
+    total = Number(page.total || 0);
+    const pageItems = Array.isArray(page.items) ? page.items : [];
+    items.push(...pageItems.filter((item) => String(item.parent_record_id).toLowerCase() === parentId.toLowerCase()));
+    if (!pageItems.length) break;
+    offset += pageItems.length;
+  } while (offset < total);
+  return { items, total: items.length };
 }
 
 function validateRecordPatch(body: JsonObject): JsonObject {
@@ -448,6 +725,34 @@ Deno.serve(async (req: Request) => {
       p_username: credentials.username,
       p_password: credentials.password,
     };
+
+    if (route === "/files/upload-url" && req.method === "POST") {
+      const result = await createSignedUpload(auth, await readJson(req), requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+    if (route === "/files" && req.method === "POST") {
+      const result = await completeUpload(auth, await readJson(req), requestId);
+      return jsonResponse({ data: result }, 201, origin, { "X-Request-Id": requestId });
+    }
+    if (route === "/files" && req.method === "GET") {
+      const parentId = url.searchParams.get("parent_record_id") ?? "";
+      if (!UUID_RE.test(parentId)) throw new ApiError(400, "VALIDATION_ERROR");
+      await assertAttachableParent(auth, parentId, requestId);
+      const result = await listRecordFiles(auth, parentId, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+    const fileDownloadMatch = route.match(/^\/files\/([0-9a-f-]{36})\/download-url$/i);
+    if (fileDownloadMatch && req.method === "GET") {
+      if (!UUID_RE.test(fileDownloadMatch[1])) throw new ApiError(400, "VALIDATION_ERROR");
+      const result = await createSignedDownload(auth, fileDownloadMatch[1], requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+    const fileMatch = route.match(/^\/files\/([0-9a-f-]{36})$/i);
+    if (fileMatch && req.method === "DELETE") {
+      if (!UUID_RE.test(fileMatch[1])) throw new ApiError(400, "VALIDATION_ERROR");
+      const result = await deleteStoredFile(auth, fileMatch[1], requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
 
     const projectTasksMatch = route.match(/^\/projects\/([0-9a-f-]{36})\/tasks$/i);
     const customerMatch = route.match(/^\/customers(?:\/([0-9a-f-]{36}))?$/i);
@@ -533,6 +838,9 @@ Deno.serve(async (req: Request) => {
       if (id && req.method === "PATCH") {
         const patch = validateRecordPatch(await readJson(req));
         const existing = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+        if (existing.record_type === "file") throw new ApiError(400, "FILE_ENDPOINT_REQUIRED");
+        if (existing.record_type === "transaction") validateTransactionFields(patch, false);
+        if (existing.record_type === "document") validateDocumentFields(patch, false);
         if (existing.record_type === "project") {
           validateProjectProgressFields(patch);
           const existingData = existing.data && typeof existing.data === "object" ? existing.data as JsonObject : {};
@@ -557,6 +865,9 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({ data: result, request_id: requestId }, 200, origin);
       }
       if (id && req.method === "DELETE") {
+        const existing = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+        // Attachments must be removed through DELETE /files/:id so the Storage object is deleted too.
+        if (existing.record_type === "file") throw new ApiError(400, "FILE_ENDPOINT_REQUIRED");
         const result = await rpc("company_delete_record", {
           ...auth, p_record_id: id,
         }, requestId);

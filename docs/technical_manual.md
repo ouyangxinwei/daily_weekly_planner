@@ -50,12 +50,16 @@
 
 ## 5. 个人公司网站
 
-- 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`。
+- 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`，以及 V10.56.0 的 `company-records-rules.js`（纯规则）和 `company-records-workspace.js`（交易/文档/附件界面）。
 - 后端：Supabase Edge Function `company-api`。
 - 业务表：`company_records`，通过 `record_type` 区分 customer、project、task、follow_up 等对象；任务通过 `parent_record_id` 关联项目，`due_date` 保存截止日期。V10.45.0 使用 `data.progress_mode`（manual/auto）、`data.manual_progress_percent`、`data.progress_percent` 及自动统计字段；数据库触发器在任务变化时更新自动进度。
 - 前端复用当前登录会话，通过 HTTPS Basic Authorization 请求 API；不得把密码持久化到 LocalStorage，也不得暴露 service-role/secret key。
 - 客户、项目、项目任务和跟进记录与计划模块 LocalStorage、云端快照隔离。
 - 项目删除受下游关联保护，不应擅自改成级联删除。
+- 交易（`transaction`）：`amount`/`currency` 原值、`record_date`、`data.direction`（income/expense）；文档（`document`）：`data.document_type`、`data.document_number`、`record_date`、`due_date`。两者的 `parent_record_id` 为关联项目或客户，与业务跟进相同。
+- 附件（`file`）：元数据在 `company_records`（`parent_record_id` 指向所属记录，`data.file` 保存 bucket/path/fileName/mimeType/fileSize/uploadedAt），内容在私有 Bucket `company-documents`。只能通过 `company-api` 的 `/files` 端点管理：`POST /files/upload-url`、`POST /files`、`GET /files?parent_record_id=`、`GET /files/:id/download-url`、`DELETE /files/:id`；`/records` 不能创建、修改或删除 file 记录。
+- 签名下载 URL 有效期 300 秒，属于短期凭据，不得写入日志、LocalStorage 或业务记录。
+- `supabase/migrations/20261121090000_company_documents_storage_stage_3a.sql`：创建私有 Bucket（10 MB、MIME 允许列表），不创建 `storage.objects` 客户端策略。
 - `supabase/migrations/20261120065100_company_project_progress_linkage_stage_1h.sql`：增加项目进度同步触发器；触发器使用 SECURITY DEFINER、空 search_path、按 owner/project 过滤并撤销普通角色直接执行权限。
 
 专项设计、数据库和 API 说明见 [公司网站开发文档](company-website/README.md)。

@@ -47,6 +47,21 @@
 - 浏览器网络请求是否返回预期 HTTP 状态和 API 错误信息。
 - 不要在前端暴露 service-role 或其他服务端密钥。
 
+### 附件存储（V10.56.0 起）
+
+- 附件依赖私有 Bucket `company-documents`（迁移 `20261121090000_company_documents_storage_stage_3a.sql`）和 company-api v6。部署命令：
+
+  ```bash
+  supabase link --project-ref kopvznygsqsheibsjjvv
+  supabase db push
+  supabase functions deploy company-api --no-verify-jwt
+  ```
+
+- 附件窗口显示“操作失败”：先确认 company-api 已部署 v6（v5 没有 `/files` 端点）。
+- 上传失败：确认 Bucket 存在、文件 ≤10 MB 且类型在允许列表内；浏览器网络面板中 Storage `PUT` 请求的状态码。
+- 下载链接打不开：签名链接 5 分钟后失效，重新点击“下载”即可；若返回“文件已不存在”，删除该附件记录后重新上传。
+- Bucket 必须保持 private；不要为 `storage.objects` 添加 anon/authenticated 策略。
+
 ## 6. 常见问题处理原则
 
 | 现象 | 建议检查 |
