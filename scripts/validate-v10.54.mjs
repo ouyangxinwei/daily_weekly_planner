@@ -16,7 +16,7 @@ const weekly = getBusinessTrendReport({
   followups: [
     { id: 'f1', record_date: '2025-12-31', created_at: '2026-01-06T11:00:00Z' },
     { id: 'f2', record_date: '', created_at: '2026-01-07T11:00:00Z' },
-    { id: 'f3', record_date: 'invalid', created_at: 'invalid' }
+    { id: 'f3', record_date: 'invalid', created_at: '2026-01-08T11:00:00Z' }
   ]
 }, 'week', '2026-01-05');
 
@@ -28,11 +28,11 @@ assert.equal(weekly.periods.at(-1).projectsCreated, 2);
 assert.equal(weekly.periods.at(-1).projectsCompleted, 1);
 assert.equal(weekly.periods.at(-1).tasksCreated, 2);
 assert.equal(weekly.periods.at(-1).tasksCompleted, 1);
-assert.equal(weekly.periods.at(-1).followups, 1);
+assert.equal(weekly.periods.at(-1).followups, 2);
 assert.equal(weekly.periods.at(-2).followups, 1);
 assert.equal(weekly.metrics.find(item => item.key === 'projectsCreated').change, 2);
 assert.equal(weekly.metrics.find(item => item.key === 'projectsCompleted').change, 1);
-assert.equal(weekly.metrics.find(item => item.key === 'followups').change, 0);
+assert.equal(weekly.metrics.find(item => item.key === 'followups').change, 1);
 
 const monthly = getBusinessTrendReport({
   projects: [
