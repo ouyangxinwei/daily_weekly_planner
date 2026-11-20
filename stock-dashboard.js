@@ -35,7 +35,7 @@
   function cache() {
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || 'null');
-      return value && number(value.fetchedAt) && Array.isArray(value.stocks) && value.stocks.length === 7 ? value : null;
+      return value && number(value.fetchedAt) && Array.isArray(value.stocks) && value.stocks.length > 0 && value.stocks.length <= 7 && value.stocks.every(stock => Array.isArray(stock.days) && stock.days.length > 0) ? value : null;
     } catch (_) { return null; }
   }
   function save(value) {
