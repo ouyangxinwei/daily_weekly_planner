@@ -1,3 +1,13 @@
+# V10.52 Company workspace: unified to-do center — 2026-11-20
+
+- Add a unified to-do center for overdue tasks, tasks due today, tasks due in the next 7 days, open tasks without due dates, and pending customer follow-ups.
+- The next-seven-day task group covers the seven calendar days after today and does not overlap with the today group.
+- Group items by type and show task project/status/due date plus follow-up customer/project links and next-follow-up date state.
+- Open the existing task or follow-up editor directly from each item, reusing current CRUD rather than creating duplicate records.
+- Load complete paginated task, follow-up, project, and customer records; API or pagination failures display an error instead of a misleading empty list.
+- Add Simplified Chinese, English, Japanese, and responsive layouts while preserving the overview, CRUD, project progress linkage, and relationship navigation.
+- Reuse company-api v5 and public.company_records. No database, RLS, Edge Function, or production business-data changes.
+
 # V10.51 Company workspace: business overview dashboard — 2026-11-20
 
 - Add a business overview entry with customer, active project, open task, and pending follow-up KPIs.
