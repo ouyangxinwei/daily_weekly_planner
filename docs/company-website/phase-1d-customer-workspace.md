@@ -52,3 +52,12 @@
 ## 后续
 
 下一阶段可按业务优先级继续增加项目和跟进管理；文件上传与下载需单独实施私有 Storage 及签名 URL。
+
+
+## 部署记录
+
+- 应用版本：`10.41.0`（页面显示 `V10.41`）。
+- GitHub Pages：`https://ouyangxinwei.github.io/daily_weekly_planner/`。
+- Pages 构建与部署工作流：2026-11-20，Run `44673505170`，状态 `success`，对应主分支提交 `fc63daa587cdde6d4283958629c868b7e5044df6`。
+- Supabase Edge Function `company-api` 继续使用已部署的 v3；本阶段没有新增数据库迁移。
+- Playwright 测试使用模拟 API，不写入真实客户记录。真实账号下的客户 CRUD 仍需用户在已部署页面中操作验证；当前数据库客户记录数为 0。
