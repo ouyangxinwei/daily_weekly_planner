@@ -293,7 +293,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     updateBusinessTrendLabels();
     if(state.trendData)renderBusinessTrends(state.trendData);
   }
-  function trendDeltaText(value) {
+  function trendMetricLabel(key) {\n    const labels={projectsCreated:t('trendsProjects')+' · '+t('trendsCreated'),projectsCompleted:t('trendsProjects')+' · '+t('trendsCompleted'),tasksCreated:t('trendsTasks')+' · '+t('trendsCreated'),tasksCompleted:t('trendsTasks')+' · '+t('trendsCompleted'),followups:t('trendsRecorded')};\n    return labels[key]||key;\n  }\n  function trendDeltaText(value) {
     if(value===0)return t('trendsNoChange');
     return (value>0?'+':'')+String(value)+' · '+t(value>0?'trendsIncrease':'trendsDecrease');
   }
@@ -323,7 +323,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const kpis=$('cw-trends-kpis');kpis.replaceChildren();
     report.metrics.forEach(metric=>{
       const card=node('article','cw-trends-kpi');
-      card.append(node('span','',t(metric.key)),node('strong','',String(metric.current)),node('small','',t('trendsVsPrevious')+': '+trendDeltaText(metric.change)));
+      card.append(node('span','',trendMetricLabel(metric.key)),node('strong','',String(metric.current)),node('small','',t('trendsVsPrevious')+': '+trendDeltaText(metric.change)));
       kpis.append(card);
     });
     const current=report.currentPeriod;
@@ -331,7 +331,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const review=$('cw-trends-review');review.replaceChildren();
     report.metrics.forEach(metric=>{
       const line=node('p','cw-trends-review-line');
-      line.append(node('strong','',t(metric.key)),node('span','',trendDeltaText(metric.change)));
+      line.append(node('strong','',trendMetricLabel(metric.key)),node('span','',trendDeltaText(metric.change)));
       review.append(line);
     });
     renderTrendChart($('cw-trends-projects'),report.periods,[
