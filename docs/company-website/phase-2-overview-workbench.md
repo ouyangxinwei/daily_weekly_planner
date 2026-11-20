@@ -57,7 +57,7 @@ Phase 1 已建立客户、项目、任务、跟进及跨模块关联管理能力
 - 功能 PR #55 已 squash merge，合并提交 `5bc006224f2e179b83d9cdde06c43c4dc7855f46`。
 - PR 验证 run `44747122154`、main 验证 run `44747206317` 均 success。
 - Pages run `44747206274` 的 build、deploy、report-build-status 均 success，V10.53.0 已部署。
-- Playwright 未取得通过结论，不记录为通过；等待用户真实浏览器验收。
+- Playwright 未取得通过结论，不记录为通过；用户于 2026-11-20 确认真实浏览器验收 OK。
 
 ## 10. Phase 2-C 用户验收结果
 
