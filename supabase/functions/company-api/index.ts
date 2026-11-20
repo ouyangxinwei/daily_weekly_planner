@@ -376,9 +376,23 @@ async function listProjectTasks(auth: JsonObject, projectId: string, url: URL, r
   return { items: matches.slice(offset, offset + limit), total: matches.length, limit, offset };
 }
 
+function validateProjectProgressFields(body: JsonObject) {
+  if (body.data === undefined) return;
+  const data = body.data as JsonObject;
+  if (data.progress_mode !== undefined && !["manual", "auto"].includes(String(data.progress_mode))) {
+    throw new ApiError(400, "INVALID_PROJECT_PROGRESS_MODE");
+  }
+  for (const key of ["progress_percent", "manual_progress_percent"]) {
+    if (data[key] !== undefined && (!Number.isInteger(data[key]) || Number(data[key]) < 0 || Number(data[key]) > 100)) {
+      throw new ApiError(400, "INVALID_PROJECT_PROGRESS");
+    }
+  }
+}
+
 function validateRecordCreate(body: JsonObject): JsonObject {
   validateCommonFields(body, true);
   if (body.record_type === "task") validateTaskFields(body, true);
+  if (body.record_type === "project") validateProjectProgressFields(body);
   return body;
 }
 
@@ -519,6 +533,7 @@ Deno.serve(async (req: Request) => {
       if (id && req.method === "PATCH") {
         const patch = validateRecordPatch(await readJson(req));
         const existing = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+        if (existing.record_type === "project") validateProjectProgressFields(patch);
         if (existing.record_type === "task") {
           validateTaskFields(patch, false);
           const nextProjectId = patch.parent_record_id === undefined ? existing.parent_record_id : patch.parent_record_id;
