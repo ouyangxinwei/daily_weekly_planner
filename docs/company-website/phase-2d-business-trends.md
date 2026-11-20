@@ -70,4 +70,16 @@
 - 目标版本：V10.54.0。
 - 开发分支：feature/phase-2d-business-trends。
 - 基于 main：9dcc2563299538eb2cde0dfd6bb78f1ff65ef2d7。
-- 当前状态：开发与验证中；尚未合并、部署或用户验收。
+- 当前状态：已合并、已部署，等待用户真实浏览器验收。
+
+## 9. 合并与部署记录（2026-11-20）
+
+- 功能 PR #57：https://github.com/ouyangxinwei/daily_weekly_planner/pull/57，已 squash merge。
+- 合并提交：`e5d53d61c9d14bc0e6ccc257f2013bdb35bd1f1b`。
+- 版本：V10.54.0。
+- PR 验证 run `44750139310`：completed / success，周/月统计边界、完成代理口径、跟进日期回退和既有回归验证通过。
+- main 验证 run `44750195057`：completed / success。
+- Pages run `44750193594`：completed / success；build、deploy、report-build-status 均成功。
+- Playwright 未取得通过结论，不记录为通过，也不作为本阶段合并前提。
+- 用户真实浏览器验收：等待确认。
+- 未修改数据库、RLS、Edge Function、认证或生产业务数据。
