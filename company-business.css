@@ -12,3 +12,19 @@
 @media(max-width:700px){.cw-business-toolbar{grid-template-columns:1fr 1fr}.cw-business-toolbar .cw-search{grid-column:1/-1}.cw-business-toolbar #cw-business-new{grid-column:1/-1}.cw-business-card{grid-template-columns:minmax(0,1fr) auto}.cw-business-details{grid-column:1/-1;grid-row:2}.cw-business-card .cw-card-actions{grid-column:2;grid-row:1}}
 @media(max-width:480px){.cw-business-nav{gap:4px}.cw-business-tab{flex:1;padding:9px 6px;font-size:11px}.cw-business-toolbar{gap:7px}.cw-business-toolbar select{font-size:11px;padding:9px 7px}.cw-business-card{gap:8px;padding:12px 9px}.cw-business-card .cw-card-actions{gap:4px}.cw-business-card .cw-card-actions button{padding:6px 7px;font-size:10px}}
 html[data-theme="dark"] .cw-business-tab[aria-pressed=true]{background:#302b50;color:#c9c0ff}
+
+.cw-project-progress{display:grid;gap:5px;min-width:0;margin-top:8px}
+.cw-project-progress-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px}
+.cw-project-progress-label strong{color:var(--ink);font-variant-numeric:tabular-nums}
+.cw-project-progress-track{height:7px;overflow:hidden;border-radius:999px;background:var(--line)}
+.cw-project-progress-fill{height:100%;width:0;border-radius:inherit;background:var(--brand);transition:width .2s ease}
+.cw-project-details-dialog{width:min(100% - 28px,620px)}
+.cw-project-detail-progress{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-secondary,var(--surface));margin-bottom:16px}
+.cw-project-detail-progress .cw-project-progress-track{height:10px}
+.cw-project-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
+.cw-project-detail-grid>div{min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px}
+.cw-project-detail-grid dt{margin-bottom:6px;color:var(--muted);font-size:11px}
+.cw-project-detail-grid dd{margin:0;color:var(--ink);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cw-project-detail-grid .cw-project-detail-description{grid-column:1/-1}
+html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
+@media(max-width:480px){.cw-project-detail-grid{grid-template-columns:1fr}.cw-project-detail-grid .cw-project-detail-description{grid-column:auto}}
