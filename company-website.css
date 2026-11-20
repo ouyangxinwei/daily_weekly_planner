@@ -53,3 +53,17 @@ html[data-theme="dark"] .cw-delete{background:#2b242b;border-color:#63404a}html[
 @media(max-width:700px){.cw-toolbar{grid-template-columns:1fr 1fr}.cw-search{grid-column:1/-1}.cw-toolbar #cw-new{grid-column:1/-1}.cw-customer{grid-template-columns:minmax(0,1fr) auto}.cw-customer-details{grid-column:1/-1;grid-row:2}.cw-card-actions{grid-column:2;grid-row:1}.cw-customer-main{grid-column:1;grid-row:1}}
 @media(max-width:560px){.workspace-switch button{font-size:10px;padding:7px 6px}}
 @media(max-width:480px){.cw-shell{width:min(100% - 22px,820px)}.cw-header h2{font-size:22px}.cw-overview{gap:6px}.cw-stat{padding:10px 9px}.cw-stat strong{font-size:16px}.cw-stat span{font-size:10px}.cw-panel{padding:13px 11px 9px}.cw-toolbar{gap:7px}.cw-toolbar select{font-size:11px;padding:9px 7px}.cw-search input{font-size:12px}.cw-search button{padding:8px 9px}.cw-customer{gap:8px;padding:12px 9px}.cw-customer-title{font-size:14px}.cw-card-actions{gap:4px}.cw-card-actions button{padding:6px 7px;font-size:10px}.cw-form-grid{grid-template-columns:1fr}.cw-field-wide{grid-column:auto}.cw-editor-form{padding:18px}}
+
+/* Stage 1-I-B: compact relationship summaries on customer cards */
+.cw-customer-relations{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-secondary,var(--bg))}
+.cw-customer-relations h4{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px}
+.cw-relation-counts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+.cw-relation-count{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:11px}
+.cw-relation-count strong{color:var(--ink);font-size:13px;font-variant-numeric:tabular-nums}
+.cw-customer-relation-group{min-width:0;display:grid;align-content:start;gap:5px}
+.cw-customer-relation-group>strong{font-size:11px;color:var(--ink)}
+.cw-customer-relation-group ul{display:grid;gap:4px;margin:0;padding-left:16px;color:var(--muted);font-size:11px}
+.cw-customer-relation-group li{overflow-wrap:anywhere}
+html[data-theme="dark"] .cw-customer-relations{background:#242834}
+@media(max-width:700px){.cw-customer-relations{grid-template-columns:1fr 1fr}.cw-customer-relation-group:last-child{grid-column:1/-1}}
+@media(max-width:480px){.cw-customer-relations{gap:9px;padding:10px}}
