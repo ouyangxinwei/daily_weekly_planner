@@ -68,5 +68,17 @@
 
 - 版本目标：V10.53.0。
 - 开发分支：feature/phase-2c-project-customer-overview。
-- 当前状态：功能开发与自动化验证进行中，尚未合并、部署或用户验收。
+- 当前状态：已合并、已部署，等待用户真实浏览器验收。
 - 数据库/API：无变更，继续使用 company-api v5。
+
+## 8. 合并与部署记录（2026-11-20）
+
+- 功能 PR #55：https://github.com/ouyangxinwei/daily_weekly_planner/pull/55，已 squash merge。
+- 合并提交：`5bc006224f2e179b83d9cdde06c43c4dc7855f46`。
+- 版本：V10.53.0。
+- PR 验证 run `44747122154`：completed / success。
+- main 验证 run `44747206317`：completed / success。
+- Pages run `44747206274`：completed / success；build、deploy、report-build-status 均成功。
+- Playwright run `44747121956` 未取得通过结论，不作为本阶段合并前提，不记录为通过。
+- 用户真实浏览器验收：等待用户确认。
+- 数据库、RLS、company-api v5、认证及生产业务数据均未修改。
