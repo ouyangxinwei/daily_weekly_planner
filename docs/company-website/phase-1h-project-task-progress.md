@@ -76,7 +76,7 @@ Playwright mock API 测试覆盖：
 
 ## 6. 最终部署与验收结果
 
-<badge color="success">阶段 1-H 最终交付：已完成</badge>
+**阶段 1-H 最终交付：已完成**
 
 - GitHub PR #38 已 squash merge 至 `main`。
 - 主分支交付提交：`7ea28149eb9578d8f9080aa0f69ae8b96215f5be`。
