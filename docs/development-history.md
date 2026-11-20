@@ -444,3 +444,277 @@ V10.20 · full_backup_module_colors。
 - [ ] JSON 与 Supabase 同步包含分类；旧备份兼容。
 - [ ] 三种语言正常，自定义分类名称保持原样。
 - [ ] 手机与桌面布局正常；schemaVersion: 1，无 SQL 迁移。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.13_organize_module.md`
+
+# V10.13 整理模块验收标准
+
+## 功能验收
+- [ ] 首页显示计划与整理两个入口，可来回切换。
+- [ ] 默认进入计划模块，原计划数据与操作保持不变。
+- [ ] 整理默认分类及顺序为书籍、电子产品、软件/APP、网站、其他。
+- [ ] 整理新建与快速添加默认分类为书籍。
+- [ ] 整理支持新增、编辑、删除、搜索、筛选、排序、完成状态。
+- [ ] 整理支持分类增删改；删除使用中分类先转移项目。
+- [ ] 整理支持归档、回收站、恢复、永久删除和撤销。
+- [ ] 整理界面不显示计划周期选择和周期星级统计，项目作为单一列表展示。
+- [ ] PDF 导出仅包含当前整理列表。
+
+## 数据隔离
+- [ ] 计划继续使用 personal-planner:v1。
+- [ ] 整理使用 personal-organizer:v1。
+- [ ] 修改整理项目、分类、归档、回收站不改变计划数据。
+- [ ] 修改计划不改变整理数据。
+- [ ] 切换模块后各自内容和分类正确恢复。
+
+## JSON 备份
+- [ ] 整理导出包含 moduleType=organize。
+- [ ] 计划导出包含 moduleType=plan。
+- [ ] 整理备份不能导入计划模块，计划备份不能导入整理模块。
+- [ ] 旧版无 moduleType 的计划备份仍可导入。
+- [ ] 整理导入只替换整理数据。
+
+## Supabase
+- [ ] 计划上传保留云端 organizer 分区。
+- [ ] 整理上传保留云端计划根数据。
+- [ ] 计划下载只更新计划本地键。
+- [ ] 整理下载只更新整理本地键。
+- [ ] 旧云端快照无 organizer 字段时计划下载仍兼容。
+- [ ] 上传失败或本机保存失败时不显示成功。
+
+## 发布与兼容
+- [ ] 中文、英文、日文 UI 可切换。
+- [ ] PWA 缓存版本更新。
+- [ ] V10.12 计划数据及既有分类完整保留。
+- [ ] GitHub Actions Pages build 和 deploy 对最新 main SHA 均成功。
+- [ ] 浏览器与 Android PWA 实测通过。
+
+## 已知测试边界
+静态代码检查与状态模拟不等于真实浏览器、Android PWA 或 Supabase 线上端到端测试；交付说明必须分别标注。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.14_four_module_management.md`
+
+# V10.14 验收标准
+
+- [ ] 首页模块顺序为计划、工作、外语学习、整理。
+- [ ] 四个模块切换正常，刷新后恢复上次模块。
+- [ ] 计划分类按原有顺序移除工作，依次为学习、生活、健康、财务、兴趣、未分类；未分类不能编辑或删除。
+- [ ] 旧计划、归档和回收站中的工作分类记录均迁移为未分类，其他字段不变。
+- [ ] 迁移测试覆盖普通记录、归档记录、回收站记录、其他分类顺序、字段完整性、幂等性及原始对象不被修改。
+- [ ] 迁移保存失败时不替换内存状态，原 LocalStorage 数据保持不变；下次进入计划模块可重试。
+- [ ] 工作分类顺序为待处理、进行中、已完成、工作记录、会议、其他。
+- [ ] 工作任务状态独立于分类，状态可编辑且与完成复选框同步；跨日期仍保持。
+- [ ] 外语学习分类为英语、德语、俄语、日语、其他，不含挪威语。
+- [ ] 整理原有五个分类及数据保持不变。
+- [ ] 四模块本地存储、分类、归档、回收站、搜索和统计相互隔离。
+- [ ] 四种 JSON moduleType 可分别导出和恢复；跨模块导入被拒绝。
+- [ ] 旧版无 moduleType 的计划 JSON 仍可导入。
+- [ ] Supabase 上传当前模块不会覆盖其他分区；原 organizer 分区保持兼容。
+- [ ] 中英日界面、PDF 导出、撤销、分类管理正常。
+- [ ] Service Worker 缓存升级；页面刷新无错误。
+- [ ] JavaScript 语法检查和 V10.14 静态契约工作流通过。
+- [ ] 真实浏览器、Supabase 线上 E2E、Android PWA 测试分别记录，不以静态检查代替。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.20_full_backup_module_colors.md`
+
+# V10.20 验收记录
+
+## 整体 JSON 导出
+- [ ] 新按钮在四模块入口中可见，且不依赖当前模块。
+- [ ] 导出 JSON 可解析，顶层包含 app、backupType、backupVersion、appVersion、exportedAt、modules。
+- [ ] modules 中包含 plan、work、language、organize 四个模块。
+- [ ] 每个模块均包含 moduleType、schemaVersion、categories、plans、completions、trash、appVersion、exportedAt。
+- [ ] 各模块的分类、记录、完成状态、归档字段、回收站数据与当前单模块备份支持范围一致。
+- [ ] 文件名符合 manman_planner_full_backup_YYYYMMDD_HHmmss.json。
+- [ ] 任一模块读取/解析/校验失败时取消整体导出，不产生不完整文件。
+- [ ] 导出不会修改 LocalStorage，也不访问 Supabase。
+- [ ] 不包含 IndexedDB 运行日志及系统设置。
+- [ ] 原有四个模块单独导出、导入功能保持正常。
+
+## 四模块按钮颜色
+- [ ] 计划为蓝色系、工作为绿色系、外语学习为紫色系、整理为橙色系。
+- [ ] 当前选中状态仍有足够辨识度。
+- [ ] 原有按钮文字、尺寸、排列、点击行为不变。
+- [ ] 桌面端与移动端显示正常；其他按钮不受影响。
+
+## 回归与发布
+- [ ] 四模块切换、读写、统计、归档、回收站正常。
+- [ ] 云端单模块/整体同步代码与行为未改变。
+- [ ] 中英日翻译正常。
+- [ ] Service Worker 使用 V10.20 新缓存名。
+- [ ] GitHub Actions 构建、Pages 部署均成功后方可宣布发布。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.21_plan_to_module_move.md`
+
+# V10.21 单向移动验收清单
+
+## 功能范围
+- 仅在「计划」模块编辑已有记录时显示移动区域。
+- 目标仅包含「工作」「整理」「外语学习」。
+- 其他三个模块不显示移动入口，不支持反向移动。
+
+## 数据规则
+- 保留标题、备注、参考网站和优先级。
+- 目标模块使用其默认分类；状态默认未完成，工作状态为「待处理」。
+- 不继承计划周期、日期提醒、临时周期标识、通知标记或完成状态。
+- 移动成功后，源计划记录及其完成状态记录从计划模块删除。
+- 目标模块原有记录、分类、归档、回收站和完成记录保持不变。
+
+## 持久化与异常
+- 目标模块先写入，计划模块随后删除。
+- 目标模块写入失败时，计划模块不变。
+- 计划模块删除保存失败时，回滚目标模块写入。
+- 目标模块已有数据无法识别时，取消移动，不覆盖原数据。
+- 移动操作不提供单模块撤销，避免仅恢复源记录却留下目标副本。
+
+## 手动验收
+- [ ] 新建计划并编辑，确认显示三个目标模块。
+- [ ] 分别移动到工作、整理、外语学习，确认计划模块原记录消失。
+- [ ] 确认目标模块新增一条记录，标题、备注、参考网站、优先级保留。
+- [ ] 确认目标记录默认未完成；工作状态显示「待处理」。
+- [ ] 确认目标记录不带入计划日期、周期和提醒。
+- [ ] 确认其他三个模块编辑页面没有移动入口。
+- [ ] 模拟目标模块存储失败或无效数据，确认源计划不丢失。
+- [ ] 桌面与移动端检查编辑弹窗布局。
+- [ ] 检查中文、英文、日文文案。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.22_global_search.md`
+
+# V10.22 Global Search — Acceptance Checklist
+
+## Search order
+- [ ] Plan: daily → daily_random → weekly → weekly_random → monthly → monthly_random → yearly.
+- [ ] If no Plan item matches, search Work → Foreign Language Learning → Organize.
+- [ ] Stop at the first matching item; do not show a result list or next/previous controls.
+
+## Matching rules
+- [ ] Search title, note and reference URL, case-insensitively.
+- [ ] Include completed items.
+- [ ] Exclude archived items and Trash.
+- [ ] Ignore the currently selected category filter.
+- [ ] Within a period/module, respect the current sort order and stable original order for ties.
+- [ ] Expired random-cycle items are not searchable.
+
+## Navigation and UI
+- [ ] Enter and the Search button both execute global search.
+- [ ] Switch to the matched module and, for Plan, the matched period.
+- [ ] Keep the keyword visible, clear the category filter, scroll to the first match and briefly highlight it.
+- [ ] No match: show a localized message and keep the current module, period and scroll position.
+- [ ] Chinese, English and Japanese labels are correct.
+- [ ] Mobile layout keeps the search input and button usable without horizontal overflow.
+
+## Regression protection
+- [ ] Existing CRUD, completion, sorting, category filtering, archive, Trash and Plan-to-module move remain functional.
+- [ ] No business LocalStorage keys, schemaVersion, JSON backup format, Supabase RPC or database schema changes.
+- [ ] Service Worker cache version is updated.
+
+
+---
+
+## 原文件：`docs/acceptance_V10.23_dark_theme_period_colors.md`
+
+# V10.23 黑白主题与周期颜色验收
+
+## 功能验收
+- [ ] 首次打开（没有主题偏好）默认使用黑色主题。
+- [ ] 顶部公共区域显示主题切换按钮；在计划、工作、外语学习、整理四个模块均可操作。
+- [ ] 切换为白色主题后，原有浅色界面外观保持不变。
+- [ ] 切换回黑色主题后，页面背景为深色、文字为浅色；卡片、弹窗、输入框、下拉框、按钮、边框、提示和四模块入口保持可读。
+- [ ] 刷新页面或重新打开后，恢复上次选择的主题。
+- [ ] 普通周期每日、每周、每月、每年显示蓝色；随机周期每日随机、每周随机、每月随机显示橙色。
+- [ ] 周期按钮仍按原有顺序显示，切换、搜索、统计和计划增删改完成行为不变。
+- [ ] 中、英、日三种语言下主题切换按钮文案正确。
+- [ ] 桌面与手机宽度下顶部按钮及周期标签均可正常使用。
+
+## 数据与回归
+- [ ] 四模块原有 LocalStorage 业务键和值不变。
+- [ ] 新增主题偏好仅使用独立键 `personal-planner:theme:v1`。
+- [ ] `schemaVersion: 1`、JSON 备份格式、Supabase RPC 和数据库结构不变。
+- [ ] Service Worker 使用 V10.23 新缓存名。
+- [ ] 运行现有静态验证脚本：`node scripts/validate-v10.14.mjs`。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.24_results_future_modules.md`
+
+# V10.24 成绩与未来模块验收清单
+
+## 模块入口与外观
+- [ ] 六个模块入口按计划、工作、外语学习、整理、成绩、未来排列。
+- [ ] 成绩使用青绿色，未来使用玫瑰粉；深色与浅色主题均清晰可辨。
+- [ ] 手机窄屏下入口可换行，不遮挡版本、同步和管理入口。
+- [ ] 中文、English、日本語切换后，新增模块名称、说明、分类和按钮均正确翻译。
+
+## 独立数据
+- [ ] 在成绩模块新增、编辑、完成、归档、删除记录，切换其他模块后数据不串用。
+- [ ] 在未来模块新增、编辑、完成、归档、删除记录，切换其他模块后数据不串用。
+- [ ] 成绩与未来分别使用 `personal-results:v1`、`personal-future:v1`。
+- [ ] 原计划、工作、外语学习、整理数据与本地键不发生变化。
+- [ ] 分类新增、改名、删除及回收站引用迁移行为与现有模块一致。
+
+## 记录功能
+- [ ] 快速添加、完整编辑、完成状态、优先级、搜索、分类筛选、排序正常。
+- [ ] 归档、取消归档、回收站恢复、永久删除、批量操作和撤销正常。
+- [ ] 单模块 JSON 导出带正确 `moduleType`；错误模块备份不能导入。
+- [ ] PDF 导出只包含当前模块可见记录。
+
+## 云端与兼容
+- [ ] 单模块上传成绩／未来时，不覆盖其他五个模块的云端数据。
+- [ ] 单模块下载只覆盖当前模块。
+- [ ] 六模块整体上传／下载均包含成绩与未来。
+- [ ] 旧四模块云端快照仍可整体下载；缺少新分区时成绩／未来初始化为空数据。
+- [ ] 整体下载任一原四模块分区缺失或无效时，取消覆盖并保留本地数据。
+- [ ] 不修改 schemaVersion，不需要 SQL 迁移。
+
+## 回归
+- [ ] 原四模块 CRUD、搜索、分类、归档、回收站、备份和同步无回归。
+- [ ] PWA 更新后能加载 V10.24 缓存资源。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.25_sync_overwrite_protection.md`
+
+# V10.25 验收：云端同步数据覆盖保护
+
+## 范围
+- 当前模块上传、当前模块下载。
+- 六模块整体上传、六模块整体下载。
+- 中文、英文、日文提示。
+- 本地同步元数据独立保存；云端通过现有快照 JSONB 的 `_syncMeta` 字段保存模块时间及由数据库返回的快照更新时间。
+
+## 验收项目
+1. 本地较新：上传和下载确认窗口均显示本地、云端时间及“本地数据较新”。
+2. 云端较新：确认窗口显示双方时间及“云端数据较新”。
+3. 时间相同：明确显示时间相同，仍要求用户确认。
+4. 任一侧缺少时间：显示无法可靠判断，不自动选择任何一方。
+5. 选择否：当前模块与其他模块的业务数据均不发生变化。
+6. 选择是：仅执行对应范围的上传或下载；单模块操作不得覆盖其他模块。
+7. 六模块整体操作：覆盖范围仅限六个已定义模块；不合并数据。
+8. 确认后云端快照版本发生变化：中止操作，不写入本地或云端。
+9. 单模块下载成功：只更新该模块本地数据及该模块时间；其余模块时间保持原值。
+10. 整体下载成功：六个模块及其时间元数据一起写入；任一写入失败时恢复原数据及原元数据。
+11. 旧云端快照无 `_syncMeta`：由数据库 `updated_at` 作为兼容回退时间，旧数据仍可读取。
+12. 原六个业务 LocalStorage key、`schemaVersion: 1`、JSON 单模块／整体备份格式保持不变。
+13. 在中英日三种语言下，确认窗口内容可读；桌面与移动端均可正常操作。
+
+## 需要实际账号验证
+- 使用登录账号在两个浏览器／设备间制造本地较新与云端较新两种情况。
+- 分别验证单模块和六模块整体同步的“是／否”路径。
+- 确认数据内容、模块隔离、云端时间及本地时间均符合预期。
