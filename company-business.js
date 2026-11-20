@@ -296,7 +296,8 @@ import { getBusinessTrendReport } from './company-business-trends.js';
   function trendMetricLabel(key) {
     const labels={projectsCreated:t('trendsProjects')+' · '+t('trendsCreated'),projectsCompleted:t('trendsProjects')+' · '+t('trendsCompleted'),tasksCreated:t('trendsTasks')+' · '+t('trendsCreated'),tasksCompleted:t('trendsTasks')+' · '+t('trendsCompleted'),followups:t('trendsRecorded')};
     return labels[key]||key;
-  }\n  function trendDeltaText(value) {
+  }
+  function trendDeltaText(value) {
     if(value===0)return t('trendsNoChange');
     return (value>0?'+':'')+String(value)+' · '+t(value>0?'trendsIncrease':'trendsDecrease');
   }
