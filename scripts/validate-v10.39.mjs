@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync('index.html','utf8');
+const js=fs.readFileSync('weather-dashboard.js','utf8');
+const css=fs.readFileSync('weather-dashboard.css','utf8');
+const sw=fs.readFileSync('sw.js','utf8');
+assert.equal(fs.readFileSync('VERSION','utf8').trim(),'10.39.0');
+assert.match(html,/id="weather-dashboard"/);
+assert.match(html,/weather-dashboard\.js/);
+assert.match(html,/weather-dashboard\.css/);
+assert.match(js,/timezone:'Asia\/Tokyo'/);
+assert.match(js,/forecast_days:'2'/);
+assert.match(js,/TTL=600000/);
+assert.match(js,/当前为离线缓存数据/);
+assert.match(css,/weather-dashboard/);
+assert.match(sw,/weather-dashboard\.js/);
+assert.match(sw,/weather-dashboard\.css/);
+console.log('V10.39 weather dashboard validation passed.');
