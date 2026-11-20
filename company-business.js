@@ -43,17 +43,20 @@ import { getTodoCenterSections, getTodoFollowupDateState } from './company-todo-
     const host = root(); if (!host || $('cw-business-nav')) return;
     const shell = host.querySelector('.cw-shell');
     const nav = node('nav', 'cw-business-nav'); nav.id = 'cw-business-nav'; nav.setAttribute('aria-label', 'Company sections');
-    [['overview',t('overview')],['customers',t('customers')],['projects',t('projects')],['tasks',t('tasks')],['followups',t('followups')]].forEach(([key,label]) => {
+    [['overview',t('overview')],['todos',t('todoCenter')],['customers',t('customers')],['projects',t('projects')],['tasks',t('tasks')],['followups',t('followups')]].forEach(([key,label]) => {
       const b = button(label, 'cw-business-tab', () => { switchTab(key); if (key === 'customers') window.CompanyWebsite?.refresh?.(); }); b.dataset.tab = key; nav.append(b);
     });
     const customerPanel = host.querySelector('.cw-panel'); customerPanel.id = 'cw-customer-panel';
     const overview = node('section', 'cw-panel cw-overview-panel'); overview.id = 'cw-business-overview';
     overview.innerHTML = '<header class="cw-overview-heading"><div><h3 id="cw-overview-title"></h3><p id="cw-overview-subtitle"></p></div><button class="secondary" id="cw-overview-refresh" type="button"></button></header><div id="cw-overview-feedback" class="cw-feedback" role="status" aria-live="polite"></div><section class="cw-overview-kpis" id="cw-overview-kpis"></section><h3 class="cw-overview-section-title" id="cw-overview-attention-title"></h3><section class="cw-overview-attention" id="cw-overview-attention"></section><h3 class="cw-overview-section-title" id="cw-overview-recent-title"></h3><section class="cw-overview-recent" id="cw-overview-recent"></section>';
+    const todos = node('section', 'cw-panel cw-todo-panel'); todos.id = 'cw-business-todos';
+    todos.innerHTML = '<header class="cw-todo-heading"><div><h3 id="cw-todo-title"></h3><p id="cw-todo-subtitle"></p></div><button class="secondary" id="cw-todo-refresh" type="button"></button></header><div id="cw-todo-feedback" class="cw-feedback" role="status" aria-live="polite"></div><div id="cw-todo-sections" class="cw-todo-sections"></div>';
     const business = node('section', 'cw-panel cw-business-panel'); business.id = 'cw-business-panel';
     business.innerHTML = '<div class="cw-business-toolbar"><form id="cw-business-search" class="cw-search"><label class="sr-only" for="cw-business-query"></label><input id="cw-business-query" type="search" maxlength="100"><button class="secondary" type="submit">搜索</button></form><select id="cw-business-status" aria-label="' + escape(t('allStatus')) + '"></select><select id="cw-business-project-filter" aria-label="' + escape(t('taskProject')) + '" hidden></select><select id="cw-business-due-filter" aria-label="' + escape(t('taskDue')) + '" hidden></select><select id="cw-business-followup-due-filter" aria-label="' + escape(t('nextDate')) + '" hidden></select><button class="primary" id="cw-business-new" type="button"></button><button class="secondary" id="cw-business-refresh" type="button">' + escape(t('refresh')) + '</button></div><div id="cw-business-relation-context" class="cw-relation-context" hidden></div><div class="cw-feedback" id="cw-business-feedback" role="status" aria-live="polite"></div><div class="cw-business-list" id="cw-business-list"></div><nav class="cw-pagination" id="cw-business-pagination"></nav>';
-    shell.insertBefore(nav, customerPanel); shell.insertBefore(overview, customerPanel); customerPanel.insertAdjacentElement('afterend', business);
+    shell.insertBefore(nav, customerPanel); shell.insertBefore(overview, customerPanel); shell.insertBefore(todos, customerPanel); customerPanel.insertAdjacentElement('afterend', business);
     $('cw-overview-title').textContent = t('overviewTitle'); $('cw-overview-subtitle').textContent = t('overviewSubtitle'); $('cw-overview-refresh').textContent = t('refresh'); $('cw-overview-attention-title').textContent = t('needsAttention'); $('cw-overview-recent-title').textContent = t('recentProjects') + ' · ' + t('recentTasks') + ' · ' + t('recentFollowups');
     $('cw-overview-refresh').addEventListener('click', loadOverview);
+    $('cw-todo-title').textContent=t('todoCenterTitle'); $('cw-todo-subtitle').textContent=t('todoCenterSubtitle'); $('cw-todo-refresh').textContent=t('refresh'); $('cw-todo-refresh').addEventListener('click',loadTodoCenter);
     const dialog = document.createElement('dialog'); dialog.className = 'cw-dialog'; dialog.id = 'cw-business-editor';
     dialog.innerHTML = '<form id="cw-business-form" class="cw-editor-form"><div class="cw-dialog-head"><div><p class="cw-eyebrow">BUSINESS RECORD</p><h2 id="cw-business-editor-title"></h2></div><button class="close-btn" id="cw-business-close" type="button" aria-label="Close">×</button></div><div id="cw-business-fields" class="cw-form-grid"></div><p class="cw-form-error" id="cw-business-error" role="alert"></p><div class="cw-dialog-actions"><button class="secondary" id="cw-business-cancel" type="button">' + escape(t('cancel')) + '</button><button class="primary" type="submit">' + escape(t('save')) + '</button></div></form>';
     host.append(dialog);
@@ -86,8 +89,10 @@ import { getTodoCenterSections, getTodoFollowupDateState } from './company-todo-
     $('cw-customer-panel').hidden = tab !== 'customers';
     $('cw-business-panel').hidden = !['projects','tasks','followups'].includes(tab);
     $('cw-business-overview').hidden = tab !== 'overview';
+    $('cw-business-todos').hidden = tab !== 'todos';
     $('cw-business-nav').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
     if (tab === 'overview') loadOverview();
+    else if (tab === 'todos') loadTodoCenter();
     else if (tab !== 'customers') { updateToolbar(); loadActive(); }
   }
   function setOffset(value) { if (state.tab === 'projects') state.projectOffset = value; else if (state.tab === 'tasks') state.taskOffset = value; else state.followupOffset = value; }
@@ -199,6 +204,60 @@ import { getTodoCenterSections, getTodoFollowupDateState } from './company-todo-
       renderOverviewList(section,getRecentBusinessRecords(records,3),tab,t('noRecent'));recent.append(section);
     });
   }
+  function renderTodoCenter(tasks, followups) {
+    const host=$('cw-todo-sections');host.replaceChildren();
+    const today=getLocalDateKey(),sections=getTodoCenterSections(tasks,followups,today);
+    if(!sections.some(section=>section.records.length)){host.append(node('p','cw-todo-empty',t('todoEmpty')));return;}
+    sections.forEach(section=>{
+      const group=node('section','cw-todo-group'),heading=node('header','cw-todo-group-heading');
+      heading.append(node('h4','',t(section.key)),node('span','cw-todo-count',String(section.records.length)));
+      group.append(heading);
+      if(!section.records.length){group.append(node('p','cw-todo-group-empty',t('noRecent')));host.append(group);return;}
+      const list=node('div','cw-todo-list');
+      section.records.forEach(record=>{
+        const isTask=section.type==='tasks',data=record.data&&typeof record.data==='object'?record.data:{};
+        const item=button('','cw-todo-item',()=>openRelatedRecord(section.type,record));
+        const main=node('span','cw-todo-item-main');
+        main.append(node('strong','',record.title||'—'));
+        const meta=node('span','cw-todo-item-meta');
+        if(isTask){
+          meta.textContent=t('todoProject')+': '+projectName(record.parent_record_id)+' · '+t('taskStatus')+': '+(t(record.status)||record.status||'—');
+          if(record.due_date)meta.textContent+=' · '+t('todoDueDate')+': '+dateText(record.due_date);
+        }else{
+          const customerId=data.customer_id||(record.related_record_ids||[]).find(id=>state.customers.some(c=>c.id===id))||(state.customers.some(c=>c.id===record.parent_record_id)?record.parent_record_id:'');
+          const projectLabel=data.project_title||(data.project_id?projectName(data.project_id):'');
+          const nextDate=data.next_follow_up_date;
+          meta.textContent=(customerId?customerName(customerId)+' · ':'')+(projectLabel?projectLabel+' · ':'')+t('todoNextFollowup')+': '+(nextDate?dateText(nextDate):t('todoNoNextDate'));
+          item.append(node('span','cw-todo-status',t(getTodoFollowupDateState(record,today))));
+        }
+        main.append(meta);item.append(main,node('span','cw-todo-open',t('todoOpenRecord')));list.append(item);
+      });
+      group.append(list);host.append(group);
+    });
+  }
+  async function loadTodoCenter(){
+    if(state.todoBusy)return;
+    state.todoBusy=true;const feedback=$('cw-todo-feedback');feedback.classList.remove('error');feedback.textContent=t('todoLoading');
+    try{
+      const [tasks,followups,projects,customers]=await Promise.all([
+        fetchCompleteRecords('/records?record_type=task','tasks'),
+        fetchCompleteRecords('/records?record_type=follow_up','followups'),
+        fetchCompleteRecords('/records?record_type=project','projects'),
+        fetchCompleteRecords('/records?record_type=customer','customers')
+      ]);
+      state.tasks=tasks;state.followups=followups;state.projects=projects;state.customers=customers;
+      state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);
+      renderTodoCenter(tasks,followups);feedback.textContent='';
+    }catch(error){
+      $('cw-todo-sections').replaceChildren();feedback.classList.add('error');feedback.textContent=error.message||t('todoLoadError');
+    }finally{state.todoBusy=false;}
+  }
+  async function refreshCurrentTab(){
+    if(state.tab==='overview')return loadOverview();
+    if(state.tab==='todos')return loadTodoCenter();
+    if(state.tab!=='customers')return loadActive();
+  }
+
   async function loadOverview() {
     if(state.overviewBusy)return;
     state.overviewBusy=true;const feedback=$('cw-overview-feedback');feedback.classList.remove('error');feedback.textContent=t('overviewLoading');
@@ -555,20 +614,20 @@ import { getTodoCenterSections, getTodoFollowupDateState } from './company-todo-
       payload = { record_type:'follow_up', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:projectId || customerId, related_record_ids:projectId ? [customerId] : [], record_date:when ? new Date(when).toISOString() : new Date().toISOString(), data:{ customer_id:customerId, project_id:projectId, project_title:projectId ? state.projects.find(p=>p.id===projectId)?.title || '' : '', method:$('cw-biz-method').value, outcome:$('cw-biz-outcome').value.trim(), next_follow_up_date:$('cw-biz-next').value || null, notes:$('cw-biz-notes').value.trim() } };
     }
     const id = state.editing?.id;
-    try { if (id) { const patch = { ...payload }; delete patch.record_type; await api('/records/'+encodeURIComponent(id),'PATCH',patch); } else await api('/records','POST',payload); $('cw-business-editor').close(); state.editing=null; invalidateRelations(); await loadActive(); }
+    try { if (id) { const patch = { ...payload }; delete patch.record_type; await api('/records/'+encodeURIComponent(id),'PATCH',patch); } else await api('/records','POST',payload); $('cw-business-editor').close(); state.editing=null; invalidateRelations(); await refreshCurrentTab(); }
     catch (error) { $('cw-business-error').textContent = error.message || t('failed'); }
   }
   async function removeRecord(record, project, task) {
     if (!window.confirm(t(project?'confirmDeleteProject':task?'confirmDeleteTask':'confirmDeleteFollowup')+'\n'+record.title)) return;
-    try { await api('/records/'+encodeURIComponent(record.id),'DELETE'); invalidateRelations(); await loadActive(); }
+    try { await api('/records/'+encodeURIComponent(record.id),'DELETE'); invalidateRelations(); await refreshCurrentTab(); }
     catch (error) { $('cw-business-feedback').textContent = error.message || t('failed'); $('cw-business-feedback').classList.add('error'); }
   }
   function closeEditor() { $('cw-business-editor').close(); state.editing=null; }
   function init() {
     if (!root()) return;
     install();
-    window.addEventListener('planner-workspace-change', () => { if (document.documentElement.dataset.workspace === 'company' && state.tab !== 'customers') loadActive(); });
-    window.addEventListener('planner-auth-change', () => { state.verified=''; invalidateRelations(); if (state.tab !== 'customers' && document.documentElement.dataset.workspace === 'company') loadActive(); });
+    window.addEventListener('planner-workspace-change', () => { if (document.documentElement.dataset.workspace === 'company') refreshCurrentTab(); });
+    window.addEventListener('planner-auth-change', () => { state.verified=''; invalidateRelations(); if (document.documentElement.dataset.workspace === 'company') refreshCurrentTab(); });
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
