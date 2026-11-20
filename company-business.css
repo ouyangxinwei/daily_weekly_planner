@@ -38,3 +38,6 @@ html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
   .cw-business-toolbar #cw-business-project-filter{grid-column:1/-1}
   .cw-business-toolbar #cw-business-new{grid-column:1/-1}
 }
+
+.cw-form-hint{grid-column:1/-1;margin:-4px 0 4px;color:var(--muted);font-size:12px;line-height:1.5}
+.cw-form-grid .field input:disabled{opacity:.62;cursor:not-allowed}
