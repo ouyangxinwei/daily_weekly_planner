@@ -65,4 +65,4 @@
 - GitHub Actions 验证 run 44725923075：completed / success。
 - GitHub Pages run 44725921635：completed / success；build、deploy、report-build-status 均成功，V10.51.0 已部署。
 - Playwright 未作为合并前提，不记录为通过。
-- 用户真实浏览器验收：等待用户确认。
+- 用户于 2026-11-20 明确确认生产环境真实浏览器验收 OK，阶段 2-A 正式完成。
