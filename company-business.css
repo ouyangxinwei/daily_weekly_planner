@@ -67,3 +67,12 @@ html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
 .cw-related-more{font-size:10px;color:var(--muted)}
 html[data-theme="dark"] .cw-project-related{background:#242834}
 @media(max-width:560px){.cw-project-related-grid{grid-template-columns:1fr}}
+
+
+/* Stage 1-I-C: make relationship-scoped lists explicit and easy to reset */
+.cw-relation-context{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:-4px 0 13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface-secondary,var(--surface));}
+.cw-relation-context[hidden]{display:none!important}
+.cw-relation-context-label{min-width:0;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.cw-clear-relation-filter{flex:none;padding:6px 9px;font-size:11px}
+html[data-theme="dark"] .cw-relation-context{background:#242834}
+@media(max-width:480px){.cw-relation-context{align-items:flex-start}.cw-clear-relation-filter{white-space:nowrap}}

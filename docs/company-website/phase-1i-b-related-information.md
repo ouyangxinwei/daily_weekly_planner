@@ -39,4 +39,14 @@
 
 ## 6. 最终交付状态
 
-PR 合并、Pages 部署、自动化验证和用户真实浏览器验收状态将在最终交付时补齐。
+**阶段 1-I-B 已完成。**
+
+- PR #42 已 squash merge 至 `main`。
+- 合并提交：`187511f08e28c898c8982b4522131b09b6297bc37`。
+- 应用版本：V10.47.0。
+- Pages workflow run `44698743326`：completed / success。
+- 用户于 2026-11-20 确认真实浏览器验收通过。
+- 未等待 Playwright E2E 作为交付条件；不记录为 Playwright 通过。
+- 数据库无迁移；Edge Function 未修改，继续使用 `company-api` v5。
+
+Pages：https://ouyangxinwei.github.io/daily_weekly_planner/

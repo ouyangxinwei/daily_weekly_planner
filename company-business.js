@@ -44,7 +44,7 @@
     });
     const customerPanel = host.querySelector('.cw-panel'); customerPanel.id = 'cw-customer-panel';
     const business = node('section', 'cw-panel cw-business-panel'); business.id = 'cw-business-panel';
-    business.innerHTML = '<div class="cw-business-toolbar"><form id="cw-business-search" class="cw-search"><label class="sr-only" for="cw-business-query"></label><input id="cw-business-query" type="search" maxlength="100"><button class="secondary" type="submit">搜索</button></form><select id="cw-business-status" aria-label="' + escape(t('allStatus')) + '"></select><select id="cw-business-project-filter" aria-label="' + escape(t('taskProject')) + '" hidden></select><button class="primary" id="cw-business-new" type="button"></button><button class="secondary" id="cw-business-refresh" type="button">' + escape(t('refresh')) + '</button></div><div class="cw-feedback" id="cw-business-feedback" role="status" aria-live="polite"></div><div class="cw-business-list" id="cw-business-list"></div><nav class="cw-pagination" id="cw-business-pagination"></nav>';
+    business.innerHTML = '<div class="cw-business-toolbar"><form id="cw-business-search" class="cw-search"><label class="sr-only" for="cw-business-query"></label><input id="cw-business-query" type="search" maxlength="100"><button class="secondary" type="submit">搜索</button></form><select id="cw-business-status" aria-label="' + escape(t('allStatus')) + '"></select><select id="cw-business-project-filter" aria-label="' + escape(t('taskProject')) + '" hidden></select><button class="primary" id="cw-business-new" type="button"></button><button class="secondary" id="cw-business-refresh" type="button">' + escape(t('refresh')) + '</button></div><div id="cw-business-relation-context" class="cw-relation-context" hidden></div><div class="cw-feedback" id="cw-business-feedback" role="status" aria-live="polite"></div><div class="cw-business-list" id="cw-business-list"></div><nav class="cw-pagination" id="cw-business-pagination"></nav>';
     shell.insertBefore(nav, customerPanel); customerPanel.insertAdjacentElement('afterend', business);
     const dialog = document.createElement('dialog'); dialog.className = 'cw-dialog'; dialog.id = 'cw-business-editor';
     dialog.innerHTML = '<form id="cw-business-form" class="cw-editor-form"><div class="cw-dialog-head"><div><p class="cw-eyebrow">BUSINESS RECORD</p><h2 id="cw-business-editor-title"></h2></div><button class="close-btn" id="cw-business-close" type="button" aria-label="Close">×</button></div><div id="cw-business-fields" class="cw-form-grid"></div><p class="cw-form-error" id="cw-business-error" role="alert"></p><div class="cw-dialog-actions"><button class="secondary" id="cw-business-cancel" type="button">' + escape(t('cancel')) + '</button><button class="primary" type="submit">' + escape(t('save')) + '</button></div></form>';
@@ -63,7 +63,7 @@
     details.addEventListener('click', e => { if (e.target === details) details.close(); });
     $('cw-business-search').addEventListener('submit', e => { e.preventDefault(); const q = $('cw-business-query').value.trim(); if (state.tab === 'projects') state.projectQuery = q; else if (state.tab === 'tasks') state.taskQuery = q; else state.followupQuery = q; setOffset(0); loadActive(); });
     $('cw-business-status').addEventListener('change', () => { if (state.tab === 'projects') state.projectStatus = $('cw-business-status').value; else if (state.tab === 'tasks') state.taskStatus = $('cw-business-status').value; else state.followupStatus = $('cw-business-status').value; setOffset(0); loadActive(); });
-    $('cw-business-project-filter').addEventListener('change', () => { if (state.tab === 'tasks') { state.taskProjectFilter = $('cw-business-project-filter').value; state.taskOffset = 0; } else { state.followupProjectFilter = $('cw-business-project-filter').value; state.followupOffset = 0; } loadActive(); });
+    $('cw-business-project-filter').addEventListener('change', () => { if (state.tab === 'tasks') { state.taskProjectFilter = $('cw-business-project-filter').value; state.taskOffset = 0; } else { state.followupProjectFilter = $('cw-business-project-filter').value; state.followupCustomerFilter = ''; state.followupOffset = 0; } renderRelationContext(); loadActive(); });
     $('cw-business-new').addEventListener('click', () => openEditor());
     $('cw-business-refresh').addEventListener('click', loadActive);
     $('cw-business-form').addEventListener('submit', saveEditor);
@@ -90,6 +90,34 @@
     status.innerHTML = selectOptions(choices, current);
     const projectFilter = $('cw-business-project-filter'); projectFilter.hidden = !(task || followup);
     if (task || followup) projectFilter.innerHTML = selectOptions([['',t('allProjects')],...state.projects.map(p=>[p.id,p.title])],task ? state.taskProjectFilter : state.followupProjectFilter);
+    renderRelationContext();
+  }
+  function renderRelationContext() {
+    const host = $('cw-business-relation-context');
+    if (!host) return;
+    host.replaceChildren();
+    let label = '';
+    if (state.tab === 'projects' && state.projectCustomerFilter) {
+      label = t('relatedCustomer') + ': ' + customerName(state.projectCustomerFilter);
+    } else if (state.tab === 'tasks' && state.taskProjectFilter) {
+      label = t('relatedProject') + ': ' + projectName(state.taskProjectFilter);
+    } else if (state.tab === 'followups' && state.followupCustomerFilter) {
+      label = t('relatedCustomer') + ': ' + customerName(state.followupCustomerFilter);
+    } else if (state.tab === 'followups' && state.followupProjectFilter) {
+      label = t('relatedProject') + ': ' + projectName(state.followupProjectFilter);
+    }
+    if (!label) { host.hidden = true; return; }
+    host.hidden = false;
+    host.append(node('span', 'cw-relation-context-label', label));
+    host.append(button(t('clearRelationFilter'), 'secondary cw-clear-relation-filter', () => {
+      if (state.tab === 'projects') state.projectCustomerFilter = '';
+      else if (state.tab === 'tasks') state.taskProjectFilter = '';
+      else { state.followupCustomerFilter = ''; state.followupProjectFilter = ''; }
+      setOffset(0);
+      updateToolbar();
+      renderRelationContext();
+      loadActive();
+    }));
   }
   async function fetchAllRecords(type) {
     const items=[]; let offset=0,total=0;
@@ -167,6 +195,8 @@
     state.busy = true; $('cw-business-feedback').textContent = t('loading');
     try {
       await loadCustomers();
+      updateToolbar();
+      renderRelationContext();
       const project = state.tab === 'projects', task = state.tab === 'tasks', type = project ? 'project' : task ? 'task' : 'follow_up';
       if (task || state.tab === 'followups') updateToolbar();
       const offset = project ? state.projectOffset : task ? state.taskOffset : state.followupOffset;
