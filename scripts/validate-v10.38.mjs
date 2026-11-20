@@ -12,10 +12,10 @@ const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
 // 版本与缓存
-assert.ok(html.includes("APP_VERSION='V10.38_toeic_question_bank'"));
-assert.ok(sw.includes("const CACHE_NAME = 'daily-weekly-planner-v10-38-toeic-question-bank'"));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.38.0');
-assert.ok(zh.startsWith('# V10.38') && en.startsWith('# V10.38') && ja.startsWith('# V10.38'));
+assert.ok(html.includes("APP_VERSION='V10.39_home_weather_dashboard'"));
+assert.ok(sw.includes("const CACHE_NAME = 'daily-weekly-planner-v10-39-home-weather-dashboard'"));
+assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.39.0');
+assert.ok(zh.includes('# V10.38') && en.includes('# V10.38') && ja.includes('# V10.38'));
 assert.ok(html.includes('src="./language-workspace.js?v=2.1.0"'));
 assert.ok(js.includes("const WORKSPACE_VERSION = '2.1.0'"));
 

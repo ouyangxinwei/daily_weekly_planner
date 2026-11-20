@@ -1,3 +1,10 @@
+# V10.39 Homepage Weather Dashboard — 2026-11-20
+
+- Added Tokyo and Yokohama weather using the free Open-Meteo API, Asia/Tokyo timezone and a two-day hourly forecast.
+- Shows current conditions and rain/wind alerts for the next 12 hours.
+- Added a 10-minute local cache, forced manual refresh and offline-cache fallback. Weather data is separate from planner data and Supabase sync.
+- Added documentation and automated validation; bumped app and Service Worker versions.
+
 # V10.38 · Language Workspace: TOEIC Question Bank — 2026-11-19
 
 - Added a "TOEIC question bank" page to the language workspace, browsed as Set → Test → Part with breadcrumbs at each level, plus answered and correct counts and progress bars.
