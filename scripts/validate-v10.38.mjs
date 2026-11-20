@@ -12,9 +12,10 @@ const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
 // 版本与缓存
-assert.ok(html.includes("APP_VERSION='V10.40_weekly_weather_bottom'"));
-assert.ok(sw.includes("const CACHE_NAME = 'daily-weekly-planner-v10-40-weekly-weather-bottom'"));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.40.0');
+assert.match(html, /APP_VERSION='V10\.\d+_[a-z0-9_]+'/);
+assert.match(sw, /const CACHE_NAME = 'daily-weekly-planner-v10-[0-9]+-[a-z0-9-]+'/);
+const currentVersion = fs.readFileSync('VERSION', 'utf8').trim().split('.').map(Number);
+assert.ok(currentVersion[0] > 10 || (currentVersion[0] === 10 && currentVersion[1] >= 40), 'current app version must remain at or above V10.40');
 assert.ok(zh.includes('# V10.38') && en.includes('# V10.38') && ja.includes('# V10.38'));
 assert.ok(html.includes('src="./language-workspace.js?v=2.1.0"'));
 assert.ok(js.includes("const WORKSPACE_VERSION = '2.1.0'"));

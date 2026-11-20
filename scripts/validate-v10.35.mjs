@@ -12,15 +12,15 @@ const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
 // 版本与缓存
-assert.match(html, /APP_VERSION='V10\.(3[5-9]|40)_[a-z0-9_]+'/);
+assert.match(html, /APP_VERSION='V10\.\d+_[a-z0-9_]+'/);
 assert.match(html, /type="module" src="\.\/language-workspace\.js\?v=2\.\d+\.\d+"/);
-assert.match(sw, /daily-weekly-planner-v10-(3[5-9]|40)-/);
-assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.(3[5-9]|40)\.\d+$/);
+assert.match(sw, /daily-weekly-planner-v10-[0-9]+-[a-z0-9-]+/);
+const currentVersion = fs.readFileSync('VERSION', 'utf8').trim().split('.').map(Number); assert.ok(currentVersion[0] > 10 || (currentVersion[0] === 10 && currentVersion[1] >= 35));
 assert.ok(zh.includes('# V10.35') && en.includes('# V10.35') && ja.includes('# V10.35'));
 
 // 工作区切换
 assert.ok(html.includes('id="workspace-plan"') && html.includes('id="workspace-language"'));
-assert.ok(html.includes("<script data-workspace-boot>try{if(localStorage.getItem('personal-planner:active-workspace:v1')==='language')"));
+assert.ok(html.includes("<script data-workspace-boot>try{const ws=localStorage.getItem('personal-planner:active-workspace:v1');if(ws==='language'||ws==='company')"));
 assert.ok(html.includes('html[data-workspace="language"] #app-shell>.top~*:not(#language-workspace-root):not(dialog){display:none!important}'));
 assert.ok(!/<script>\s*try\{if\(localStorage\.getItem\('personal-planner:active-workspace/.test(html), 'boot script must not be the first bare <script> used by CI syntax checks');
 assert.ok(js.includes("const WORKSPACE_KEY = 'personal-planner:active-workspace:v1'"));

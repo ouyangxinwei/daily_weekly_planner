@@ -4,7 +4,7 @@ const html=fs.readFileSync('index.html','utf8');
 const js=fs.readFileSync('weather-dashboard.js','utf8');
 const css=fs.readFileSync('weather-dashboard.css','utf8');
 const sw=fs.readFileSync('sw.js','utf8');
-assert.equal(fs.readFileSync('VERSION','utf8').trim(),'10.40.0');
+const currentVersion=fs.readFileSync('VERSION','utf8').trim().split('.').map(Number);assert.ok(currentVersion[0]>10||(currentVersion[0]===10&&currentVersion[1]>=40),'current app version must remain at or above V10.40');
 assert.match(html,/id="weather-dashboard"/);
 assert.match(html,/weather-dashboard\.js/);
 assert.match(html,/weather-dashboard\.css/);

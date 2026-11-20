@@ -1,3 +1,12 @@
+# V10.41 · Company Website Customer Workspace — 2026-11-20
+
+- Added a separate Company Website workspace alongside the Planner and Language Study workspaces, without changing the existing seven planner modules or their sync partitions.
+- Added the first customer-management workflow: search by customer name, filter by trade/software/ecommerce and status, paginate, create, edit, and delete customers.
+- Customer records use the `customer` record type in `company_records`; contact, email, phone, website, address, and notes are stored in the record's JSONB `data` field.
+- Reuses the existing Manman Planner account session. Credentials remain in memory and are sent to `company-api` over HTTPS Basic Authorization; no password is stored in LocalStorage and no service-role/secret key is exposed to the browser.
+- Added an isolated frontend script and stylesheet, Chinese/English/Japanese labels, PWA cache entries, version updates, and a minimal Playwright test with a mocked API.
+- Real customer CRUD still requires one browser-side verification with the existing account after Pages deployment; automated tests use a mock API and do not touch real customer data.
+
 # V10.40 · Weekly Weather at the Bottom — 2026-11-20
 
 - Moved the weather dashboard from the main home content to the bottom of the planner page, keeping plans and tasks as the primary focus.
