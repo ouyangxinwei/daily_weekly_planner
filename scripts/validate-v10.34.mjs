@@ -9,7 +9,7 @@ const zh=fs.readFileSync('CHANGELOG.md','utf8');
 const en=fs.readFileSync('CHANGELOG.en.md','utf8');
 const ja=fs.readFileSync('CHANGELOG.ja.md','utf8');
 const docs=['docs/language-learning-workspace.md','docs/language-learning-workspace.en.md','docs/language-learning-workspace.ja.md'];
-assert.match(html,/APP_VERSION='V10\.3[4-9]_[a-z0-9_]+'/);
+assert.match(html,/APP_VERSION='V10\.(3[4-9]|40)_[a-z0-9_]+'/);
 assert.ok(/type="module" src="\.\/language-workspace\.js\?v=\d+\.\d+\.\d+"/.test(html));
 assert.ok(html.includes('id="module-language"'));
 assert.ok(js.includes("personal-language-study-workspace:v1"));
