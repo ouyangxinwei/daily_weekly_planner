@@ -12,7 +12,7 @@ const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
 // 版本与缓存
-assert.ok(html.includes("APP_VERSION='V10.39_home_weather_dashboard'"));
+assert.ok(html.includes("APP_VERSION='V10.40_weekly_weather_bottom'"));
 assert.ok(sw.includes("const CACHE_NAME = 'daily-weekly-planner-v10-39-home-weather-dashboard'"));
 assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.39.0');
 assert.ok(zh.includes('# V10.38') && en.includes('# V10.38') && ja.includes('# V10.38'));
