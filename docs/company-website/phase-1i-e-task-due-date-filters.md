@@ -32,10 +32,14 @@
 - `node --check company-business.js`
 - `node --check company-task-date-filter.js`
 - `node scripts/validate-v10.50.mjs`：覆盖逾期（含已完成排除）、今天、7 日边界、无截止日期、空筛选和非法日期。
-- Playwright：覆盖全部筛选、组合条件、完整结果分页及已完成逾期排除。是否执行浏览器测试以当前 CI 环境为准；未运行或未通过时不记为通过。
+- GitHub Actions 验证 run `44714456423`：成功，包含 JavaScript 语法、日期过滤边界和既有静态回归检查。
+- Playwright：已新增覆盖全部筛选、组合条件、完整结果分页及已完成逾期排除的用例；本次交付前没有取得完成/通过结论，不记录为通过。
 
 ## 交付记录
 
 - 应用版本：V10.50.0。
-- PR / merge / Pages 部署：待记录。
-- 用户真实浏览器验收：待记录。
+- PR #48：https://github.com/ouyangxinwei/daily_weekly_planner/pull/48，已 squash merge。
+- 合并提交：`97c5cdaf25871c793c174ebbaa5e70594d560dd7`。
+- Pages run `44714657241`：build、deploy、report-build-status 均成功；V10.50.0 已部署。
+- 未修改 Supabase schema、migration、RLS 或 `company-api`。
+- 用户真实浏览器验收：待用户确认。
