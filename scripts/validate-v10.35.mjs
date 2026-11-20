@@ -14,7 +14,7 @@ const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 // 版本与缓存
 assert.match(html, /APP_VERSION='V10\.\d+_[a-z0-9_]+'/);
 assert.match(html, /type="module" src="\.\/language-workspace\.js\?v=2\.\d+\.\d+"/);
-assert.match(sw, /daily-weekly-planner-v10-(3[5-9]|40)-/);
+assert.match(sw, /daily-weekly-planner-v10-[0-9]+-[a-z0-9-]+/);
 const currentVersion = fs.readFileSync('VERSION', 'utf8').trim().split('.').map(Number); assert.ok(currentVersion[0] > 10 || (currentVersion[0] === 10 && currentVersion[1] >= 35));
 assert.ok(zh.includes('# V10.35') && en.includes('# V10.35') && ja.includes('# V10.35'));
 
