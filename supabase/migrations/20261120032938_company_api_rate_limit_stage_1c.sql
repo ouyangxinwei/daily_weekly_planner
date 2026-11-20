@@ -57,7 +57,7 @@ begin
     ceil(extract(epoch from (v_started_at + make_interval(secs => p_window_seconds) - now())))::integer
   );
 
-  if mod(hashtext(p_ip_hash)::bigint, 100) = 0 then
+  if mod(abs(hashtext(p_ip_hash)), 100) = 0 then
     delete from public.company_api_rate_limits
     where updated_at < now() - interval '1 day';
   end if;
