@@ -41,7 +41,8 @@
 - 应用版本：V10.48.0。
 - 合并后 JavaScript/兼容性验证 workflow run `44700049027`：completed / success。
 - GitHub Pages workflow run `44700048137`：build 与 deploy 均 completed / success。
-- Playwright 浏览器测试未作为合并前提，不记录为通过；用户真实浏览器验收待确认。
+- Playwright 浏览器测试未作为合并前提，不记录为通过。
+- 用户于 2026-11-20 确认真实浏览器验收通过。
 - 数据库无迁移；Edge Function 未修改，继续使用生产 `company-api` v5。
 - 功能分支已在 PR 合并后自动删除。
 
