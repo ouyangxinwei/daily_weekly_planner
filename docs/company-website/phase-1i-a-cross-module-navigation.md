@@ -48,7 +48,7 @@
 
 ## 5. 最终交付状态
 
-**阶段 1-I-A 功能已合并并部署，等待用户真实浏览器验收。**
+**阶段 1-I-A 功能已合并、部署，用户真实浏览器验收通过。**
 
 - PR #40：已 squash merge 至 `main`。
 - PR：https://github.com/ouyangxinwei/daily_weekly_planner/pull/40
@@ -73,4 +73,4 @@ Pages 已部署地址：https://ouyangxinwei.github.io/daily_weekly_planner/
 4. 跟进卡片的客户和项目跳转。
 5. 中文、英文、日文及移动端布局。
 
-用户真实浏览器验收完成后，再将阶段 1-I-A 标记为最终验收通过，并进入阶段 1-I-B。
+用户于 2026-11-20 确认真实浏览器验收通过，阶段 1-I-A 正式完成，并进入阶段 1-I-B。
