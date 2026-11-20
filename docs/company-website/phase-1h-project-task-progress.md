@@ -5,7 +5,7 @@
 - Supabase 项目：`kopvznygsqsheibsjjvv`
 - 业务表：`public.company_records`
 - 数据库迁移：`20261120065100_company_project_progress_linkage_stage_1h.sql`
-- Edge Function：继续使用阶段 1-G 的 `company-api` v4；本阶段只增加进度字段校验，v5 已部署
+- Edge Function：`company-api` v5 已部署；增加进度字段校验，沿用现有认证与权限边界
 - 用户验收基线：阶段 1-G 已由用户确认真实浏览器验收通过
 
 ## 1. 业务规则
@@ -74,6 +74,23 @@ Playwright mock API 测试覆盖：
 - 删除任务后总数和进度重新计算。
 - 既有客户、项目、任务和跟进 CRUD 流程不回归。
 
-## 6. 部署与验收状态
+## 6. 最终部署与验收结果
 
-数据库迁移已应用，company-api v5 已部署。Pages 部署、自动化测试和用户真实浏览器验收仍需分别确认。未完成的项目不标记为已交付。真实验收使用测试项目和测试任务，不修改用户已有真实业务任务。
+**阶段 1-H 最终交付：已完成**
+
+- GitHub PR #38 已 squash merge 至 `main`。
+- 主分支交付提交：`7ea28149eb9578d8f9080aa0f69ae8b96215f5be`。
+- 应用版本：V10.45.0；版本号、三语 CHANGELOG、PWA cache/build 标识均已更新。
+- 数据库迁移 `20261120065100_company_project_progress_linkage_stage_1h.sql` 已应用。
+- `company-api` v5 已部署。
+- GitHub Pages workflow run `44691110062`：completed / success。
+- JavaScript 与兼容性验证 workflow run `44691110192`：completed / success。
+- 用户已确认 V10.45.0 真实浏览器验收通过，包含自动进度、手动进度保留与恢复、任务状态变化及任务删除后的联动。
+- 数据库事务测试覆盖 0%、50%、100%、手动进度恢复、任务状态更新、任务改派和删除；测试记录已回滚，没有修改既有业务记录。
+- 远程开发分支已在 PR 合并后自动删除。
+
+### 自动化浏览器测试说明
+
+GitHub Actions Playwright workflow run `44691110272` 在最后检查时仍停留在 Chromium 安装步骤，尚未进入测试步骤，因此不标记为 CI Playwright 通过。该状态不改变用户已完成的真实浏览器验收结果。后续可单独排查 CI Chromium 安装耗时/卡住问题。
+
+真实浏览器验收由用户使用测试项目和测试任务完成；没有为验证而修改既有真实业务任务。
