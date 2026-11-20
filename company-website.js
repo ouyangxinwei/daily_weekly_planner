@@ -229,6 +229,7 @@
       requestAnimationFrame(()=>document.querySelector('[data-customer-id="'+CSS.escape(String(id))+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}));
     }catch(error){setFeedback(error.message||'读取客户资料失败。','error')}
   }
-  window.CompanyWebsite=Object.freeze({version:'1.0.0',refresh:loadCustomers,focusCustomer});
+  function showAllCustomers(){state.query='';state.businessType='';state.status='';state.offset=0;$('cw-search').value='';$('cw-business-filter').value='';$('cw-status-filter').value='';loadCustomers()}
+  window.CompanyWebsite=Object.freeze({version:'1.0.0',refresh:loadCustomers,focusCustomer,showAllCustomers});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
