@@ -5,7 +5,7 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
   const API = 'company-api';
   const PROJECT_URL = 'https://kopvznygsqsheibsjjvv.supabase.co';
   const PAGE_SIZE = 20;
-  const state = { tab: 'customers', verified: '', customers: [], projects: [], followups: [], tasks: [], projectOffset: 0, followupOffset: 0, taskOffset: 0, projectQuery: '', followupQuery: '', taskQuery: '', taskDueFilter: '', projectStatus: '', followupStatus: '', taskStatus: '', taskProjectFilter: '', projectCustomerFilter: '', followupCustomerFilter: '', editing: null, busy: false, followupProjectFilter: '', relationshipRecords: null, relationshipPromise: null };
+  const state = { tab: 'customers', verified: '', customers: [], projects: [], followups: [], tasks: [], projectOffset: 0, followupOffset: 0, taskOffset: 0, projectQuery: '', followupQuery: '', taskQuery: '', taskDueFilter: '', projectStatus: '', followupStatus: '', taskStatus: '', taskProjectFilter: '', projectCustomerFilter: '', followupCustomerFilter: '', editing: null, busy: false, reloadPending: false, followupProjectFilter: '', relationshipRecords: null, relationshipPromise: null };
   const $ = id => document.getElementById(id);
   const root = () => $('company-workspace-root');
   const locale = () => (document.documentElement.lang || 'zh-CN').toLowerCase().startsWith('ja') ? 'ja' : ((document.documentElement.lang || '').toLowerCase().startsWith('en') ? 'en' : 'zh');
@@ -124,7 +124,7 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
       loadActive();
     }));
   }
-  async function fetchAllRecords(type) {
+  async function fetchAllRecords(type, maxRecords = 10000) {
     const items=[]; let offset=0,total=0;
     do {
       const params=new URLSearchParams({record_type:type,limit:'100',offset:String(offset)});
@@ -132,7 +132,7 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
       const page=Array.isArray(result?.items)?result.items:[];
       items.push(...page); total=Number(result?.total||0); offset+=page.length;
       if(!page.length)break;
-    } while(offset<total && offset<10000);
+    } while(offset<total && offset<maxRecords);
     return items;
   }
   async function getRelationshipRecords() {
@@ -197,7 +197,8 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
     state.projects = state.relationshipRecords?.projects ? [...new Map([...pageProjects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()] : pageProjects;
   }
   async function loadActive() {
-    if (state.busy || state.tab === 'customers') return;
+    if (state.tab === 'customers') return;
+    if (state.busy) { state.reloadPending = true; return; }
     state.busy = true; $('cw-business-feedback').textContent = t('loading');
     try {
       await loadCustomers();
@@ -212,7 +213,7 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
       let records = [], total = 0;
       if (task) {
         // Date filtering must run against the complete task set before pagination.
-        const allTasks = await fetchAllRecords('task');
+        const allTasks = await fetchAllRecords('task', Number.MAX_SAFE_INTEGER);
         const normalizedQuery = query.toLowerCase();
         const filteredTasks = allTasks.filter(record => {
           if (normalizedQuery && !String(record.title || '').toLowerCase().includes(normalizedQuery)) return false;
@@ -265,7 +266,10 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
         renderList(project, task, records, total, offset);
       }
     } catch (error) { $('cw-business-feedback').textContent = error.message || t('failed'); $('cw-business-feedback').classList.add('error'); }
-    finally { state.busy = false; }
+    finally {
+      state.busy = false;
+      if (state.reloadPending) { state.reloadPending = false; loadActive(); }
+    }
   }
   function customerName(id) { return state.customers.find(c => c.id === id)?.title || '—'; }
   function openCustomer(id) { const customer = state.customers.find(c => c.id === id); switchTab('customers'); if (customer && window.CompanyWebsite?.focusCustomer) window.CompanyWebsite.focusCustomer(id); else if (window.CompanyWebsite?.focusCustomer) window.CompanyWebsite.focusCustomer(id); }
