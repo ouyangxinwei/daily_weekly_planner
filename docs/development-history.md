@@ -1149,3 +1149,215 @@ V10.20 · full_backup_module_colors。
 - 状态增加 categories 数组，计划 category 字段保持字符串，schemaVersion: 1 不变。
 - JSON 与 Supabase 整份快照包含分类；旧数据缺少该字段时回退原有七项，无 SQL 迁移。
 - 分类改名／删除迁移同时覆盖 plans 与 trash[].plan；事务保存和撤销机制避免部分写入。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.13_organize_module.md`
+
+# V10.13 整理模块影响分析
+
+## 影响范围
+- index.html：新增模块切换、模块状态装载、模块专属列表显示、备份与云端分区合并。
+- i18n.js：增加整理模块中文、英文、日文文案。
+- sw.js：更新缓存版本。
+- README、功能说明、技术手册、部署说明和三语 CHANGELOG：补充 V10.13 记录。
+
+## 本地数据
+- 原计划键 personal-planner:v1 不变。
+- 新增 personal-organizer:v1。
+- 两者仍采用 schemaVersion 1 的兼容状态形状，但各自独立存储。
+- 计划旧数据不迁移、不重写；整理首次使用时创建五个默认分类。
+
+## 云端数据
+- 复用既有 planner_cloud_data JSONB 单记录及 RPC。
+- 保持根级 schemaVersion、plans、categories、completions、trash 结构，新增 organizer 子对象。
+- 既有 planner_put_data SQL 校验根级字段，允许额外 JSONB 属性，因此本版本无需 SQL 迁移。
+- 上传前先获取当前云端快照，更新当前模块并保留另一模块；避免两套数据互相覆盖。
+- 旧快照无 organizer 字段时按“整理尚未上传”处理。
+
+## 风险与控制
+1. 并发设备同时上传可能发生最后写入者覆盖：现有系统本来就是手动整份快照同步，本版本在每次上传前先读取并合并，减少模块间覆盖，但不是数据库事务级并发锁。
+2. 老版本网页若在 V10.13 之后继续上传计划，会覆盖云端 organizer 字段。建议整理模块启用后，所有设备都刷新至 V10.13 再进行云端上传。
+3. 旧版客户端的计划下载忽略 organizer 字段，不会污染本地计划数据。
+4. 整理内部 period 固定 daily，只用于兼容现有通用数据校验，界面不暴露周期。
+5. 尚未进行真实 Android PWA 与 Supabase 线上 E2E 验证，不能将静态检查描述为端到端通过。
+
+## 数据库
+无表结构变更、无 SQL migration。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.14_four_module_management.md`
+
+# V10.14 影响分析
+
+## 高影响区域
+- index.html：四模块切换、状态管理、列表渲染、JSON 导入导出、Supabase 分区和分类迁移。
+- i18n.js：新增工作、外语学习和分类／状态文案。
+- sw.js：缓存名更新。
+- README、CHANGELOG、技术手册及验收文档：同步版本信息。
+
+## 数据兼容
+- Plan 原键 personal-planner:v1 不变；只迁移 category=工作 的记录到未分类。
+- Work/Language 新增独立键；Organize 继续使用 personal-organizer:v1。
+- schemaVersion 仍为 1；计划旧备份兼容。
+- Supabase 继续使用现有 planner_get_data / planner_put_data；保留旧 organizer 云端分区并新增 work 和 language 分区。
+
+## 风险与控制
+- 分类迁移采用候选状态保存成功后才替换内存状态；失败保留旧数据并显示错误。
+- 云端上传前读取远端快照，仅替换当前分区。
+- Work 状态采用稳定模块 completion key，避免日期变化导致完成状态重置。
+- JSON 导入先校验 moduleType 和结构；失败不覆盖当前数据。
+- 不执行 SQL 迁移，不改登录认证，不重构现有引擎。
+
+## 测试边界
+自动化静态检查不代表真实浏览器、Supabase 线上端到端或 Android PWA 安装已通过；未执行项必须标记未执行。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.25_sync_overwrite_protection.md`
+
+# V10.25 影响分析
+
+- 本地新增独立元数据键 `personal-planner:sync-meta:v1`，不写入业务模块数据，不影响 JSON 备份。
+- 云端在现有 JSONB 快照保留字段 `_syncMeta`；现有 RPC 名称、参数和返回业务数据形状保持兼容。仅 `planner_get_data` 在返回快照时附加数据库 `updated_at` 与模块时间。
+- 不修改表结构、六模块业务存储键、`schemaVersion: 1`、备份结构。
+- 上传时当前模块的时间来自本地元数据；未操作的模块沿用云端元数据。整体上传使用本地六模块元数据。
+- 下载时仅同步对应模块的元数据；整体下载同步六模块元数据。
+- 时间无法确认时仍要求用户确认；云端版本在确认后变化时中止。
+- 主要风险是旧数据缺少模块时间，使用数据库快照更新时间作为兼容回退值，首次同步后逐步建立模块级时间。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.26_clear_sync_status_on_cancel.md`
+
+# V10.26 影响分析：同步取消后清除状态文字
+
+本次变更只影响同步界面的状态提示：用户在覆盖确认框选择「否」后，清空本次同步操作产生的状态文字。上传／下载的确认、快照复查、数据写入和错误处理均保持不变。四种同步入口共用各自模块范围的状态清除函数，不触碰业务存储或数据库。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.27_move_plan_to_results_future.md`
+
+# V10.27 影响分析：扩展计划移动目标
+
+本次修改只扩展计划编辑窗口中的目标选项和移动函数允许列表。目标模块仍通过现有 MODULE_KEYS、MODULE_CATEGORIES、moduleCache、safeState、commitState 流程独立读写。原有目标、移动确认、目标写入失败保护、原计划删除及回滚逻辑保持不变。不修改模块 schema、LocalStorage 键、JSON 备份结构或 Supabase 同步协议。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.2_remove_login_lockout.md`
+
+# V10.2 影响分析：移除登录失败锁定
+
+## 变更范围
+- `docs/supabase-setup.sql`：新建数据库时不创建失败次数表，校验函数直接比对 bcrypt 摘要。
+- `docs/migration_V10.2_remove_login_lockout.sql`：替换既有校验函数、删除旧的 `planner_login_attempts` 表并重申 RPC 执行权限。
+- `README.md`、`CHANGELOG.md` 及需求、验收、技术说明、部署排障文档：更新升级步骤与行为说明。
+- `sw.js`：更改缓存名称，避免浏览器继续使用旧版本资源。
+- `index.html`：登录调用和 RPC 参数保持不变，不需要改动前端接口。
+
+## 数据与兼容性
+- 不修改 `planner_credentials`、`planner_cloud_data` 中的账号或计划数据。
+- 不改变 `planner_login`、`planner_get_data`、`planner_put_data` 的签名。
+- 迁移删除的仅是失败计数/锁定状态表 `planner_login_attempts`。
+- 现有账号密码摘要继续有效，无需重新设置密码。
+
+## 风险与限制
+- 取消应用层失败次数锁定会减少对密码猜测的防护；需确保密码强度及数据库权限配置。
+- 该变更不能关闭 Supabase 平台、代理或网络层独立实施的限制。
+- 真实 Supabase 未在本环境连接验证；迁移必须在项目 SQL Editor 执行后进行验收。
+
+## 回滚思路
+如需恢复旧规则，必须重新创建失败统计表并恢复旧版函数定义；仅恢复前端 ZIP 不会恢复数据库函数。因此建议在执行迁移前保存当前 SQL 定义/数据库备份。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.35_language_workspace_v2.md`
+
+# V10.35 影响分析：外语学习工作区 V2
+
+对应需求：`requirements_V10.35_language_workspace_v2.md`（已确认）。
+
+## 1. 现状（V10.34）
+- `language-workspace.js` 在捕获阶段监听 `#module-language` 点击；进入时给 `#app-shell` 加 `language-workspace-active`，CSS 隐藏 `.top` 之后除工作区根节点外的全部内容。
+- 由于工作区接管了「外语学习」模块按钮，旧任务模块（`LANGUAGE_KEY='personal-language:v1'`）仍由主程序加载、搜索、同步，但界面上没有入口。
+- 工作区数据：`personal-language-study-workspace:v1`，schemaVersion 1，字段 `items / records / settings`；状态只有 `new / mistake / mastered`。
+
+## 2. 修改范围
+
+| 文件 | 修改内容 | 风险 |
+|---|---|---|
+| `index.html` | 顶部工具栏增加工作区切换控件；「外语学习」模块按钮文案改为「外语任务」；脚本版本号；应用版本 10.35.0 | 中：主页面结构 |
+| `language-workspace.js` | 去掉对 `#module-language` 的点击劫持，改由工作区切换控件激活；状态模型、单元/难度字段、分页、详情页、笔记、schema 2 迁移、导入兼容 | 高：数据迁移 |
+| `language-workspace.css` | 工作区切换控件、详情页、分页、笔记样式；隐藏规则改为同时隐藏模块切换栏 | 低 |
+| `i18n.js` | 新增「计划工作区 / 外语学习工作区 / 外语任务」三语文案 | 低 |
+| `sw.js` | 缓存版本号 | 低 |
+| `VERSION` `package.json` `CHANGELOG*.md` | 版本与更新记录 | 低 |
+| `docs/language-learning-workspace*.md` | 更新为 V2 说明 | 低 |
+| `tests/e2e/helpers.js` | `language` 模块条目改回旧任务键 `personal-language:v1`，工作区单独处理 | 中：影响既有隔离测试 |
+| `tests/e2e/language-workspace.spec.js` | 进入方式改为工作区切换；增加状态、分页、笔记、迁移用例 | 中 |
+| `scripts/validate-v10.34.mjs` | 「必须存在 `#module-language`」等断言保持；若断言依赖点击劫持需调整 | 低 |
+| `scripts/validate-v10.35.mjs`（新增） | 静态校验 schema 2、迁移备份键、工作区键、无 Supabase 访问 | 低 |
+
+## 3. 不修改的内容
+- 七个模块的存储键、`schemaVersion: 1`、JSON 备份格式、`MODULE_KEYS`、`CLOUD_PARTITIONS`。
+- 「外语任务」模块的分类、星级统计、分页、计划移动目标、全局搜索、单模块/整体云同步——仅改显示名称。
+- Supabase 表结构、RPC 及参数；不需要 SQL 迁移。
+- 外语学习工作区仍不参与云同步、整体备份。
+
+## 4. 关键风险与对策
+
+### 4.1 V1 → V2 数据迁移
+- 风险：迁移出错导致学习内容丢失。
+- 对策：迁移前把原始字符串写入 `personal-language-study-workspace:v1:pre-v2-backup`（已存在不覆盖）；迁移为纯函数，先在内存生成并校验 items/records 数量一致后再写回；失败时只读打开并提示导出。
+
+### 4.2 工作区切换与主程序状态
+- 风险：切换工作区触发 `switchModule` 或重新 `load()`，导致计划模块搜索、分页、撤销状态丢失。
+- 对策：工作区切换只改 `#app-shell` 的类名和 `personal-planner:active-workspace:v1`，不调用主程序任何模块函数；返回计划工作区时不重新渲染列表以外的状态。E2E 覆盖「切换前后搜索词与页码不变」。
+
+### 4.3 旧任务入口恢复
+- 风险：V10.34 期间用户看不到旧任务，恢复后可能误以为是新增数据。
+- 对策：更新记录中说明「外语任务」即原外语学习任务列表，数据未变化。
+
+### 4.4 启动顺序
+- 风险：`language-workspace.js` 作为 module 脚本晚于主程序执行，刷新恢复外语学习工作区时出现计划列表闪现。
+- 对策：在 `index.html` 头部用极小的同步脚本读取工作区键，提前给 `<html>` 加 `data-workspace="language"`，CSS 据此先隐藏计划区域。
+
+### 4.5 既有测试
+- `helpers.js` 当前把 `language` 模块指向工作区键，V10.35 需改回旧任务键，否则模块隔离测试会误判。
+
+## 5. 回滚
+- 代码回滚到 V10.34 后，V1 的 `load()` 读到 schemaVersion 2 会静默以空数据打开；之后任何操作（包括切换导航页）都会调用 `save()`，**用空数据覆盖 V2 数据**。
+- 对策：
+  - 回滚前先在 V10.35 中导出 JSON 备份；回滚后从 `personal-language-study-workspace:v1:pre-v2-backup` 或导出的备份恢复。
+  - V10.35 发布前确认可用后再推送到 `main`（GitHub Pages 自动部署），避免需要线上回滚。
+  - 回滚步骤写入维护文档。
+
+
+---
+
+## 原文件：`docs/impact_analysis_V10.38_toeic_question_bank.md`
+
+# V10.38 影响分析：托业题库
+
+| 范围 | 影响 |
+|---|---|
+| `language-workspace.js` | 新增托业题库页、`exam` 规范化、点选记录；V2.0.0 → V2.1.0。原有页面逻辑不变，只有卡片预览和详情页对带 `exam` 的条目换了排版 |
+| `language-workspace.css` | 只追加 `.lw-set*`、`.lw-part*`、`.lw-exq*`、`.lw-opt*` 等新类，不改旧样式 |
+| 数据 | 存储键、schemaVersion 不变。`exam` 和 `settings.toeic` 是可选字段，旧数据照常读取 |
+| 计划工作区、云同步 | 不涉及 |
+| `index.html` | 只改脚本版本参数 `?v=2.1.0` 和应用版本 |
+| 测试 | 新增 `tests/e2e/toeic-workspace.spec.js`（编造示例题）；`language-workspace.spec.js` 的导航选择器限定在 `.lw-nav` 内 |
+
+## 风险
+
+- **回滚到 V10.37**：V2.0.0 的 `normalizeItem` 会保留 `exam` 等额外字段（展开复制），`settings.toeic` 也会保留，所以回滚不会丢失点选记录，只是看不到托业题库页。
+- **导入替换全部数据**：导入题库 JSON 会覆盖已有学习内容。工具提供 `--merge`，页面导入前也有确认框。
+- **数据量**：7 套 × 2 个 T 约 1.4 MB，低于 5 MB 导入上限；LocalStorage 一般有 5–10 MB。
