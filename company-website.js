@@ -83,6 +83,7 @@
   function setSessionMessage(message,kind=''){const host=$('cw-session');if(!host)return;host.textContent=message;host.className='cw-session'+(kind?' '+kind:'')}
   function businessLabel(value){return({trade:'贸易',software:'软件开发',ecommerce:'电子商务'})[value]||'未分类'}
   function statusLabel(value){return({active:'合作中',prospect:'潜在客户',inactive:'暂停合作'})[value]||value||'未设置'}
+  function localeLabel(key){const lang=(document.documentElement.lang||'zh-CN').toLowerCase();const labels={viewProjects:{zh:'查看项目',en:'View projects',ja:'プロジェクト一覧'},viewFollowups:{zh:'查看跟进',en:'View follow-ups',ja:'フォローを見る'}};return labels[key]?.[lang.startsWith('ja')?'ja':lang.startsWith('en')?'en':'zh']||key}
   function addText(parent,tag,className,value){const node=document.createElement(tag);if(className)node.className=className;node.textContent=value??'';parent.append(node);return node}
   function renderCustomers(){
     const host=$('cw-customer-list');if(!host)return;host.replaceChildren();
@@ -104,7 +105,9 @@
         const actions=document.createElement('div');actions.className='cw-card-actions';
         const edit=document.createElement('button');edit.type='button';edit.className='secondary';edit.textContent='编辑';edit.addEventListener('click',()=>openEditor(customer));
         const remove=document.createElement('button');remove.type='button';remove.className='cw-delete';remove.textContent='删除';remove.addEventListener('click',()=>deleteCustomer(customer));
-        actions.append(edit,remove);card.append(actions);host.append(card);
+        const projectsButton=document.createElement('button');projectsButton.type='button';projectsButton.className='secondary';projectsButton.textContent=localeLabel('viewProjects');projectsButton.addEventListener('click',()=>window.CompanyBusiness?.showCustomerProjects(customer.id));
+        const followupsButton=document.createElement('button');followupsButton.type='button';followupsButton.className='secondary';followupsButton.textContent=localeLabel('viewFollowups');followupsButton.addEventListener('click',()=>window.CompanyBusiness?.showCustomerFollowups(customer.id));
+        actions.append(projectsButton,followupsButton,edit,remove);card.dataset.customerId=String(customer.id);card.append(actions);host.append(card);
       }
     }
     $('cw-total').textContent=String(state.total);$('cw-showing').textContent=String(state.items.length);renderPagination();
@@ -183,6 +186,17 @@
     window.addEventListener('planner-workspace-change',onWorkspaceChange);
     if(document.documentElement.dataset.workspace==='company')loadCustomers();else setSessionMessage('选择「个人公司网站」工作区即可开始管理客户。');
   }
-  window.CompanyWebsite=Object.freeze({version:'1.0.0',refresh:loadCustomers});
+  async function focusCustomer(id){
+    try{
+      const customer=await request('/customers/'+encodeURIComponent(id));
+      if(!customer?.id)throw new Error('Customer not found');
+      state.query='';state.businessType='';state.status='';state.offset=0;
+      $('cw-search').value='';$('cw-business-filter').value='';$('cw-status-filter').value='';
+      state.items=[customer];state.total=1;renderCustomers();
+      setFeedback('');
+      requestAnimationFrame(()=>document.querySelector('[data-customer-id="'+CSS.escape(String(id))+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}));
+    }catch(error){setFeedback(error.message||'读取客户资料失败。','error')}
+  }
+  window.CompanyWebsite=Object.freeze({version:'1.0.0',refresh:loadCustomers,focusCustomer});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
