@@ -45,6 +45,8 @@ for (const marker of [
   "if (reportedTotal !== expectedTotal)",
   "id = 'cw-business-overview'",
   "data.next_follow_up_date",
+  "getBusinessOverviewMetrics(data, today)",
+  "getRecentBusinessRecords(records,3)",
   "state.followupDueFilter === 'overdue'"
 ]) assert.ok(source.includes(marker), 'Missing overview integration: ' + marker);
 for (const label of ["overview:'业务总览'", "overview:'Business overview'", "overview:'業務概要'"]) {
