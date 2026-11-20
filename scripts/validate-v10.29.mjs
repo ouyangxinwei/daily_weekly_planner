@@ -13,7 +13,7 @@ const summary=buildPrioritySummary([{id:'a',priority:5},{id:'b',priority:3},{id:
 assert.equal(summary.total,4,'completed and archived tasks are excluded from open-task statistics');
 assert.deepEqual(JSON.parse(JSON.stringify(summary.counts)),{'1':0,'2':1,'3':1,'4':1,'5':1});
 assert.ok(h.includes("const supportedModules=['work','language','organize','results','future']"));
-assert.ok(h.includes("APP_VERSION='V10.38_toeic_question_bank'"));
+assert.ok(h.includes("APP_VERSION='V10.39_home_weather_dashboard'"));
 assert.ok(h.includes("share.textContent=percent+'%'"));
 assert.ok(h.includes("activePages[paginationKey()]=Math.floor(target.index/PAGE_SIZE)+1")&&h.includes("activePages[paginationKey()]=Math.floor(targetIndex/PAGE_SIZE)+1"));
 assert.ok(h.includes(".memo-mode #star-summary{display:none!important}"));
