@@ -1,3 +1,11 @@
+# V10.53 Company workspace: project and customer overview — 2026-11-20
+
+- Added a dedicated project and customer overview with project status distribution, average progress, completed/overdue projects, customer project coverage and recent activity.
+- Project rows show customer, status, progress and task completion; customer rows summarize project counts and follow-ups.
+- Metrics are calculated from complete paginated customer, project, task and follow-up records. Items link to existing details and editing workflows.
+- Added Chinese, English and Japanese labels with responsive layouts; retained the business overview, to-do center and existing CRUD.
+- Reuses company-api v5 and public.company_records. No database, RLS, Edge Function, authentication or production business data changes.
+
 # V10.52 Company workspace: unified to-do center — 2026-11-20
 
 - Add a unified to-do center for overdue tasks, tasks due today, tasks due in the next 7 days, open tasks without due dates, and pending customer follow-ups.
