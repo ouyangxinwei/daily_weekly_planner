@@ -1,7 +1,7 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
 const h=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
 const zh=fs.readFileSync('CHANGELOG.md','utf8'),en=fs.readFileSync('CHANGELOG.en.md','utf8'),ja=fs.readFileSync('CHANGELOG.ja.md','utf8');
-assert.ok(h.includes("APP_VERSION='V10.39_home_weather_dashboard'"));
+assert.ok(h.includes("APP_VERSION='V10.40_weekly_weather_bottom'"));
 assert.ok(h.includes("const allowed=['work','organize','language','results','future']"));
 const a=h.indexOf('function movePlanToModule('),b=h.indexOf('\n    function deletePlan',a);
 assert.ok(a>=0&&b>a);const move=h.slice(a,b);
