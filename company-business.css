@@ -76,3 +76,12 @@ html[data-theme="dark"] .cw-project-related{background:#242834}
 .cw-clear-relation-filter{flex:none;padding:6px 9px;font-size:11px}
 html[data-theme="dark"] .cw-relation-context{background:#242834}
 @media(max-width:480px){.cw-relation-context{align-items:flex-start}.cw-clear-relation-filter{white-space:nowrap}}
+
+
+/* Stage 1-I-D: keyboard-accessible shortcuts from relationship previews */
+.cw-related-preview-button{display:block;width:100%;padding:3px 0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:11px;line-height:1.5;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.cw-related-preview-button:hover,.cw-related-preview-button:focus-visible{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+.cw-related-row-action{width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.cw-related-row-action:hover,.cw-related-row-action:focus-visible{border-radius:8px;background:var(--brand-soft);outline:none}
+.cw-related-row-action:focus-visible,.cw-related-preview-button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+html[data-theme="dark"] .cw-related-row-action:hover,html[data-theme="dark"] .cw-related-row-action:focus-visible{background:#302b50}

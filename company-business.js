@@ -177,10 +177,10 @@
     loadProjectRelations(projectId).then(({tasks,followups})=>{
       if($('cw-project-details').dataset.projectId!==projectId)return;
       tasksHost.replaceChildren(); if(!tasks.length)tasksHost.append(node('p','cw-related-empty',t('noRelatedRecords')));
-      tasks.slice(0,6).forEach(task=>{const data=task.data&&typeof task.data==='object'?task.data:{};const row=node('div','cw-related-row');row.append(node('strong','',task.title||t('task')),node('span','cw-related-meta',(t(task.status)||task.status||'—')+(task.due_date?' · '+t('taskDue')+': '+dateText(task.due_date):'')));if(data.description)row.append(node('p','cw-related-note',data.description));tasksHost.append(row);});
+      tasks.slice(0,6).forEach(task=>{const data=task.data&&typeof task.data==='object'?task.data:{};const row=button('', 'cw-related-row cw-related-row-action',()=>openRelatedRecord('tasks',task));row.dataset.relatedRecordId=String(task.id);row.dataset.relatedRecordType='tasks';row.setAttribute('aria-label',t('edit')+': '+(task.title||t('task')));row.append(node('strong','',task.title||t('task')),node('span','cw-related-meta',(t(task.status)||task.status||'—')+(task.due_date?' · '+t('taskDue')+': '+dateText(task.due_date):'')));if(data.description)row.append(node('span','cw-related-note',data.description));tasksHost.append(row);});
       if(tasks.length>6)tasksHost.append(node('p','cw-related-more','+'+(tasks.length-6)));
       followupsHost.replaceChildren(); if(!followups.length)followupsHost.append(node('p','cw-related-empty',t('noRelatedRecords')));
-      followups.slice(0,6).forEach(record=>{const data=record.data&&typeof record.data==='object'?record.data:{};const row=node('div','cw-related-row');row.append(node('strong','',record.title||t('followup')),node('span','cw-related-meta',dateText(record.record_date)+' · '+(t(record.status)||record.status||'—')));if(data.outcome)row.append(node('p','cw-related-note',data.outcome));followupsHost.append(row);});
+      followups.slice(0,6).forEach(record=>{const data=record.data&&typeof record.data==='object'?record.data:{};const row=button('', 'cw-related-row cw-related-row-action',()=>openRelatedRecord('followups',record));row.dataset.relatedRecordId=String(record.id);row.dataset.relatedRecordType='followups';row.setAttribute('aria-label',t('edit')+': '+(record.title||t('followup')));row.append(node('strong','',record.title||t('followup')),node('span','cw-related-meta',dateText(record.record_date)+' · '+(t(record.status)||record.status||'—')));if(data.outcome)row.append(node('span','cw-related-note',data.outcome));followupsHost.append(row);});
       if(followups.length>6)followupsHost.append(node('p','cw-related-more','+'+(followups.length-6)));
     }).catch(()=>{tasksHost.replaceChildren(node('p','cw-related-empty',t('relationLoadFailed')));followupsHost.replaceChildren(node('p','cw-related-empty',t('relationLoadFailed')));});
   }
@@ -188,7 +188,8 @@
     const result = await api('/customers?limit=100&offset=0');
     state.customers = Array.isArray(result?.items) ? result.items : [];
     const projects = await api('/records?record_type=project&limit=100&offset=0');
-    state.projects = Array.isArray(projects?.items) ? projects.items : [];
+    const pageProjects = Array.isArray(projects?.items) ? projects.items : [];
+    state.projects = state.relationshipRecords?.projects ? [...new Map([...pageProjects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()] : pageProjects;
   }
   async function loadActive() {
     if (state.busy || state.tab === 'customers') return;
@@ -248,6 +249,16 @@
   function showProjectFollowups(id) { state.followupProjectFilter = id || ''; state.followupCustomerFilter = ''; state.followupOffset = 0; switchTab('followups'); }
   function showProjectTasks(id) { state.taskProjectFilter = id || ''; state.taskOffset = 0; switchTab('tasks'); }
   function projectName(id) { return state.projects.find(p => p.id === id)?.title || '—'; }
+  async function openRelatedRecord(tab, record) {
+    if (!record?.id || !['projects','tasks','followups'].includes(tab)) return;
+    const detailsDialog = $('cw-project-details');
+    if (detailsDialog?.open) detailsDialog.close();
+    if (state.relationshipRecords?.projects) {
+      state.projects = [...new Map([...state.projects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()];
+    }
+    switchTab(tab);
+    await openEditor(record);
+  }
   function renderList(project, task, records, total, offset) {
     const host = $('cw-business-list'); host.replaceChildren();
     if (!records.length) {
@@ -437,5 +448,5 @@
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
-  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, loadCustomerRelations, invalidateRelations });
+  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations });
 })();
