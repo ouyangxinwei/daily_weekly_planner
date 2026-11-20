@@ -2806,3 +2806,485 @@ V5 · bulk_clear_controls（2026-10-28）。在 V4 基础上增加按当前标�
 ## V10.11 多语言界面
 
 应用通过独立的 `i18n.js` 模块提供简体中文（zh）、英文（en）和日文（ja）界面。首次使用默认中文；语言偏好保存于 `personal-planner:language:v1`，与计划数据分开。登录页和主界面均可切换语言，切换立即生效。系统自身的菜单、按钮、表单、筛选排序、弹窗、确认提示、操作反馈、回收站、归档、云端同步、日期时间、通知和 PDF 导出使用当前语言。用户输入的计划标题、备注、参考 URL、用户名等内容不翻译。分类和周期的存储值保持中文原始枚举，不随显示语言改变；JSON 备份与 Supabase 快照格式不变。
+
+
+---
+
+## 历史快照：`docs/technical_manual.md`（整合前）
+
+# V10.24 成绩与未来双模块技术实现
+
+- 模块顺序：`plan`、`work`、`language`、`organize`、`results`、`future`；原四模块顺序不变。
+- 独立 LocalStorage：`personal-results:v1`、`personal-future:v1`。模块状态仍为 `schemaVersion: 1`，结构复用 `categories`、`plans`、`completions`、`trash`。
+- 成绩默认分类为考试成绩、资格证书、学习成果、其他；未来默认分类为短期目标、中期目标、长期目标、人生愿望。分类可通过既有分类管理界面维护。
+- 两个模块均为无周期的单列表，沿用工作／外语学习／整理的 CRUD、快速添加、完成状态、优先级、搜索、分类、归档、回收站、撤销、PDF 和模块专属 JSON 备份。
+- 单模块 Supabase 分区分别使用 `results`、`future`；上传保留其他所有分区，下载只恢复当前模块。整体同步按六个模块读写。旧云端快照缺少 `results` 或 `future` 时，整体下载将对应模块初始化为空状态；原四个分区仍要求存在且有效。
+- 全局检索顺序为计划周期顺序，其后工作、外语学习、整理、成绩、未来。
+- 不修改原四模块存储键、原数据、计划周期、`schemaVersion`、既有 JSON 单模块备份格式或 Supabase RPC。无需 SQL 迁移。
+- 成绩模块配色为青绿色，未来模块配色为柔和玫瑰粉；均支持深色／浅色主题。中英日文案同步更新。
+- Service Worker cache：`daily-weekly-planner-v10-24-results-future-modules`。
+
+# V10.23 黑白主题与周期颜色
+
+- 默认主题为深色，HTML 根节点使用 `data-theme="dark"`；启动时优先读取独立偏好键 `personal-planner:theme:v1`，仅接受 `dark` 或 `light`。
+- 主题切换通过根节点主题属性和 CSS 变量实现。浅色主题沿用既有样式；深色主题覆盖页面、卡片、表单控件、对话框、模块导航及主要状态色。
+- 主题偏好不写入四模块业务对象，不参与 JSON 备份或 Supabase 同步。
+- 周期颜色仅根据既有 `data-period` 标识进行样式区分：普通周期蓝色，随机周期橙色；不修改 `PERIODS`、`RANDOM_BASE` 或周期处理逻辑。
+- APP_VERSION：`V10.23_dark_theme_period_colors`；Service Worker cache：`daily-weekly-planner-v10-23-dark-theme-period-colors`。
+- 验收清单见 `docs/acceptance_V10.23_dark_theme_period_colors.md`。
+
+# V10.19 数据与云端专项追踪、系统健康检查（Phase 4）
+
+- Supabase `supabaseRequest()` 记录 START / END SUCCESS / END FAILED；仅记录路径、HTTP 方法、HTTP 状态，不记录请求体、用户名、密码、apikey 或会话信息。
+- 单模块及整体上传／下载的失败分支写入 Cloud ERROR；底层 RPC 请求保留独立 trace。
+- `localModuleSnapshot()`、`validateWholeCloudSnapshot()`、`persistWholeLocalSnapshot()` 分别记录本地快照读取、云端整体分区校验、本地四模块覆盖及失败回滚执行结果。
+- 首页「系统健康检查」由 `health-check.js` 提供。检查项：应用版本／入口、四个 LocalStorage 分区结构、运行日志 IndexedDB 诊断写入与查询、Service Worker 注册、Supabase `planner_get_data` 只读调用、当前 main 对应 GitHub Pages workflow。
+- 健康检查仅读取业务数据；不会写入／修复／覆盖业务 LocalStorage。Supabase 只调用读取 RPC。IndexedDB 测试只产生一条普通运行日志诊断记录。
+- 未登录时 Supabase 状态为 Not Checked；GitHub API 网络失败时部署状态为 Not Checked，不误报部署失败。
+- 检查结果按 INFO/WARN/ERROR 写入本机日志并显示时间；支持中英日及响应式布局。
+- 不改变四模块键、`schemaVersion: 1`、JSON 备份结构、Supabase RPC／DB schema 或登录流程。
+- APP_VERSION：`V10.19_data_cloud_health_check`；Service Worker cache：`daily-weekly-planner-v10-19-data-cloud-health-check`。
+- Phase 4 验收见 `docs/acceptance_V10.19_runtime_logging_phase4.md`。
+
+# V10.16 运行日志基础设施（Phase 1）\n\n- 独立模块：`logger.js`，通过 `window.AppLogger` 暴露统一接口；在主应用脚本前加载。\n- 存储：IndexedDB 数据库 `manman-planner-runtime-logs`，对象仓库 `entries`；索引包括 createdAt、level、module、executionId。与四个业务模块的 LocalStorage 键隔离。\n- 等级：ERROR、WARN、INFO、DEBUG；DEBUG 默认关闭，设置键为 `personal-planner:runtime-log-settings:v1`。\n- 追踪：`start/end/fail/cancel`，记录 Execution ID、spanId、parentSpanId、耗时和版本。\n- 保留：30 天；容量目标 10,000 条，优先淘汰最旧 DEBUG/INFO；IndexedDB 不可用时使用最多 200 条内存降级队列。\n- 安全：敏感字段名、Bearer 凭据和带查询参数 URL 做基础脱敏；日志失败不得影响业务启动。\n- 全局监听：记录 window error 和 unhandledrejection。\n- 主应用版本：V10.16_runtime_logging_foundation；Service Worker cache：`daily-weekly-planner-v10-16-runtime-logging`。\n- Phase 1 不包含日志 UI、完整业务函数接入或健康检查；验收步骤见 `docs/acceptance_V10.16_runtime_logging_phase1.md`。\n\n# V10.15 四模块整体云端同步技术实现
+
+- 新增首页整体同步区，入口按钮为 `sync-all-upload` 与 `sync-all-download`；当前模块独立按钮及原处理函数保持不变。
+- 模块顺序：`plan`、`work`、`language`、`organize`；云端 JSONB 分区映射为根对象（计划）、`work`、`language`、`organizer`。
+- 整体上传分别读取四个 LocalStorage 键，按模块默认分类执行 `safeState()` 校验，构建单个根 JSON 对象并调用一次 `planner_put_data` RPC。现有 SQL 函数对根计划结构校验后在单条 INSERT ... ON CONFLICT 中写入完整 JSONB 快照，PostgreSQL 事务保证云端整体替换。
+- 整体下载调用一次 `planner_get_data`，要求根计划及 `work`、`language`、`organizer` 均存在且可通过对应模块数据校验；任何分区缺失或格式异常均在写入本地前终止。
+- 用户确认覆盖后，先读取四个本地存储原值，再逐键写入；任一写入异常时尽力恢复四个原值。恢复成功后清空模块内存缓存，重新载入当前活动模块并刷新分类、列表、归档和回收站视图。整体覆盖不做智能合并。
+- 整体下载清除当前撤销快照，避免撤销操作把旧状态重新写回。模块独立上传／下载逻辑不变。
+- PWA cache：`daily-weekly-planner-v10-15-whole-cloud-sync`。不修改业务 schemaVersion（仍为 1），不需要 SQL 迁移。
+
+# V10.14 四模块管理技术实现
+
+- 模块标识：`activeModule` 取值 `plan`、`work`、`language`、`organize`；模块入口顺序固定。四个模块复用渲染、编辑、搜索、分类、归档、回收站、撤销和 PDF 引擎。
+- 本地存储：`plan`=`personal-planner:v1`、`work`=`personal-work:v1`、`language`=`personal-language:v1`、`organize`=`personal-organizer:v1`。最后活动模块单独保存在 `personal-planner:active-module:v1`。
+- 分类：计划默认分类按原有顺序移除「工作」，保留「学习、生活、健康、财务、兴趣、未分类」；工作默认分类为待处理、进行中、已完成、工作记录、会议、其他；外语学习默认分类为英语、德语、俄语、日语、其他；整理分类保持 V10.13。计划「未分类」为固定分类。
+- 迁移：首次载入计划状态时，把分类数组、普通／归档计划和回收站计划中的「工作」映射到「未分类」，删除旧分类；事务保存成功后才替换内存状态。迁移不修改 ID、标题、备注、日期、完成记录、优先级、提醒或归档时间。
+- 工作状态：计划对象增加可选 `status`（待处理／进行中／已完成）；仅工作模块显示状态选择器。工作状态与该模块稳定 completion key 同步；其他模块不受影响。
+- JSON：所有导出均包含 `moduleType`（`plan`／`work`／`language`／`organize`）。非计划模块必须匹配当前模块类型；计划模块拒绝其他模块备份，但兼容历史无 `moduleType` 的计划备份。
+- Supabase：沿用 `planner_get_data`／`planner_put_data` RPC。根对象保存原计划 schema；工作使用 `work`、外语学习使用 `language`、整理继续使用历史字段 `organizer`。上传前读取远端快照，只替换当前分区并保留其他分区；下载只恢复当前模块。无需 SQL 迁移。
+- PWA：Service Worker cache 更新为 `daily-weekly-planner-v10-14-four-module-management`。
+
+# V10.13 整理模块技术实现
+
+- 模块标识：`activeModule`，取值 `plan` 或 `organize`；两个模块共用页面和渲染／编辑／分类／归档／回收站引擎。
+- 本地存储：计划使用 `personal-planner:v1`，整理使用 `personal-organizer:v1`。切换模块时加载对应状态；`save()` 按当前模块写入独立键。整理默认分类为书籍、电子产品、软件/APP、网站、其他，项目周期固定为 `daily` 以复用既有状态校验，但 UI 隐藏周期选择并将列表作为整体显示。
+- JSON：导出增加 `moduleType`（`plan`／`organize`）。整理导入要求 `moduleType: organize`；计划拒绝整理备份，旧版无 moduleType 的计划备份仍可导入。
+- Supabase：沿用 `planner_get_data`／`planner_put_data` RPC。云端根对象继续保存原计划 schema（`schemaVersion`、`plans`、`categories`、`completions`、`trash`），另加 `organizer` 对象保存整理完整状态。上传前先读取远端快照，只替换当前模块并保留另一个分区；下载只解析当前模块。旧版无 `organizer` 字段时视为尚无整理云端备份。
+- SQL `planner_put_data` 仅校验根对象的 schemaVersion、plans 和 completions，允许额外 JSON 字段，因此无需 SQL 迁移；计划 schemaVersion 保持 1。
+- Service Worker cache 更新至 `daily-weekly-planner-v10-13-organize-module`。
+
+# V10.12 分类管理实现
+
+- 业务状态新增 categories 数组，默认保留原有七项；计划 category 字段不变，schemaVersion: 1 不变。
+- normalizeCategories() 和 safeState() 兼容旧状态／旧备份缺少 categories 的情况，并兼顾回收站计划引用。
+- 分类增删改通过 commitState() 事务保存。改名同步 plans 与 trash[].plan；删除使用中的分类时先迁移两处引用，再移除分类。撤销快照包含完整状态。
+- renderCategoryOptions() 统一刷新新建／编辑下拉框和筛选器。新建及快速添加均使用 state.categories[0]。
+- JSON 备份与 Supabase 整份快照均包含 categories；旧快照自动回退原有分类。无需 SQL 迁移。
+- i18n 增加中英日静态文案，并跳过用户自定义分类名称。
+
+## V10.10 首页星级统计与定位实现
+
+- 版本标识：APP_VERSION 为 V10.10_star_dashboard_jump；Service Worker cache 为 daily-weekly-planner-v10-10-star-dashboard-jump。
+- renderStarSummary() 遍历 state.plans，只纳入 daily、weekly、monthly、yearly，排除 archivedAt 非空及 state.completions[completionKey(plan)] === true 的计划；优先级经 validPriority() 归一为 1–5。
+- 统计使用 completionKey(plan)，因此每日／每周／每月／每年的完成状态均按当前周期计算；随机周期不计入。
+- 点击星级时按 daily → weekly → monthly → yearly 顺序查找最大计数；使用严格大于比较保留首次命中的周期作为并列规则。
+- 跳转时清空搜索和分类筛选，更新周期标签并调用统一 render()；排序偏好不变。列表行写入 data-priority，再查找首个匹配的 .task，平滑滚动并添加短时高亮 class。
+- 统计按钮由 DOM API 创建，标签使用 textContent；零计数按钮 disabled。功能不调用 commitState()，不修改 state、不新增存储键、不改变 schema 或 Supabase 接口。
+- 首页摘要在 render() 中同步刷新，因此完成状态、计划新增／编辑／归档／恢复、导入及云端下载等现有重绘操作都会更新计数。
+
+## V10.9 优先级默认排序实现
+
+- 版本标识：APP_VERSION 为 V10.9_priority_sorting；Service Worker cache 为 daily-weekly-planner-v10-9-priority-sorting。
+- 排序偏好使用独立键 personal-planner:sort-mode:v1 保存，不写入 personal-planner:v1 业务状态、JSON 备份或 Supabase 快照。
+- loadSortMode() 只接受白名单模式；首次使用、存储缺失或读取失败时默认为 priority-desc。
+- render() 先应用周期、归档、搜索与分类过滤，再排序。优先级模式使用完成状态（未完成 0、已完成 1）、有效星级降序、筛选后原始索引作为三级排序键。
+- 同星级排序通过筛选结果的原始索引稳定打破平局；不依赖创建时间，不改变 state.plans 的原始顺序。
+- 保留 default（原始顺序）、title、created-desc、created-asc 现有模式。排序模式切换只写独立偏好键并重绘，不调用 commitState()。
+- 所有周期标签共用 render()，普通与随机临时视图均使用相同规则。完成状态、星级编辑、导入、恢复等现有操作重绘后自动重新排序。
+- 不修改计划 schema、完成记录、撤销逻辑或云端同步接口；无 SQL 迁移。
+
+## V10.8 版本履历与部署状态
+
+- 入口：`#open-release`；弹窗：`#release-dialog`。
+- 当前运行版本来自 `APP_VERSION`，只显示语义版本前缀（例如 V10.8）。
+- 履历：`loadReleaseHistory()` 请求 `raw.githubusercontent.com/.../main/CHANGELOG.md`，`renderReleaseHistory()` 将 Markdown 标题和列表项通过 DOM `textContent` 构建，避免将远程内容作为 HTML 执行。
+- 部署状态：`refreshReleaseStatus()` 并行请求 GitHub REST `commits/main` 与 `actions/runs?branch=main&per_page=20`，匹配 Pages build and deployment workflow 的 `head_sha` 与 main 当前 SHA。按 workflow 状态显示 success / in progress / failure / no matching run；GitHub API 网络或限流错误显示检查失败并可手动刷新。
+- 不使用认证 token；依赖公开仓库 GitHub API 的匿名访问额度。更新履历读取失败时提供 CHANGELOG 页面链接。
+- Service Worker 缓存名升级至 V10.8；业务数据 schema 与 `commitState()` 不变。
+
+## V10.7 快速添加计划实现
+
+- UI：`#quick-add-form`、`#quick-add-title` 与 `#quick-add-error` 位于当前计划卡片的进度条下方，桌面端横向排列，窄屏自动适配。
+- 交互：表单 submit 同时支持 Enter 和按钮点击；输入仅做 trim，空字符串不提交。输入变更时清除错误状态。
+- 数据：创建普通 `daily` 计划，字段沿用现有结构：`title`、空 `note`／`referenceUrl`／`dueAt`、`category: '未分类'`、`priority: 1`、空提醒标记及时间戳；不增加 schema 字段。
+- 事务：`quickAddPlan()` 使用 `commitState()` 写入候选状态。只有成功后才切换每日标签、清理搜索／分类过滤、重绘、清空输入并提示成功；失败保留输入框内容。
+- 快速添加不替代 `openDialog()` 完整表单。无 SQL 或数据迁移。
+
+## V10.6 事务式保存机制
+
+- `save(nextState = state)` 将指定候选状态序列化并写入浏览器存储，返回布尔结果；失败时不修改正式状态。
+- `cloneState(source)` 生成独立状态副本；`commitState(mutator, options)` 在副本上执行修改，写入成功后才赋值 `state = next`。
+- 只有持久化成功后才更新撤销快照、刷新界面、执行后续 UI 回调及显示成功消息。
+- 失败路径不替换 `state`；表单不关闭，完成复选框恢复原值。
+- 撤销先保存快照，再提交到内存；撤销保存失败时保留当前状态和撤销能力。
+- JSON 导入、云端下载与自动清理同样使用候选状态；提醒标记先保存，再发送系统通知。
+- 数据结构及 `schemaVersion: 1` 不变，不需要数据库迁移。
+
+### 失败路径测试建议
+
+通过浏览器开发者工具临时模拟存储写入异常，分别测试新建、编辑、完成切换、删除、归档、恢复、永久删除、导入和撤销；确认旧数据保持一致、无成功提示、表单仍可继续编辑。测试结束后恢复原生存储方法。
+
+## V10.5 五级优先级实现
+
+- `validPriority(value)` 接受 1–5 的整数；其他值（含缺失、非整数、0 或大于 5）回退为 1。
+- 计划对象字段名仍为 `priority`，JSON 与 Supabase 快照结构不变；`schemaVersion` 继续为 1。
+- UI 提供五个星级按钮；列表按 `validPriority(plan.priority)` 绘制相应数量的 SVG 星形。高优先级排序沿用数值降序。
+- PDF 从 `.priority-display` 的无障碍标签读取优先级，因此输出 1–5 星。
+- 旧数据中的 1/2/3 不变；旧备份缺少该字段仍按 1 星处理。无需 SQL 迁移。
+
+# 技术手册
+
+## V9 数据库认证接口
+
+登录页调用 `planner_login` RPC；同步分别调用 `planner_put_data`、`planner_get_data`。数据库以 pgcrypto bcrypt 摘要验证密码，客户端不读取账号或密码摘要表。各 RPC 对账号密码重新验证。V10.2 起不再启用登录失败次数统计或临时锁定。`planner_credentials` 仅允许 `oooo` 一个用户名。初始账号由项目管理员通过 SQL Editor 单独插入；切勿将带有密码的初始化语句提交至公开仓库。
+
+
+## 1. 技术构成
+
+- `index.html`：页面、样式和交互逻辑，原生 HTML/CSS/JavaScript，无第三方依赖和构建步骤。
+- `manifest.webmanifest`：PWA 名称、图标、启动路径和显示模式。
+- `sw.js`：静态资源缓存及离线入口回退。
+- `icon.svg`：应用图标。
+- JSON 备份：由页面 Blob 下载生成；恢复时解析并验证 JSON，再写入现有本地存储键。
+
+## 2. 本地数据结构
+
+存储键：`personal-planner:v1`。
+
+```json
+{
+  "schemaVersion": 1,
+  "plans": [{
+    "id": "uuid",
+    "title": "读书 20 分钟",
+    "note": "睡前阅读",
+    "period": "daily",
+    "category": "学习",
+    "priority": 3,
+    "dueAt": "2026-10-28T18:30",
+    "notifiedFor": "",
+    "createdAt": "ISO-8601",
+    "updatedAt": "ISO-8601"
+  }],
+  "completions": {
+    "uuid|daily|2026-10-28": true
+  }
+}
+```
+
+周期值包括 `daily`、`weekly`、`monthly`、`yearly`，以及临时的 `daily_random`、`weekly_random`、`monthly_random`。随机临时计划还保存创建时的 `cycleId`。计划分类允许 `未分类`、`工作`、`学习`、`生活`、`健康`、`财务`、`兴趣`。优先级是 1–5 的整数。提醒时间 `dueAt` 为本地 `YYYY-MM-DDTHH:mm` 字符串，`notifiedFor` 记录已发送提醒对应的时间；旧数据缺少这些字段时视为未设置提醒。读取时会检查 schema 版本、字段类型和周期枚举；旧数据缺少 category 时映射为“未分类”，缺少 priority 时映射为 1。列表文本通过 `textContent` 显示，不作为 HTML 执行。
+
+### JSON 备份格式与校验
+
+导出文件保留 schemaVersion 1 的数据结构，并增加 `appVersion` 与 `exportedAt` 元信息；提醒时间和已提醒标记随计划导出。导入上限为 2 MB、5000 条计划和 100000 条完成记录；验证 ID 唯一、标题和周期有效，仅接受属于导入计划的完成记录。确认导入后整体覆盖当前存储。用户取消确认时不写入。解析或结构错误不会覆盖现有数据。
+
+## 2.2 分类、筛选与排序
+
+计划 `category` 是本地受控枚举，`priority` 范围 1–5；旧版本数据和备份按默认值“未分类”和 1 星兼容。列表先按当前周期筛选，再按分类和标题／备注关键词筛选，最后按添加顺序、优先级、标题 localeCompare 或 ISO 创建时间排序。进度统计基于筛选后的可见计划。星形使用内嵌 SVG symbol，无外部图片资源。
+
+## 临时计划过期规则
+
+`RANDOM_BASE` 将三个随机周期映射至 daily／weekly／monthly 的周期标识。创建临时计划时保存 `cycleId`；载入状态及每分钟刷新时，对照当前周期标识清理过期计划与完成记录。周周期从周一开始。导入备份时保留周期标识；旧备份没有随机周期记录。若新格式随机计划缺少 `cycleId`，导入时按当前周期初始化。
+
+## 批量清理范围
+
+清理操作以 `activePeriod` 作为唯一范围，不读取搜索关键词或分类筛选器。清空全部时选中该周期全部计划；清空已完成时仅选择 `completionKey(plan)` 在当前周期为 `true` 的计划。确认后统一删除计划和相关完成记录，再持久化并重绘界面。确认提示列明标签和数量。
+
+## 2.3 提醒机制
+
+提醒由页面打开期间的定时检查触发，使用浏览器 Notification API。首次保存提醒计划时请求通知权限；每 15 秒检查一次，计划未完成且提醒时间已到时发送一次，并保存 `notifiedFor` 防止重复。更改提醒时间会重置该字段。提醒时间按设备本地时区解释。页面关闭时无后台触发能力；推送或系统级定时提醒需要服务端推送或平台支持。
+
+## 3. 周期标识
+
+每日为 `YYYY-MM-DD`；每周为包含该日的一周周一日期；每月为 `YYYY-MM`；每年为 `YYYY`。日期按设备本地时区计算，周一为周起始日。
+
+## 4. 修改约定
+
+- 修改产品行为时同步更新本手册、玩法说明和更新记录。
+- 更新 Service Worker 覆盖的静态资源后，应递增 `sw.js` 中的缓存名。
+- 数据结构改变时递增存储 schema，并设计旧数据迁移或清晰的错误反馈。
+- 不要在 `innerHTML` 中拼接用户输入；保留对存储数据的类型校验。
+- 生产部署需经 HTTPS，以启用 Service Worker 和 PWA 安装能力。
+
+## 5. 已知限制
+
+没有服务器、账号或同步机制。浏览器存储可能被用户清理或受浏览器隐私策略限制。本版本没有历史周期选择、提醒和自动化测试。
+## 参考网站字段（V10.3）
+计划对象增加可选 `referenceUrl` 字符串。旧数据缺少该字段时按空字符串处理。有效 HTTP/HTTPS 链接在计划列表备注上方显示，点击在新标签页打开；网址格式无效时不显示可点击链接、不弹提示。字段自动随 JSON 备份和 Supabase JSONB 快照同步，无需 SQL 迁移。
+
+
+
+## PDF 导出（V10.4）
+
+顶部“导出 PDF”按钮从当前渲染后的 `#task-list .task` DOM 读取记录，因此导出范围与屏幕当前可见结果一致：当前周期、搜索关键词、分类筛选和排序均生效。回收站、归档管理窗口以及被筛选隐藏的计划不会被导出。导出器将当前可见记录转为独立打印页，采用内联 CSS 和系统中文字体回退，不依赖第三方库或在线 CDN。浏览器打印对话框中选择“另存为 PDF”即可保存。
+
+每条计划使用 `.plan-record { break-inside: avoid; page-break-inside: avoid; }`，长备注保留换行并允许断词，长 URL 可折行；打印使用 A4 页面、适合打印的页边距和页码。该 CSS 可避免一般长度的计划记录被拆开，但 CSS 分页规则不能保证将超过整页可打印高度的单条记录缩放到一页；此类极端长内容仍可能由浏览器分页引擎拆开。导出只读取 DOM，不修改本地计划或云端快照，不需要数据库迁移。
+
+
+## V10.11 多语言模块设计
+
+`i18n.js` 在应用脚本之前加载，提供 `window.PlannerI18n` 的 `getLanguage()`、`setLanguage(lang)`、`locale()` 和 `t(text)` 接口。翻译字典以现有中文系统文案为键，支持 zh（默认）、en、ja。语言偏好保存在独立 LocalStorage 键 `personal-planner:language:v1`，不写入业务状态对象。模块扫描系统界面文本及 placeholder、aria-label、title 等显示属性，并监听后续动态 DOM 更新；计划标题、备注、参考链接等用户内容节点被排除。日期格式通过当前语言 locale 输出。版本履历按语言加载 `CHANGELOG.md`、`CHANGELOG.en.md` 或 `CHANGELOG.ja.md`。PDF 导出使用当前语言的系统标签。
+
+语言功能不得改变 `schemaVersion: 1`、计划字段、分类枚举、周期枚举、完成记录、JSON 备份、Supabase RPC 或事务式保存机制。新增语言仅扩展字典和对应版本履历。
+
+
+---
+
+## 历史快照：`docs/deployment_and_troubleshooting.md`（整合前）
+
+# V10.14 四模块管理部署与数据说明
+
+- V10.14 沿用现有 GitHub Pages、Supabase 登录和 `planner_get_data`／`planner_put_data` RPC，不需要新建数据库表或执行 SQL 迁移。
+- Service Worker 缓存名为 `daily-weekly-planner-v10-14-four-module-management`。部署新版时同时发布 `index.html`、`i18n.js`、`sw.js`、三种语言 CHANGELOG 和文档。
+- 本地数据键：计划 `personal-planner:v1`、工作 `personal-work:v1`、外语学习 `personal-language:v1`、整理 `personal-organizer:v1`。切换模块不会混合数据。
+- 首次打开 V10.14 时，计划模块会将普通记录、归档记录和回收站中 category=「工作」的记录迁移为「未分类」，并从计划分类中移除「工作」。迁移只修改分类字段，保持其他字段、记录顺序和完成信息；迁移可重复执行。保存成功后才替换当前内存状态；若 LocalStorage 保存失败，原数据不被覆盖，下次进入计划模块会重试。迁移前建议先导出计划 JSON 备份。其他计划分类顺序保持不变。
+- 工作分类与任务状态独立；外语学习分类为英语、德语、俄语、日语、其他（不含挪威语）。
+- JSON 备份分别使用 `moduleType: plan/work/language/organize`。旧版没有 `moduleType` 的计划备份仍可导入；跨模块备份会被拒绝。
+- 云端快照保留原计划根结构，并使用 `work`、`language`、`organizer` 分区保存其他模块。上传当前模块时先读取云端快照并合并，不覆盖其他模块；下载只恢复当前模块。若要把本机计划分类迁移同步到云端，请在计划模块完成首次迁移后上传计划数据。
+- 更新后刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。不要为了刷新版本而清除整个站点数据，以免删除尚未备份的本地记录。
+
+---
+
+# V10.13 整理模块部署与数据说明
+
+- V10.13 沿用现有 GitHub Pages 和 Supabase 配置，不需要新建数据库表或执行 SQL 迁移。
+- 整理数据本地保存在 `personal-organizer:v1`；计划仍保存在 `personal-planner:v1`。清除浏览器数据前，请分别在两个模块导出 JSON 备份。
+- 云端上传会先读取当前完整快照，再合并当前模块；请在整理模块中上传整理数据，在计划模块中上传计划数据。下载只替换当前打开的模块。
+- 旧云端快照只有计划数据时仍可下载计划；整理模块会提示尚无整理备份，上传整理数据后才建立 organizer 分区。
+- JSON 文件包含 moduleType，不能将整理备份导入计划，反之亦然。跨设备恢复时先登录相同 Supabase 账号，再分别下载计划和整理数据。
+
+# V10.12 自定义分类管理部署说明
+
+部署新版 index.html、i18n.js、sw.js、三种语言的 CHANGELOG 和文档。Service Worker 缓存名为 daily-weekly-planner-v10-12-custom-category-management。无需 Supabase SQL 或数据库迁移，schemaVersion: 1 不变。分类配置进入本地状态、JSON 备份／恢复和 Supabase 快照。旧版数据缺少 categories 时自动补充原有七个分类。删除使用中分类前需选择目标分类，普通、归档和回收站计划先迁移再删除。更新后刷新网页；已安装 PWA 请完全关闭后重新打开。不要直接清除整个站点数据。
+
+## V10.10 首页星级统计与任务快速定位
+
+部署新版 index.html、sw.js 和更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-10-star-dashboard-jump。无需 Supabase SQL 或数据迁移，schemaVersion: 1 和现有 JSON 备份格式保持不变。
+
+首页欢迎语下方会显示 1–5 星未完成任务数量。统计仅包括每日、每周、每月、每年正式计划，排除已完成、已归档和随机临时计划。点击非零星级后进入任务数量最多的周期；并列时每日优先，其次每周、每月、每年。系统会清空搜索和分类筛选，保留排序模式，并定位高亮第一条匹配任务。
+
+更新后若没有看到新面板，请刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。统计为 0 的星级不可点击属于正常行为。
+
+## V10.9 优先级默认排序更新
+
+部署新版 index.html、sw.js 及更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-9-priority-sorting。无需 Supabase SQL 或数据迁移，计划 schemaVersion: 1 不变。
+
+首次使用 V10.9 时，若当前浏览器没有已保存的排序偏好，将默认显示「优先级（未完成优先）」。之后用户切换的排序方式保存在该浏览器的独立 LocalStorage 键中。排序偏好不会随 JSON 备份或 Supabase 云端快照迁移；其他设备首次使用时也会默认优先级排序。
+
+若仍显示旧排序界面，请刷新页面；已安装 PWA 建议完全关闭后重新打开，以便 Service Worker 更新缓存。
+
+## V10.8 版本记录与部署状态
+
+首页「版本与更新记录」弹窗通过公开 GitHub 内容地址读取 CHANGELOG，并调用 GitHub API 检查 main 最新提交与 Pages 构建部署工作流。若 API 受网络限制或匿名请求达到额度，状态会显示「检查失败」，可稍后刷新；完整履历仍可通过弹窗内 GitHub 链接查看。
+
+「部署成功」表示 GitHub Pages 的 build and deployment workflow 已对当前 main SHA 成功完成。它不保证浏览器或 PWA 缓存已经切换到最新文件。若仍看到旧界面，请刷新网页；已安装 PWA 请完全关闭后重新打开。Service Worker 缓存名为 `daily-weekly-planner-v10-8-release-history`。
+
+## V10.7 快速添加计划
+
+部署新版 `index.html`、`sw.js` 及更新后的文档。Service Worker 缓存名升级为 `daily-weekly-planner-v10-7-quick-add`；更新后重新载入网页，已安装 PWA 建议完全关闭后重新打开。无需 Supabase SQL 或数据迁移，`schemaVersion: 1` 保持不变。
+
+快速添加位于计划卡片进度条下方。输入名称后按 Enter 或点击“＋ 添加”。新计划进入每日视图，默认未完成、未分类、1 星且无提醒。保存失败时输入内容会保留；若出现存储错误，请先检查浏览器站点存储，不要清除网站数据。
+
+## V10.6 保存一致性修复
+
+部署新版 `index.html` 与 `sw.js`。Service Worker 缓存名升级为 V10.6，更新后建议重新载入页面；已安装 PWA 可完全关闭后重新打开。无需数据库迁移，数据结构保持 `schemaVersion: 1`。
+
+若出现保存失败提示，应用会保留本次操作前的数据状态。建议先导出 JSON 备份，再检查浏览器站点存储空间、隐私模式或存储限制。不要为了排查而直接清除网站数据，以免删除尚未备份的计划。
+
+## V10.5 五级优先级更新
+
+上传新版 `index.html`、`sw.js` 及更新后的文档即可。Service Worker 缓存名已升级为 V10.5。无需 Supabase SQL 迁移；优先级继续存储在原 `priority` 字段，旧数据 1/2/3 无需转换。JSON 备份恢复和云端上传/下载会自动保留 4、5 星。
+
+# 部署与故障排查
+
+## 数据库账号初始化
+
+1. 在新 Supabase 项目 SQL Editor 中全选 `docs/supabase-setup.sql` 的全部内容并运行，确保最后一个函数结束标记也包含在内。不要只运行从 `returns boolean ... as $put_data$` 开始的选中片段。
+2. 按 SQL 脚本注释在 SQL Editor 单独插入用户名 `oooo` 的密码摘要。该初始化命令不要加入公开仓库。
+3. 登录页面填入项目 URL、公开 publishable/anon key、用户名和密码。
+4. V10.2 已移除项目自定义的连续失败锁定；若旧数据库仍表现为锁定，请确认已执行 `docs/migration_V10.2_remove_login_lockout.sql`。
+
+登录验证和数据读写由 database RPC 处理；直接访问表的权限已撤销。不要将 service_role key 填入网页。
+
+## V9 云端同步
+
+登录页需要 Supabase 项目 URL 和公开 publishable/anon key。登录使用 `planner_login` RPC；同步读写使用 `planner_get_data` 与 `planner_put_data`。SQL 初始化步骤在前面的“数据库账号初始化”中。部署到 HTTPS 后使用 GitHub Pages 网址登录；直接用 `file://` 打开时，浏览器可能拦截对 Supabase 的请求。
+
+### 同步报错
+
+- 检查 URL 与 publishable/anon key 是否来自同一个 Supabase 项目。
+- 若提示关系或权限错误，确认已执行 `docs/supabase-setup.sql`，并确认 `planner_login`、`planner_get_data`、`planner_put_data` RPC 已创建且允许 anon 调用。
+- 同步按钮为灰色时，先登录账号。
+- 上传和下载是整份快照的单向替换，不是自动合并；先确认数据来源并保留 JSON 备份。
+
+## 1. 发布到 GitHub Pages
+
+1. 在 GitHub 创建一个仓库。
+2. 上传本项目全部文件，保持 `index.html`、`manifest.webmanifest`、`sw.js` 和 `icon.svg` 位于发布目录根部。
+3. 打开仓库 **Settings → Pages**。
+4. 在 **Build and deployment** 中选择 **Deploy from a branch**，选择 `main` 分支和 `/(root)`，保存。
+5. 等待部署完成后，打开 Pages 页面显示的 HTTPS 地址。
+
+Pages 的实际访问地址由 GitHub 提供。项目使用相对资源路径，既可部署到用户站点也可部署到仓库项目路径。
+
+## 2. 手机使用与离线能力
+
+首次请通过 HTTPS 在线打开。Service Worker 安装后会缓存入口、manifest 和图标。支持 PWA 安装的浏览器可从菜单选择“安装应用”或“添加到主屏幕”；不同浏览器选项可能不同。双击本地 HTML 可使用核心功能，但不启用 Service Worker 离线缓存。
+
+## 3. 更新后仍显示旧版
+
+更新静态资源时递增 `sw.js` 中的 `CACHE_NAME`，再提交到 GitHub。若仍显示旧版，确认 Pages 发布完成，关闭旧标签页后重新打开并刷新；必要时清理该站点缓存或重新安装 PWA。清除站点数据可能同时清除本地计划，请谨慎操作。
+
+## 4. 常见问题
+
+### 批量清理按钮是灰色的
+
+- “清空当前标签计划”在该标签没有计划时禁用。
+- “清空当前标签已完成”在该标签当前周期没有已完成计划时禁用。
+- 批量操作按当前标签范围处理，不会因搜索或分类筛选而缩小范围；执行前会显示影响数量并要求确认。
+
+### 提醒没有出现
+
+- 确认保存时允许了浏览器通知权限，并检查系统是否允许该浏览器发送通知。
+- 提醒需要计划页面保持打开；页面关闭、浏览器休眠或设备省电可能导致不触发或延迟。
+- 已完成的计划不会提醒，且每个提醒时间只发送一次。
+
+### 随机临时计划消失
+
+随机临时计划只在创建时所在的日、周或月内有效。日历周期结束后会自动清除；每周按周一开始计算。需要跨周期保留的事项，请添加为普通每日／每周／每月计划。
+
+### JSON 导入失败
+
+- 确认选择的是本网页导出的 `.json` 文件，文件大小不超过 2 MB。
+- 文件必须包含支持的 `schemaVersion: 1`，且计划字段和周期值有效。
+- 导入错误不会改写当前数据；可尝试从原网页重新导出备份。
+- 导入确认会替换当前浏览器数据，恢复前可先导出一份现有备份。
+- 旧版备份中的计划若未包含优先级，会显示为 1 星。
+
+### 导出后找不到文件
+
+- 查看浏览器默认“下载”目录及下载列表。
+- 检查浏览器是否拦截了下载，或设备存储空间是否充足。
+
+### V1 备份中的分类为空
+
+V1 不包含分类字段。导入 V1 备份后，计划默认显示为“未分类”，可以逐条编辑选择分类，再导出新的 V2 备份。
+
+### 页面空白
+
+- 确认打开的是 Pages 发布地址，而不是仓库源码页。
+- 检查根目录是否包含 `index.html`。
+- 打开浏览器开发者工具 Console 查看脚本报错。
+- 检查 HTML 上传是否完整。
+
+### 计划没有保留
+
+- 确认没有使用无痕窗口，且仍在同一浏览器和设备访问。
+- 检查浏览器是否限制网站存储或已清理该站点数据。
+- 页面出现存储警告时，浏览器可能拒绝读取或写入 `localStorage`。
+
+### PWA 没有安装或离线不可用
+
+- PWA 需通过 HTTPS 或 localhost 访问，不能依赖 `file://`。
+- 确认 manifest、图标和 `sw.js` 均可通过发布网址访问。
+- 部分浏览器不会显示安装提示，可尝试浏览器菜单中的安装选项。
+
+## 5. 发布前检查
+
+- [ ] GitHub Pages 能打开首页。
+- [ ] 新增、编辑、完成、取消完成和删除流程可操作。
+- [ ] 刷新后本地计划仍存在。
+- [ ] 桌面和手机视口下布局可用。
+- [ ] 静态资源路径正确，缓存名与本次版本一致。
+## V10.3 参考网站部署说明
+本功能仅修改前端计划 JSON 字段，无需执行 Supabase SQL。部署时上传完整项目文件并确保 `sw.js` 一并更新，以便浏览器更新缓存。
+
+
+
+## V10.4 PDF 导出说明
+
+PDF 导出在浏览器本地生成打印排版页，不调用服务器，也不依赖外部 CDN。点击“导出 PDF”后需允许本站打开新窗口；若没有打开，请检查浏览器的弹出窗口拦截设置。随后在浏览器打印对话框中选择“另存为 PDF”。如需中文字体正常显示，建议使用现代版 Chrome、Edge 或 Firefox，并确保操作系统有可用的中文字体。若打印预览仍显示旧版，请强制刷新页面；PWA 用户可关闭后重新打开，以加载新的 Service Worker 缓存版本。
+
+
+## V10.11 多语言部署与缓存
+
+部署时必须同时上传 `index.html`、`i18n.js`、`sw.js` 和三种语言的 CHANGELOG 文件。Service Worker 缓存名升级为 `daily-weekly-planner-v10-11-multilingual-ui`，并将 `i18n.js` 加入预缓存列表，因此三种语言界面支持首次在线载入后离线使用。无需 Supabase SQL、数据库迁移或计划数据转换；语言偏好单独保存在 `personal-planner:language:v1`。更新后请刷新网页；已安装 PWA 请完全关闭再重新打开。若仍显示旧版本，检查 Pages 对应提交的部署工作流成功后再处理站点缓存，避免清除会影响计划数据的整个站点存储。
+
+
+---
+
+## 历史快照：`docs/nightly-e2e-testing.md`（整合前）
+
+# Nightly Playwright E2E and Stability Testing
+
+## Purpose
+
+This project is a static HTML application. The browser suite verifies real user-visible behavior without changing the production application or its data format.
+
+## Safety boundary
+
+- Every test uses a fresh Playwright browser context and its isolated LocalStorage.
+- The test intercepts the Supabase login RPC and returns a synthetic success response.
+- Every other request under `/rest/v1/` is blocked by Playwright.
+- No real Supabase account, password, snapshot, upload, or download is used.
+- The tests do not open cloud-sync dialogs or invoke cloud synchronization.
+- Test records exist only in the temporary browser context created by the test runner.
+
+## Test coverage
+
+- All seven module navigation buttons.
+- Independent LocalStorage partitions for Plan, Work, Language, Organize, Results, Future, and Memo.
+- Create/save behavior in each module.
+- Persistence after a browser reload.
+- Plan completion-state persistence.
+- Long-running repeated module navigation and LocalStorage JSON/schema audits.
+- Uncaught browser JavaScript errors.
+
+## Run locally
+
+Requirements: Node.js 24, Python 3, and npm.
+
+```bash
+npm install
+npx playwright install chromium
+npm run test:e2e
+```
+
+Run only the normal browser regression tests:
+
+```bash
+npm run test:e2e:smoke
+```
+
+Run a shorter stability test while developing:
+
+```bash
+STABILITY_DURATION_MINUTES=2 npm run test:stability
+```
+
+## GitHub Actions
+
+- Daily schedule: removed in V10.35 to keep maintenance light for a personal project.
+- Push and pull-request validation: 1-minute stability smoke duration plus all functional tests.
+- Manual run: Actions → Nightly Playwright E2E and Stability → Run workflow; default stability duration 10 minutes, can be changed.
+- Job timeout: 60 minutes.
+- HTML report, JSON results, screenshots, traces, and stability summary are uploaded as an artifact for 30 days.
+
+There is no scheduled run. Re-add a `schedule` trigger to the workflow if nightly runs are needed again.
+
+## Interpreting results
+
+A green workflow means the browser scenarios and the configured soak duration completed without detected failures. It is not a proof that every possible application state is defect-free. A failed run should be inspected through the HTML report and any attached screenshot/trace.
