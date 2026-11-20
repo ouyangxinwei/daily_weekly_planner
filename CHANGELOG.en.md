@@ -1,3 +1,11 @@
+# V10.55 Magnificent Seven stock dashboard — 2026-11-21
+
+- Added a Magnificent Seven stock dashboard directly below the homepage weather section for AAPL, MSFT, NVDA, AMZN, GOOGL, META and TSLA.
+- Shows daily closes, daily and weekly changes for the latest trading week in US Eastern dates, with expandable OHLCV details; dates follow returned market data rather than assuming weekend or holiday sessions.
+- Added a dedicated Supabase `stock-market-api` Edge Function proxy. No provider key is exposed in the frontend. The current source is Yahoo Finance's unofficial public Chart endpoint; possible delays and availability limitations are disclosed.
+- Added 10-minute server cache, 15-minute browser cache, manual refresh and cached-data fallback; supports Chinese, English, Japanese, dark theme and responsive layouts.
+- Does not modify company-api, business database, RLS, authentication or planner cloud-sync data.
+
 # V10.54 Company workspace: business trends and period review — 2026-11-20
 
 - Added weekly (last 8 weeks) and monthly (last 6 months) business trend views.
