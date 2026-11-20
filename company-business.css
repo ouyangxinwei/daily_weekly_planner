@@ -28,3 +28,13 @@ html[data-theme="dark"] .cw-business-tab[aria-pressed=true]{background:#302b50;c
 .cw-project-detail-grid .cw-project-detail-description{grid-column:1/-1}
 html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
 @media(max-width:480px){.cw-project-detail-grid{grid-template-columns:1fr}.cw-project-detail-grid .cw-project-detail-description{grid-column:auto}}
+
+
+.cw-business-toolbar{grid-template-columns:minmax(160px,1fr) 140px minmax(150px,190px) auto auto}
+.cw-business-toolbar #cw-business-project-filter[hidden]{display:none!important}
+@media(max-width:700px){
+  .cw-business-toolbar{grid-template-columns:1fr 1fr}
+  .cw-business-toolbar .cw-search{grid-column:1/-1}
+  .cw-business-toolbar #cw-business-project-filter{grid-column:1/-1}
+  .cw-business-toolbar #cw-business-new{grid-column:1/-1}
+}
