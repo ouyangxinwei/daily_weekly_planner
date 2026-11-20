@@ -5,8 +5,8 @@ const weekly = getBusinessTrendReport({
   projects: [
     { id: 'p1', status: 'active', created_at: '2026-01-05T09:00:00Z', updated_at: '2026-01-05T09:00:00Z' },
     { id: 'p2', status: 'completed', created_at: '2025-12-20T09:00:00Z', updated_at: '2026-01-05T12:00:00Z' },
-    { id: 'p3', status: 'planned', created_at: '2026-01-06T09:00:00Z', updated_at: '2026-01-06T09:00:00Z' },
-    { id: 'p4', status: 'completed', created_at: '2025-12-01T09:00:00Z', updated_at: '2025-12-31T09:00:00Z' }
+    { id: 'p3', status: 'planned', created_at: '2026-01-05T12:00:00Z', updated_at: '2026-01-06T09:00:00Z' },
+    { id: 'p4', status: 'completed', created_at: '2025-12-01T09:00:00Z', updated_at: '2025-12-20T09:00:00Z' }
   ],
   tasks: [
     { id: 't1', status: 'todo', created_at: '2026-01-05T10:00:00Z', updated_at: '2026-01-05T10:00:00Z' },
