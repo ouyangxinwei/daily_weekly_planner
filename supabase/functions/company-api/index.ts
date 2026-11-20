@@ -533,7 +533,19 @@ Deno.serve(async (req: Request) => {
       if (id && req.method === "PATCH") {
         const patch = validateRecordPatch(await readJson(req));
         const existing = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
-        if (existing.record_type === "project") validateProjectProgressFields(patch);
+        if (existing.record_type === "project") {
+          validateProjectProgressFields(patch);
+          const existingData = existing.data && typeof existing.data === "object" ? existing.data as JsonObject : {};
+          const incomingData = patch.data && typeof patch.data === "object" ? patch.data as JsonObject : {};
+          const nextMode = String(incomingData.progress_mode ?? existingData.progress_mode ?? "manual");
+          if (existingData.progress_mode === "auto" && nextMode === "auto") {
+            for (const key of ["progress_percent", "manual_progress_percent"]) {
+              if (incomingData[key] !== undefined && incomingData[key] !== existingData[key]) {
+                throw new ApiError(400, "AUTOMATIC_PROGRESS_IS_READ_ONLY");
+              }
+            }
+          }
+        }
         if (existing.record_type === "task") {
           validateTaskFields(patch, false);
           const nextProjectId = patch.parent_record_id === undefined ? existing.parent_record_id : patch.parent_record_id;
