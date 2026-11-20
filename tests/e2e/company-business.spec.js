@@ -46,6 +46,10 @@ test('company workspace manages projects and linked follow-ups through generic r
       await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:row})});return;
     }
     if(match&&method==='DELETE'){
+      const target=records.find(r=>r.id===match[1]);
+      if(target?.record_type==='project'&&records.some(r=>r.parent_record_id===target.id||(r.related_record_ids||[]).includes(target.id))){
+        await cors(route,{status:409,contentType:'application/json',body:JSON.stringify({error:'RECORD_IN_USE_OR_INVALID_RELATION'})});return;
+      }
       const index=records.findIndex(r=>r.id===match[1]);if(index>=0)records.splice(index,1);
       await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:{deleted:true}})});return;
     }
@@ -123,6 +127,13 @@ test('company workspace manages projects and linked follow-ups through generic r
   expect(taskRecord.due_date).toBe('2026-12-01');
   expect(taskRecord.data.description).toBe('Create responsive landing page');
   expect(calls.some(c=>c.method==='GET'&&c.path==='/projects/'+PROJECT_ID+'/tasks')).toBe(true);
+
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
+  await expect(page.locator('#cw-business-feedback')).toContainText('该项目仍有关联的任务或跟进记录');
+  expect(records.some(r=>r.record_type==='task'&&r.parent_record_id===PROJECT_ID)).toBe(true);
+  await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
 
   await page.locator('#cw-business-list button').filter({hasText:'编辑'}).click();
   await page.locator('#cw-biz-title').fill('Build project landing page v2');
