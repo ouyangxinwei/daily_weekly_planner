@@ -41,3 +41,15 @@ html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
 
 .cw-form-hint{grid-column:1/-1;margin:-4px 0 4px;color:var(--muted);font-size:12px;line-height:1.5}
 .cw-form-grid .field input:disabled{opacity:.62;cursor:not-allowed}
+
+/* Stage 1-I-A: relationship links and cross-module actions */
+.cw-relation-link{border:0;cursor:pointer;font:inherit;text-align:left}
+.cw-relation-link:hover{color:var(--brand);text-decoration:underline;text-underline-offset:2px}
+.cw-project-details-dialog .cw-dialog-actions{flex-wrap:wrap}
+.cw-customer .cw-card-actions{flex-wrap:wrap}
+.cw-business-card .cw-card-actions{flex-wrap:wrap}
+@media(max-width:480px){
+  .cw-customer .cw-card-actions{max-width:156px;justify-content:flex-end}
+  .cw-project-details-dialog .cw-dialog-actions{justify-content:stretch}
+  .cw-project-details-dialog .cw-dialog-actions button{flex:1 1 42%}
+}
