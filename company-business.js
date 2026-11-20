@@ -188,7 +188,8 @@
     const result = await api('/customers?limit=100&offset=0');
     state.customers = Array.isArray(result?.items) ? result.items : [];
     const projects = await api('/records?record_type=project&limit=100&offset=0');
-    state.projects = Array.isArray(projects?.items) ? projects.items : [];
+    const pageProjects = Array.isArray(projects?.items) ? projects.items : [];
+    state.projects = state.relationshipRecords?.projects ? [...new Map([...pageProjects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()] : pageProjects;
   }
   async function loadActive() {
     if (state.busy || state.tab === 'customers') return;
@@ -250,6 +251,8 @@
   function projectName(id) { return state.projects.find(p => p.id === id)?.title || '—'; }
   async function openRelatedRecord(tab, record) {
     if (!record?.id || !['projects','tasks','followups'].includes(tab)) return;
+    const detailsDialog = $('cw-project-details');
+    if (detailsDialog?.open) detailsDialog.close();
     if (state.relationshipRecords?.projects) {
       state.projects = [...new Map([...state.projects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()];
     }
