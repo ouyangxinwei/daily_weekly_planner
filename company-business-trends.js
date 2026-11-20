@@ -102,7 +102,7 @@ export function getBusinessTrendReport(data = {}, mode = 'month', today = '') {
     mode: periodMode,
     periods: series,
     metrics,
-    currentPeriod: { start: current.start, end: current.end },
+    currentPeriod: { start: current.start, end: today },
     previousPeriod: { start: previous.start, end: previous.end },
     totals: {
       projects: projects.length,
