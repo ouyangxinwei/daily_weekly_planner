@@ -1,3 +1,11 @@
+# V10.42 Company workspace: projects and follow-ups — 2026-11-20
+
+- Added dedicated Projects and Business Follow-ups views alongside customer management.
+- Projects support customer links, create/edit/delete, status, start and target dates, and descriptions.
+- Follow-ups support customer and optional project links, contact method, follow-up time, outcome, next follow-up date, notes, and completion status.
+- Reuses the existing generic `/records` API and `company_records`; no database migration, schema change, or change to planner authentication/sync.
+- Added Chinese, English and Japanese UI, responsive layouts, and Playwright mock-API CRUD coverage. Automated tests do not write to production business data.
+
 # V10.41 · Company Website Customer Workspace — 2026-11-20
 
 - Added a separate Company Website workspace alongside the Planner and Language Study workspaces, without changing the existing seven planner modules or their sync partitions.

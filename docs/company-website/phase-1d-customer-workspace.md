@@ -40,7 +40,7 @@
 
 - 新增 Playwright 用例 `tests/e2e/company-website.spec.js`，通过模拟 API 验证工作区入口、现有会话桥接、客户新增/读取、编辑、搜索和删除。
 - 测试使用虚构凭据和内存 mock，不连接真实 Supabase 客户接口，不创建真实客户数据。
-- 真实账号端到端 CRUD 仍需在 GitHub Pages 部署后由用户浏览器完成；此项不会要求用户把密码发送到聊天。
+- 真实账号端到端 CRUD 已由用户在 GitHub Pages 浏览器中验证，用户反馈功能测试 OK；未要求用户发送密码。
 
 ## 本阶段未包含
 
@@ -60,4 +60,4 @@
 - GitHub Pages：`https://ouyangxinwei.github.io/daily_weekly_planner/`。
 - Pages 构建与部署工作流：2026-11-20，Run `44673505170`，状态 `success`，对应主分支提交 `fc63daa587cdde6d4283958629c868b7e5044df6`。
 - Supabase Edge Function `company-api` 继续使用已部署的 v3；本阶段没有新增数据库迁移。
-- Playwright 测试使用模拟 API，不写入真实客户记录。真实账号下的客户 CRUD 仍需用户在已部署页面中操作验证；当前数据库客户记录数为 0。
+- Playwright 测试使用模拟 API，不写入真实客户记录。用户随后反馈真实账号下客户功能测试 OK。真实项目/跟进功能仍需本阶段部署后由用户浏览器验证。
