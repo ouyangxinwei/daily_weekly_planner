@@ -56,5 +56,10 @@
 
 - 开发版本：V10.52.0。
 - 数据库/API：无变更，继续使用 company-api v5。
-- 功能 PR、Actions、Pages 部署和用户验收：待完成。
+- 功能 PR #53：https://github.com/ouyangxinwei/daily_weekly_planner/pull/53，已 squash merge。
+- 合并提交：015ddcdefe9d6d2b43e8d4a36d44fab8cde3a1d7。
+- PR 验证 run 44728547467：completed / success。
+- main 验证 run 44728617816：completed / success。
+- Pages run 44728617320：completed / success；build、deploy、report-build-status 均成功，V10.52.0 已部署。
+- 用户真实浏览器验收：等待用户确认。
 - Playwright 不作为默认合并前提；没有明确运行结果不记录为通过。
