@@ -2,10 +2,11 @@
 
 - 项目：`daily_weekly_planner`
 - 模块：个人公司网站
-- 文档状态：实施记录
+- 文档状态：已实施并完成数据库层最小验证（2026-11-20）
 - 实施分支：`company-website-phase-1b-database`
 - 数据库项目：慢慢计划现有 Supabase 项目 `kopvznygsqsheibsjjvv`
-- 对应迁移：`supabase/migrations/20261120110000_company_records.sql`
+- Supabase Migration：`20261120032536_company_records_stage_1b`
+- 仓库 SQL 文件：`supabase/migrations/20261120110000_company_records.sql`
 
 ---
 
@@ -13,7 +14,7 @@
 
 本阶段仅实现数据库层，不开发页面、不部署 Edge Function、不创建 Storage Bucket，也不修改慢慢计划现有登录、云同步或 `planner_cloud_data`。
 
-已实现的数据库设计：
+已实现：
 
 - 单一业务主表 `public.company_records`。
 - 七种记录类型：customer、project、task、follow_up、transaction、document、file。
@@ -50,18 +51,28 @@
 6. 不修改现有 `planner_check_password`、`planner_login`、`planner_get_data`、`planner_put_data`。
 7. service_role Secret Key 只能由后续 Edge Function 在服务端使用，绝不能进入 GitHub Pages 或前端代码。
 
-## 4. 最小验证计划与边界
+## 4. 数据库应用与验证结果
 
-本阶段最小验证包含：
+<badge>已应用</badge> Supabase 返回 migration 应用成功，迁移历史中出现 `20261120032536_company_records_stage_1b`。
 
-- 检查表字段、主键、外键、约束、索引和 RLS。
-- 检查 anon/authenticated/service_role 无法直接访问业务表。
-- 检查六个业务 RPC 只允许 service_role 执行。
-- 使用错误密码验证 RPC 拒绝请求。
-- 在事务回滚环境中检查基础记录插入、读取、更新、删除，以及交易金额/币种约束。
-- 确认现有计划数据表及旧 RPC 未被迁移修改。
+已完成最小 SQL 验证：
 
-由于当前没有把用户密码提供给数据库验证流程，本阶段不会读取或导出密码摘要，也不会伪造有效登录。真实凭据下的完整 RPC CRUD 将在 1-C Edge Function 联调时验证。
+- 表创建成功，三个业务查询索引和主键索引存在。
+- RLS 已启用。
+- anon、authenticated、service_role 对业务表均没有 SELECT 直接权限。
+- 六个业务 RPC 的 EXECUTE 权限仅对 service_role 开放；anon/authenticated 均无权执行。
+- 两个内部辅助函数不对任何 API 角色开放。
+- 错误密码验证结果为 `false`，没有通过认证。
+- 使用数据库事务内的临时测试记录完成客户创建、交易创建、数值读取、更新、删除。
+- 非法币种 EUR 被数据库 CHECK 约束拒绝。
+- 测试记录已清理，没有保留示例业务数据。
+- 旧计划表及旧登录/同步 RPC 未修改。
+
+尚未使用真实用户密码调用完整 RPC CRUD；没有读取或导出密码摘要，也没有要求用户把密码发到聊天中。有效凭据下的端到端 RPC 验证将在 1-C Edge Function 联调时完成。
+
+### Security Advisor
+
+本次 Advisor 对新表报告 `RLS Enabled No Policy` 信息项。这是当前刻意采用的封闭策略：没有客户端直连策略，且所有客户端角色无表权限。Advisor 另外列出的公开 SECURITY DEFINER 警告，指向原有 `planner_login`、`planner_get_data`、`planner_put_data`，不是本阶段新增的 company RPC；按阶段边界未修改旧认证系统。
 
 ## 5. 变更与未包含内容
 
@@ -70,7 +81,7 @@
 - 暂不创建 Storage Bucket 或文件对象。
 - 暂不创建 Edge Function。
 - 暂不修改前端、应用 VERSION 或 Pages 部署。
-- 本阶段数据库迁移需要在目标 Supabase 项目实际应用并通过 SQL 验证后，才能标记为完成；GitHub 文件提交/合并不代表数据库已更新。
+- 数据库迁移已实际应用；GitHub PR 合并只负责保存迁移源文件和文档，不等于前端功能部署。
 
 ## 6. 官方参考
 
