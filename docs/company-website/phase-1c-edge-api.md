@@ -119,6 +119,9 @@ Supabase 新式 `sb_secret_*` Key 仅通过服务端 `apikey` 请求头调用 Po
 
 已确认：
 
+- IP 限流 SQL smoke test 通过：同一测试哈希在 60 秒窗口内前两次允许、第三次拒绝；测试行已删除，数据库没有残留测试行。
+- 限流技术表 RLS 已启用；anon、authenticated、service_role 均无直接 SELECT 权限；限流 RPC 仅 service_role 可执行。
+
 - 限流表和 RPC 已创建。
 - 限流 RPC 不允许 anon 执行，仅允许 service_role 执行。
 - Edge Function 部署成功，平台状态 ACTIVE，v2 已读取回查。
@@ -131,6 +134,12 @@ Supabase 新式 `sb_secret_*` Key 仅通过服务端 `apikey` 请求头调用 Po
 - 前端尚未接入 API；GitHub Pages 没有因本阶段更新。
 
 真实凭据 CRUD 验证将在前端接入时，通过用户在自己的浏览器登录后完成。先用错误密码检查 401，再创建一个临时测试客户，执行读取、更新、删除并确认清理。
+
+### Security Advisor 复查
+
+- 新增的 `company_records` 与 `company_api_rate_limits` 报告 `RLS Enabled No Policy` 信息项。当前没有客户端表访问授权，这是刻意的封闭配置；业务数据只能经受限服务端 RPC 访问。
+- 公开 SECURITY DEFINER 警告仍指向旧计划模块的 `planner_login`、`planner_get_data`、`planner_put_data`，不是本阶段新增 RPC；按项目边界未改动旧登录与同步功能。
+- `Leaked Password Protection Disabled` 针对 Supabase Auth；当前模块沿用自定义 bcrypt 账号验证，不使用 Supabase Auth，此项不改变本阶段认证实现。
 
 ## 4. 后续
 
