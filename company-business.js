@@ -208,7 +208,7 @@ import { getBusinessOverviewMetrics, getRecentBusinessRecords } from './company-
         fetchCompleteRecords('/records?record_type=task','tasks'),
         fetchCompleteRecords('/records?record_type=follow_up','followups')
       ]);
-      const data={customers,projects,tasks,followups};state.overviewData=data;renderOverview(data);feedback.textContent='';
+      const data={customers,projects,tasks,followups};state.overviewData=data;state.customers=customers;state.projects=projects;state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);renderOverview(data);feedback.textContent='';
     } catch(error) {
       feedback.classList.add('error');feedback.textContent=error.message||t('overviewError');
       $('cw-overview-kpis').replaceChildren();$('cw-overview-attention').replaceChildren();$('cw-overview-recent').replaceChildren();
