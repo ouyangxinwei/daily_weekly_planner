@@ -6,7 +6,7 @@
 - 实施分支：`company-website-phase-1b-database`
 - 数据库项目：慢慢计划现有 Supabase 项目 `kopvznygsqsheibsjjvv`
 - Supabase Migration：`20261120032536_company_records_stage_1b`
-- 仓库 SQL 文件：`supabase/migrations/20261120110000_company_records.sql`
+- 仓库 SQL 文件：`supabase/migrations/20261120032536_company_records_stage_1b.sql`
 
 ---
 
