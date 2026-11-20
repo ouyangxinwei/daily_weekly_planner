@@ -1,177 +1,67 @@
-# V10.14 四模块管理部署与数据说明
-
-- V10.14 沿用现有 GitHub Pages、Supabase 登录和 `planner_get_data`／`planner_put_data` RPC，不需要新建数据库表或执行 SQL 迁移。
-- Service Worker 缓存名为 `daily-weekly-planner-v10-14-four-module-management`。部署新版时同时发布 `index.html`、`i18n.js`、`sw.js`、三种语言 CHANGELOG 和文档。
-- 本地数据键：计划 `personal-planner:v1`、工作 `personal-work:v1`、外语学习 `personal-language:v1`、整理 `personal-organizer:v1`。切换模块不会混合数据。
-- 首次打开 V10.14 时，计划模块会将普通记录、归档记录和回收站中 category=「工作」的记录迁移为「未分类」，并从计划分类中移除「工作」。迁移只修改分类字段，保持其他字段、记录顺序和完成信息；迁移可重复执行。保存成功后才替换当前内存状态；若 LocalStorage 保存失败，原数据不被覆盖，下次进入计划模块会重试。迁移前建议先导出计划 JSON 备份。其他计划分类顺序保持不变。
-- 工作分类与任务状态独立；外语学习分类为英语、德语、俄语、日语、其他（不含挪威语）。
-- JSON 备份分别使用 `moduleType: plan/work/language/organize`。旧版没有 `moduleType` 的计划备份仍可导入；跨模块备份会被拒绝。
-- 云端快照保留原计划根结构，并使用 `work`、`language`、`organizer` 分区保存其他模块。上传当前模块时先读取云端快照并合并，不覆盖其他模块；下载只恢复当前模块。若要把本机计划分类迁移同步到云端，请在计划模块完成首次迁移后上传计划数据。
-- 更新后刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。不要为了刷新版本而清除整个站点数据，以免删除尚未备份的本地记录。
-
----
-
-# V10.13 整理模块部署与数据说明
-
-- V10.13 沿用现有 GitHub Pages 和 Supabase 配置，不需要新建数据库表或执行 SQL 迁移。
-- 整理数据本地保存在 `personal-organizer:v1`；计划仍保存在 `personal-planner:v1`。清除浏览器数据前，请分别在两个模块导出 JSON 备份。
-- 云端上传会先读取当前完整快照，再合并当前模块；请在整理模块中上传整理数据，在计划模块中上传计划数据。下载只替换当前打开的模块。
-- 旧云端快照只有计划数据时仍可下载计划；整理模块会提示尚无整理备份，上传整理数据后才建立 organizer 分区。
-- JSON 文件包含 moduleType，不能将整理备份导入计划，反之亦然。跨设备恢复时先登录相同 Supabase 账号，再分别下载计划和整理数据。
-
-# V10.12 自定义分类管理部署说明
-
-部署新版 index.html、i18n.js、sw.js、三种语言的 CHANGELOG 和文档。Service Worker 缓存名为 daily-weekly-planner-v10-12-custom-category-management。无需 Supabase SQL 或数据库迁移，schemaVersion: 1 不变。分类配置进入本地状态、JSON 备份／恢复和 Supabase 快照。旧版数据缺少 categories 时自动补充原有七个分类。删除使用中分类前需选择目标分类，普通、归档和回收站计划先迁移再删除。更新后刷新网页；已安装 PWA 请完全关闭后重新打开。不要直接清除整个站点数据。
-
-## V10.10 首页星级统计与任务快速定位
-
-部署新版 index.html、sw.js 和更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-10-star-dashboard-jump。无需 Supabase SQL 或数据迁移，schemaVersion: 1 和现有 JSON 备份格式保持不变。
-
-首页欢迎语下方会显示 1–5 星未完成任务数量。统计仅包括每日、每周、每月、每年正式计划，排除已完成、已归档和随机临时计划。点击非零星级后进入任务数量最多的周期；并列时每日优先，其次每周、每月、每年。系统会清空搜索和分类筛选，保留排序模式，并定位高亮第一条匹配任务。
-
-更新后若没有看到新面板，请刷新网页；已安装 PWA 请完全关闭后重新打开，等待 Service Worker 更新。统计为 0 的星级不可点击属于正常行为。
-
-## V10.9 优先级默认排序更新
-
-部署新版 index.html、sw.js 及更新后的文档。Service Worker 缓存名升级为 daily-weekly-planner-v10-9-priority-sorting。无需 Supabase SQL 或数据迁移，计划 schemaVersion: 1 不变。
-
-首次使用 V10.9 时，若当前浏览器没有已保存的排序偏好，将默认显示「优先级（未完成优先）」。之后用户切换的排序方式保存在该浏览器的独立 LocalStorage 键中。排序偏好不会随 JSON 备份或 Supabase 云端快照迁移；其他设备首次使用时也会默认优先级排序。
-
-若仍显示旧排序界面，请刷新页面；已安装 PWA 建议完全关闭后重新打开，以便 Service Worker 更新缓存。
-
-## V10.8 版本记录与部署状态
-
-首页「版本与更新记录」弹窗通过公开 GitHub 内容地址读取 CHANGELOG，并调用 GitHub API 检查 main 最新提交与 Pages 构建部署工作流。若 API 受网络限制或匿名请求达到额度，状态会显示「检查失败」，可稍后刷新；完整履历仍可通过弹窗内 GitHub 链接查看。
-
-「部署成功」表示 GitHub Pages 的 build and deployment workflow 已对当前 main SHA 成功完成。它不保证浏览器或 PWA 缓存已经切换到最新文件。若仍看到旧界面，请刷新网页；已安装 PWA 请完全关闭后重新打开。Service Worker 缓存名为 `daily-weekly-planner-v10-8-release-history`。
-
-## V10.7 快速添加计划
-
-部署新版 `index.html`、`sw.js` 及更新后的文档。Service Worker 缓存名升级为 `daily-weekly-planner-v10-7-quick-add`；更新后重新载入网页，已安装 PWA 建议完全关闭后重新打开。无需 Supabase SQL 或数据迁移，`schemaVersion: 1` 保持不变。
-
-快速添加位于计划卡片进度条下方。输入名称后按 Enter 或点击“＋ 添加”。新计划进入每日视图，默认未完成、未分类、1 星且无提醒。保存失败时输入内容会保留；若出现存储错误，请先检查浏览器站点存储，不要清除网站数据。
-
-## V10.6 保存一致性修复
-
-部署新版 `index.html` 与 `sw.js`。Service Worker 缓存名升级为 V10.6，更新后建议重新载入页面；已安装 PWA 可完全关闭后重新打开。无需数据库迁移，数据结构保持 `schemaVersion: 1`。
-
-若出现保存失败提示，应用会保留本次操作前的数据状态。建议先导出 JSON 备份，再检查浏览器站点存储空间、隐私模式或存储限制。不要为了排查而直接清除网站数据，以免删除尚未备份的计划。
-
-## V10.5 五级优先级更新
-
-上传新版 `index.html`、`sw.js` 及更新后的文档即可。Service Worker 缓存名已升级为 V10.5。无需 Supabase SQL 迁移；优先级继续存储在原 `priority` 字段，旧数据 1/2/3 无需转换。JSON 备份恢复和云端上传/下载会自动保留 4、5 星。
-
 # 部署与故障排查
 
-## 数据库账号初始化
+## 1. GitHub Pages 发布
 
-1. 在新 Supabase 项目 SQL Editor 中全选 `docs/supabase-setup.sql` 的全部内容并运行，确保最后一个函数结束标记也包含在内。不要只运行从 `returns boolean ... as $put_data$` 开始的选中片段。
-2. 按 SQL 脚本注释在 SQL Editor 单独插入用户名 `oooo` 的密码摘要。该初始化命令不要加入公开仓库。
-3. 登录页面填入项目 URL、公开 publishable/anon key、用户名和密码。
-4. V10.2 已移除项目自定义的连续失败锁定；若旧数据库仍表现为锁定，请确认已执行 `docs/migration_V10.2_remove_login_lockout.sql`。
+项目通过 GitHub Pages 发布静态应用。正式代码变更遵循独立分支 → PR → `main` 的工作流。
 
-登录验证和数据读写由 database RPC 处理；直接访问表的权限已撤销。不要将 service_role key 填入网页。
+1. 将功能分支通过 PR 合并到 `main`。
+2. 检查 GitHub Actions 中对应的 Pages build/deployment workflow。
+3. 只有当对应部署 workflow 成功且部署目标与预期提交一致时，才报告已部署。
+4. 打开 [在线应用](https://ouyangxinwei.github.io/daily_weekly_planner/) 验证页面。
+5. 若应用显示旧版本，先刷新页面；已安装 PWA 可完全关闭后重新打开，等待 Service Worker 更新。
 
-## V9 云端同步
+仓库提交成功、PR 合并成功和 GitHub Pages 部署成功是三个不同状态，不可互相替代。
 
-登录页需要 Supabase 项目 URL 和公开 publishable/anon key。登录使用 `planner_login` RPC；同步读写使用 `planner_get_data` 与 `planner_put_data`。SQL 初始化步骤在前面的“数据库账号初始化”中。部署到 HTTPS 后使用 GitHub Pages 网址登录；直接用 `file://` 打开时，浏览器可能拦截对 Supabase 的请求。
+## 2. Service Worker 与缓存
 
-### 同步报错
+- 静态资源更新时检查 `sw.js` 的预缓存资源列表。
+- 应用版本发布时更新 cache name，确保新资源进入新缓存。
+- 不建议通过清除浏览器全部站点数据刷新版本，这可能删除尚未备份的本地业务数据。
+- 如果页面异常，先保留数据并导出 JSON 备份，再检查浏览器控制台、网络请求和 Service Worker 状态。
 
-- 检查 URL 与 publishable/anon key 是否来自同一个 Supabase 项目。
-- 若提示关系或权限错误，确认已执行 `docs/supabase-setup.sql`，并确认 `planner_login`、`planner_get_data`、`planner_put_data` RPC 已创建且允许 anon 调用。
-- 同步按钮为灰色时，先登录账号。
-- 上传和下载是整份快照的单向替换，不是自动合并；先确认数据来源并保留 JSON 备份。
+## 3. 本地数据保护
 
-## 1. 发布到 GitHub Pages
+- 计划、工作、外语任务、整理、成绩和未来模块的数据分区彼此独立。
+- 外语学习工作区和公司网站业务数据也使用独立存储/服务边界。
+- 修改数据或进行恢复前，优先使用应用内 JSON 导出。
+- 云端下载是覆盖当前模块数据的操作；整体下载会影响对应的多个模块。必须先确认数据来源和界面提示。
+- 不要通过清除 LocalStorage、IndexedDB 或浏览器站点数据来排查普通 UI 问题。
 
-1. 在 GitHub 创建一个仓库。
-2. 上传本项目全部文件，保持 `index.html`、`manifest.webmanifest`、`sw.js` 和 `icon.svg` 位于发布目录根部。
-3. 打开仓库 **Settings → Pages**。
-4. 在 **Build and deployment** 中选择 **Deploy from a branch**，选择 `main` 分支和 `/(root)`，保存。
-5. 等待部署完成后，打开 Pages 页面显示的 HTTPS 地址。
+## 4. Supabase 初始化与认证
 
-Pages 的实际访问地址由 GitHub 提供。项目使用相对资源路径，既可部署到用户站点也可部署到仓库项目路径。
+新建计划同步数据库时，在 Supabase SQL Editor 执行 `supabase-setup.sql`。随后按脚本注释单独创建初始账号。包含真实密码的初始化语句不得提交到公开仓库。
 
-## 2. 手机使用与离线能力
+- 浏览器只配置项目 URL 和公开 publishable/anon key。
+- 不要在网页中填写或提交 `service_role` key。
+- 确认项目 URL 与公开 key 来自同一个 Supabase 项目。
+- 账号验证和云端数据读写使用项目既有 RPC，具体见 [数据库认证设计](database_auth_design_document.md)。
 
-首次请通过 HTTPS 在线打开。Service Worker 安装后会缓存入口、manifest 和图标。支持 PWA 安装的浏览器可从菜单选择“安装应用”或“添加到主屏幕”；不同浏览器选项可能不同。双击本地 HTML 可使用核心功能，但不启用 Service Worker 离线缓存。
+## 5. 公司网站服务
 
-## 3. 更新后仍显示旧版
+个人公司网站通过 Supabase Edge Function `company-api` 访问 `company_records`。数据库、API、认证和各阶段实施说明见 [公司网站文档](company-website/README.md)。
 
-更新静态资源时递增 `sw.js` 中的 `CACHE_NAME`，再提交到 GitHub。若仍显示旧版，确认 Pages 发布完成，关闭旧标签页后重新打开并刷新；必要时清理该站点缓存或重新安装 PWA。清除站点数据可能同时清除本地计划，请谨慎操作。
+排查时应分别检查：
+- GitHub Pages 是否已部署包含对应前端资源的提交。
+- `company-api` Edge Function 是否处于 ACTIVE 状态。
+- Edge Function 的 CORS allowlist 是否包含当前前端 origin。
+- 浏览器网络请求是否返回预期 HTTP 状态和 API 错误信息。
+- 不要在前端暴露 service-role 或其他服务端密钥。
 
-## 4. 常见问题
+## 6. 常见问题处理原则
 
-### 批量清理按钮是灰色的
+| 现象 | 建议检查 |
+|---|---|
+| 更新后仍显示旧界面 | Pages 部署状态、Service Worker 更新、浏览器刷新 |
+| 登录失败 | Supabase URL/key 是否匹配、数据库 RPC 是否初始化、账号是否有效 |
+| 云端数据与本机不一致 | 当前模块、最后同步时间、上传/下载方向、备份是否已保存 |
+| 公司网站请求失败 | Pages 部署、company-api 状态、CORS、认证会话和 API 响应 |
+| 本地数据无法保存 | 浏览器存储配额/隐私模式；先导出可读取的数据，不要直接清站点数据 |
+| PWA 未更新 | 关闭所有应用窗口后重新打开，确认 SW 已激活 |
 
-- “清空当前标签计划”在该标签没有计划时禁用。
-- “清空当前标签已完成”在该标签当前周期没有已完成计划时禁用。
-- 批量操作按当前标签范围处理，不会因搜索或分类筛选而缩小范围；执行前会显示影响数量并要求确认。
+## 7. 部署状态汇报规则
 
-### 提醒没有出现
-
-- 确认保存时允许了浏览器通知权限，并检查系统是否允许该浏览器发送通知。
-- 提醒需要计划页面保持打开；页面关闭、浏览器休眠或设备省电可能导致不触发或延迟。
-- 已完成的计划不会提醒，且每个提醒时间只发送一次。
-
-### 随机临时计划消失
-
-随机临时计划只在创建时所在的日、周或月内有效。日历周期结束后会自动清除；每周按周一开始计算。需要跨周期保留的事项，请添加为普通每日／每周／每月计划。
-
-### JSON 导入失败
-
-- 确认选择的是本网页导出的 `.json` 文件，文件大小不超过 2 MB。
-- 文件必须包含支持的 `schemaVersion: 1`，且计划字段和周期值有效。
-- 导入错误不会改写当前数据；可尝试从原网页重新导出备份。
-- 导入确认会替换当前浏览器数据，恢复前可先导出一份现有备份。
-- 旧版备份中的计划若未包含优先级，会显示为 1 星。
-
-### 导出后找不到文件
-
-- 查看浏览器默认“下载”目录及下载列表。
-- 检查浏览器是否拦截了下载，或设备存储空间是否充足。
-
-### V1 备份中的分类为空
-
-V1 不包含分类字段。导入 V1 备份后，计划默认显示为“未分类”，可以逐条编辑选择分类，再导出新的 V2 备份。
-
-### 页面空白
-
-- 确认打开的是 Pages 发布地址，而不是仓库源码页。
-- 检查根目录是否包含 `index.html`。
-- 打开浏览器开发者工具 Console 查看脚本报错。
-- 检查 HTML 上传是否完整。
-
-### 计划没有保留
-
-- 确认没有使用无痕窗口，且仍在同一浏览器和设备访问。
-- 检查浏览器是否限制网站存储或已清理该站点数据。
-- 页面出现存储警告时，浏览器可能拒绝读取或写入 `localStorage`。
-
-### PWA 没有安装或离线不可用
-
-- PWA 需通过 HTTPS 或 localhost 访问，不能依赖 `file://`。
-- 确认 manifest、图标和 `sw.js` 均可通过发布网址访问。
-- 部分浏览器不会显示安装提示，可尝试浏览器菜单中的安装选项。
-
-## 5. 发布前检查
-
-- [ ] GitHub Pages 能打开首页。
-- [ ] 新增、编辑、完成、取消完成和删除流程可操作。
-- [ ] 刷新后本地计划仍存在。
-- [ ] 桌面和手机视口下布局可用。
-- [ ] 静态资源路径正确，缓存名与本次版本一致。
-## V10.3 参考网站部署说明
-本功能仅修改前端计划 JSON 字段，无需执行 Supabase SQL。部署时上传完整项目文件并确保 `sw.js` 一并更新，以便浏览器更新缓存。
-
-
-
-## V10.4 PDF 导出说明
-
-PDF 导出在浏览器本地生成打印排版页，不调用服务器，也不依赖外部 CDN。点击“导出 PDF”后需允许本站打开新窗口；若没有打开，请检查浏览器的弹出窗口拦截设置。随后在浏览器打印对话框中选择“另存为 PDF”。如需中文字体正常显示，建议使用现代版 Chrome、Edge 或 Firefox，并确保操作系统有可用的中文字体。若打印预览仍显示旧版，请强制刷新页面；PWA 用户可关闭后重新打开，以加载新的 Service Worker 缓存版本。
-
-
-## V10.11 多语言部署与缓存
-
-部署时必须同时上传 `index.html`、`i18n.js`、`sw.js` 和三种语言的 CHANGELOG 文件。Service Worker 缓存名升级为 `daily-weekly-planner-v10-11-multilingual-ui`，并将 `i18n.js` 加入预缓存列表，因此三种语言界面支持首次在线载入后离线使用。无需 Supabase SQL、数据库迁移或计划数据转换；语言偏好单独保存在 `personal-planner:language:v1`。更新后请刷新网页；已安装 PWA 请完全关闭再重新打开。若仍显示旧版本，检查 Pages 对应提交的部署工作流成功后再处理站点缓存，避免清除会影响计划数据的整个站点存储。
+- PR merged：只表示代码已合并。
+- Actions validation passed：只表示相应自动检查通过。
+- Pages deployment success：才表示对应提交已成功部署。
+- 浏览器真实验证：单独记录用户实际访问和操作结果。
+- 未检查到证据时明确写“未确认”，不要推断为成功。
