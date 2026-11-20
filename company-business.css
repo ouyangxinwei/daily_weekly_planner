@@ -53,3 +53,17 @@ html[data-theme="dark"] .cw-project-progress-fill{background:#9b8cff}
   .cw-project-details-dialog .cw-dialog-actions{justify-content:stretch}
   .cw-project-details-dialog .cw-dialog-actions button{flex:1 1 42%}
 }
+
+/* Stage 1-I-B: relationship previews in project details */
+.cw-project-related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.cw-project-related{min-width:0;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface-secondary,var(--surface))}
+.cw-project-related h3{margin:0 0 9px;font-size:12px}
+.cw-related-list{display:grid;gap:8px}
+.cw-related-row{display:grid;gap:3px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.cw-related-row:last-child{padding-bottom:0;border-bottom:0}
+.cw-related-row strong{font-size:11px;overflow-wrap:anywhere}
+.cw-related-meta,.cw-related-note{color:var(--muted);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.cw-related-note{margin:0;white-space:pre-wrap}
+.cw-related-more{font-size:10px;color:var(--muted)}
+html[data-theme="dark"] .cw-project-related{background:#242834}
+@media(max-width:560px){.cw-project-related-grid{grid-template-columns:1fr}}
