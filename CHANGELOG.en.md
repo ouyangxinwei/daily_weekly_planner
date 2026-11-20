@@ -1,3 +1,13 @@
+# V10.45 Project task and progress linkage — 2026-11-20
+
+- Added Manual and Automatic from tasks project progress modes.
+- Automatic mode calculates completed tasks ÷ all project tasks, rounded to a whole percentage; projects with no tasks show 0%.
+- Manual progress is stored separately. Automatic calculations never overwrite it, and switching back to Manual restores the last manual value.
+- A database trigger recalculates affected projects when tasks are created, deleted, completed/uncompleted, or reassigned.
+- Project cards and details show the active progress mode; Automatic mode also shows completed/total task counts.
+- Existing projects remain compatible: missing mode fields default to Manual and their current progress is preserved as the manual value.
+- Added a database migration, Edge Function validation for progress fields, Chinese/English/Japanese copy, and Playwright coverage for both modes.
+
 # V10.44 Company workspace: project task management — 2026-11-20
 
 - Added a Project Tasks workspace with project, title, and status filters plus pagination.
