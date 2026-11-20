@@ -151,13 +151,13 @@
     try{
       const payload=formPayload();
       if(state.editingId){await request('/customers/'+encodeURIComponent(state.editingId),'PATCH',payload);setFeedback('客户资料已更新。','success')}
-      else{await request('/customers','POST',payload);state.offset=0;setFeedback('客户已新增。','success')}
+      else{await request('/customers','POST',payload);state.offset=0;state.query='';$('cw-search').value='';setFeedback('客户已新增。','success')}
       closeEditor();await loadCustomers();
     }catch(error){$('cw-form-error').textContent=error.message||'保存失败，请稍后重试。'}
     finally{button.disabled=false}
   }
   async function deleteCustomer(customer){
-    if(!window.confirm('确定删除客户「'+customer.title+'」吗？此操作无法撤销。'))return;
+    if(!window.confirm((window.PlannerI18n?.t('确定删除客户吗？此操作无法撤销。')||'确定删除客户吗？此操作无法撤销。')+'\n'+customer.title))return;
     try{await request('/customers/'+encodeURIComponent(customer.id),'DELETE');setFeedback('客户已删除。','success');if(state.items.length===1&&state.offset>0)state.offset=Math.max(0,state.offset-PAGE_SIZE);await loadCustomers()}
     catch(error){setFeedback(error.message||'删除失败，请稍后重试。','error')}
   }
