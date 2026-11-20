@@ -279,15 +279,15 @@ import { getProjectCustomerOverview } from './company-project-customer-overview.
     const kpis=$('cw-pc-kpis'); kpis.replaceChildren();
     [
       ['projects',metrics.totalProjects,()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
-      ['pcAverageProgress',metrics.averageProgress+'%',()=>switchTab('projects')],
-      ['pcCompletedProjects',metrics.completedProjects,()=>{state.projectStatus='completed';state.projectCustomerFilter='';state.projectOffset=0;switchTab('projects');}],
-      ['pcOverdueProjects',metrics.overdueProjects,()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectOffset=0;switchTab('projects');}],
+      ['pcAverageProgress',metrics.averageProgress+'%',()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['pcCompletedProjects',metrics.completedProjects,()=>{state.projectStatus='completed';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['pcOverdueProjects',metrics.overdueProjects,()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
       ['pcCustomersWithProjects',metrics.customersWithProjects+'/'+metrics.totalCustomers,()=>{switchTab('customers');window.CompanyWebsite?.refresh?.();}],
-      ['pcTaskCompletion',metrics.completedTasks+'/'+metrics.totalTasks,()=>{state.taskStatus='completed';state.taskProjectFilter='';state.taskOffset=0;switchTab('tasks');}]
+      ['pcTaskCompletion',metrics.completedTasks+'/'+metrics.totalTasks,()=>{state.taskQuery='';state.taskStatus='completed';state.taskProjectFilter='';state.taskDueFilter='';state.taskOffset=0;switchTab('tasks');}]
     ].forEach(([label,value,action])=>{const card=button('', 'cw-pc-kpi',action);card.append(node('span','',t(label)),node('strong','',String(value)));kpis.append(card);});
     const status=$('cw-pc-status');status.replaceChildren();
     [['planned','planned'],['active','active'],['on_hold','on_hold'],['completed','completed'],['cancelled','cancelled']].forEach(([key,label])=>{
-      const item=button('', 'cw-pc-status-card',()=>{state.projectStatus=key;state.projectCustomerFilter='';state.projectOffset=0;switchTab('projects');});
+      const item=button('', 'cw-pc-status-card',()=>{state.projectStatus=key;state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');});
       item.append(node('span','',t(label)),node('strong','',String(metrics.statusCounts[key]||0)));status.append(item);
     });
     const projectHost=$('cw-pc-projects');projectHost.replaceChildren();
