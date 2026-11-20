@@ -70,5 +70,6 @@
 - [部署与故障排查](deployment_and_troubleshooting.md)
 - [数据库认证设计](database_auth_design_document.md)
 - [公司网站阶段文档](company-website/README.md)
+- [运行日志专项设计](runtime-logging.md)
 - [开发历史与历史交付档案](development-history.md)
 - [Git 分支工作流](git-branching-workflow.md)
