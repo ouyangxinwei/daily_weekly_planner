@@ -16,6 +16,7 @@
 - [运行日志系统设计](runtime-logging.md)：日志基础设施、阶段技术设计和阶段验收。
 - [数据库认证设计](database_auth_design_document.md)：计划系统账号校验和数据库权限设计。
 - [天气看板](home-weather-dashboard.md)：天气数据来源和缓存规则。
+- [美股七巨头行情看板](stock-dashboard.md)：股票数据来源、交易周规则和缓存设计。
 - [外语学习工作区（中文）](language-learning-workspace.md) · [English](language-learning-workspace.en.md) · [日本語](language-learning-workspace.ja.md)。
 - [公司网站开发文档](company-website/README.md)：客户、项目和业务跟进的设计、数据库、API 与阶段记录。
 - [AI 协作开发指南](ai_collaboration_guide.md)：与 AI 协作开发的约定。
