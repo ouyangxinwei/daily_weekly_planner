@@ -250,7 +250,7 @@ begin
     end if;
     select coalesce(array_agg(value::uuid), '{}'::uuid[])
       into v_related_ids
-    from jsonb_array_elements_text(p_record->'related_record_ids') as value;
+    from jsonb_array_elements_text(p_record->'related_record_ids') as items(value);
   end if;
 
   if nullif(p_record->>'amount', '') is not null then
@@ -319,8 +319,8 @@ begin
     raise exception 'Patch must be a non-empty JSON object' using errcode = '22023';
   end if;
   if exists (
-    select 1 from jsonb_object_keys(p_patch) as k
-    where k <> all(v_allowed)
+    select 1 from jsonb_object_keys(p_patch) as keys(key)
+    where key <> all(v_allowed)
   ) then
     raise exception 'Patch contains unsupported fields' using errcode = '22023';
   end if;
@@ -346,7 +346,7 @@ begin
     end if;
     select coalesce(array_agg(value::uuid), '{}'::uuid[])
       into v_related_ids
-    from jsonb_array_elements_text(p_patch->'related_record_ids') as value;
+    from jsonb_array_elements_text(p_patch->'related_record_ids') as items(value);
   end if;
 
   v_amount := v_current.amount;
