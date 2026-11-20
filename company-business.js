@@ -101,7 +101,7 @@
     try {
       await loadCustomers();
       const project = state.tab === 'projects', task = state.tab === 'tasks', type = project ? 'project' : task ? 'task' : 'follow_up';
-      if (task) updateToolbar();
+      if (task || state.tab === 'followups') updateToolbar();
       const offset = project ? state.projectOffset : task ? state.taskOffset : state.followupOffset;
       const query = project ? state.projectQuery : task ? state.taskQuery : state.followupQuery;
       const status = project ? state.projectStatus : task ? state.taskStatus : state.followupStatus;
