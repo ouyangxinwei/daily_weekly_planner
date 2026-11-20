@@ -870,17 +870,23 @@ function onSubmit(e) {
 }
 
 // ---------- 工作区切换 ----------
-function currentWorkspace() { return document.documentElement.dataset.workspace === 'language' ? 'language' : 'plan'; }
+function currentWorkspace() {
+  const current = document.documentElement.dataset.workspace;
+  return current === 'language' || current === 'company' ? current : 'plan';
+}
 
 function setWorkspace(ws) {
-  const next = ws === 'language' ? 'language' : 'plan';
-  if (next === 'language') document.documentElement.dataset.workspace = 'language';
-  else delete document.documentElement.dataset.workspace;
+  const next = ws === 'language' || ws === 'company' ? ws : 'plan';
+  if (next === 'plan') delete document.documentElement.dataset.workspace;
+  else document.documentElement.dataset.workspace = next;
   try { localStorage.setItem(WORKSPACE_KEY, next); } catch (e) {}
   $('workspace-plan')?.setAttribute('aria-pressed', String(next === 'plan'));
   $('workspace-language')?.setAttribute('aria-pressed', String(next === 'language'));
+  $('workspace-company')?.setAttribute('aria-pressed', String(next === 'company'));
   if (next === 'language') render();
 }
+
+window.PlannerWorkspace = Object.freeze({ set: setWorkspace, current: currentWorkspace });
 
 function init() {
   const app = $('app-shell'), header = app?.querySelector('.top');
@@ -907,8 +913,9 @@ function init() {
   root.addEventListener('submit', onSubmit);
   load();
   tab = TAB_IDS.includes(data.settings.activeTab) ? data.settings.activeTab : 'home';
-  $('workspace-plan')?.addEventListener('click', () => setWorkspace('plan'));
-  $('workspace-language')?.addEventListener('click', () => setWorkspace('language'));
+  $('workspace-plan')?.addEventListener('click', () => { setWorkspace('plan'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
+  $('workspace-language')?.addEventListener('click', () => { setWorkspace('language'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
+  $('workspace-company')?.addEventListener('click', () => { setWorkspace('company'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
   setWorkspace(currentWorkspace());
 }
 
