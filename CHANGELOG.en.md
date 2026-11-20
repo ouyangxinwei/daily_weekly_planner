@@ -1,3 +1,11 @@
+# V10.49 Company workspace: direct editing from relationship previews — 2026-11-20
+
+- Customer-card previews for projects, tasks, and follow-ups are now actionable and open the selected record in its editor.
+- Project-detail previews for related tasks and follow-ups also open the corresponding editor directly, without requiring a trip through the full list.
+- Preserve customer/project associations when editing related records; close the project-details dialog before opening the editor to avoid nested modal dialogs.
+- Add keyboard focus and hover affordances while retaining existing navigation, CRUD, and filters across Chinese, English, and Japanese.
+- Frontend, styles, tests, version metadata, and docs only. No database, company-api v5, authentication, or production business-data changes.
+
 # V10.48 Company workspace: relationship filter context — 2026-11-20
 
 - Clearly show the customer or project that scopes a list after cross-module navigation, so filtered results are not mistaken for missing records.
