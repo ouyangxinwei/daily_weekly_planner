@@ -56,6 +56,11 @@ test('company workspace manages projects and linked follow-ups through generic r
   await page.locator('#cw-business-form button[type="submit"]').click();
   await expect(page.locator('#cw-business-list')).toContainText('E2E Website Redesign');
   expect(records[0].parent_record_id).toBe(CUSTOMER_ID);
+  await page.locator('#cw-business-list button').filter({hasText:'编辑'}).click();
+  await page.locator('#cw-biz-title').fill('E2E Website Redesign Updated');
+  await page.locator('#cw-business-form button[type="submit"]').click();
+  await expect(page.locator('#cw-business-list')).toContainText('E2E Website Redesign Updated');
+  expect(calls.some(c=>c.method==='PATCH'&&c.path==='/records/'+PROJECT_ID)).toBe(true);
 
   await page.locator('#cw-business-nav button[data-tab="followups"]').click();
   await page.locator('#cw-business-new').click();
@@ -80,7 +85,12 @@ test('company workspace manages projects and linked follow-ups through generic r
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
   await expect(page.locator('#cw-business-list')).toContainText('还没有跟进记录');
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
+  await expect(page.locator('#cw-business-list')).toContainText('还没有项目');
+  expect(calls.some(c=>c.method==='DELETE'&&c.path==='/records/'+PROJECT_ID)).toBe(true);
   expect(calls.some(c=>c.method==='POST'&&c.path==='/records')).toBe(true);
   expect(calls.filter(c=>c.method!=='OPTIONS').every(c=>c.auth?.startsWith('Basic '))).toBe(true);
-  expect(records).toHaveLength(1);
+  expect(records).toHaveLength(0);
 });
