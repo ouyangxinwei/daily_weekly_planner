@@ -26,6 +26,10 @@ test('company workspace creates, edits, searches and deletes a customer through 
     const method = request.method();
     calls.push({ method, path, auth: request.headers()['authorization'] });
 
+    if (method === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173', 'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info' } });
+      return;
+    }
     if (method === 'POST' && path === '/auth/verify') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { authenticated: true, username: 'oooo' } }) });
       return;
@@ -82,11 +86,11 @@ test('company workspace creates, edits, searches and deletes a customer through 
 
   page.once('dialog', dialog => dialog.accept());
   await page.locator('#cw-customer-list button').filter({ hasText: '删除' }).click();
-  await expect(page.locator('#cw-customer-list')).toContainText('还没有客户资料');
+  await expect(page.locator('#cw-customer-list')).toContainText('没有找到符合条件的客户');
 
   expect(calls.some(call => call.method === 'POST' && call.path === '/customers')).toBe(true);
   expect(calls.some(call => call.method === 'PATCH' && call.path === '/customers/' + CUSTOMER_ID)).toBe(true);
   expect(calls.some(call => call.method === 'DELETE' && call.path === '/customers/' + CUSTOMER_ID)).toBe(true);
-  expect(calls.every(call => call.auth?.startsWith('Basic '))).toBe(true);
+  expect(calls.filter(call => call.method !== 'OPTIONS').every(call => call.auth?.startsWith('Basic '))).toBe(true);
   expect(records).toHaveLength(0);
 });
