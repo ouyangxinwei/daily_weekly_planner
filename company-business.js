@@ -1,4 +1,5 @@
 import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.js';
+import { getBusinessOverviewMetrics, getRecentBusinessRecords } from './company-overview-metrics.js';
 
 (() => {
   'use strict';
@@ -177,28 +178,24 @@ import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.
   function renderOverview(data) {
     const kpis=$('cw-overview-kpis'),attention=$('cw-overview-attention'),recent=$('cw-overview-recent');
     kpis.replaceChildren();attention.replaceChildren();recent.replaceChildren();
+    const today=getLocalDateKey(),metrics=getBusinessOverviewMetrics(data,today);
     const cards=[
-      ['customersTotal',data.customers.length,()=>{switchTab('customers');window.CompanyWebsite?.showAllCustomers?.();}],
-      ['activeProjects',data.projects.filter(r=>r.status==='active').length,()=>{state.projectStatus='active';state.projectOffset=0;switchTab('projects');}],
-      ['unfinishedTasks',data.tasks.filter(r=>r.status!=='completed').length,()=>{state.taskStatus='__open__';state.taskDueFilter='';state.taskOffset=0;switchTab('tasks');}],
-      ['pendingFollowups',data.followups.filter(r=>r.status==='pending').length,()=>{state.followupStatus='pending';state.followupDueFilter='';state.followupOffset=0;switchTab('followups');}]
+      ['customersTotal',metrics.customers,()=>{switchTab('customers');window.CompanyWebsite?.showAllCustomers?.();}],
+      ['activeProjects',metrics.activeProjects,()=>{state.projectQuery='';state.projectCustomerFilter='';state.projectStatus='active';state.projectOffset=0;switchTab('projects');}],
+      ['unfinishedTasks',metrics.unfinishedTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='__open__';state.taskDueFilter='';state.taskOffset=0;switchTab('tasks');}],
+      ['pendingFollowups',metrics.pendingFollowups,()=>{state.followupQuery='';state.followupCustomerFilter='';state.followupProjectFilter='';state.followupStatus='pending';state.followupDueFilter='';state.followupOffset=0;switchTab('followups');}]
     ];
     cards.forEach(([key,value,action])=>{const card=button('', 'cw-overview-kpi',action);card.append(node('span','',t(key)),node('strong','',String(value)));kpis.append(card);});
-    const today=getLocalDateKey(),end=new Date();end.setDate(end.getDate()+6);const endKey=getLocalDateKey(end);
-    const taskOverdue=data.tasks.filter(r=>r.status!=='completed'&&r.due_date&&String(r.due_date).slice(0,10)<today);
-    const taskToday=data.tasks.filter(r=>r.status!=='completed'&&r.due_date&&String(r.due_date).slice(0,10)===today);
-    const taskNext7=data.tasks.filter(r=>r.status!=='completed'&&r.due_date&&String(r.due_date).slice(0,10)>=today&&String(r.due_date).slice(0,10)<=endKey);
-    const followupOverdue=data.followups.filter(r=>{const d=r.data&&typeof r.data==='object'?r.data:{};return r.status==='pending'&&d.next_follow_up_date&&String(d.next_follow_up_date).slice(0,10)<today;});
     const alerts=[
-      ['overdueTasksCount',taskOverdue.length,()=>{state.taskStatus='';state.taskDueFilter='overdue';state.taskOffset=0;switchTab('tasks');}],
-      ['dueTodayCount',taskToday.length,()=>{state.taskStatus='';state.taskDueFilter='today';state.taskOffset=0;switchTab('tasks');}],
-      ['dueNext7Count',taskNext7.length,()=>{state.taskStatus='';state.taskDueFilter='next7';state.taskOffset=0;switchTab('tasks');}],
-      ['overdueFollowups',followupOverdue.length,()=>{state.followupStatus='pending';state.followupDueFilter='overdue';state.followupOffset=0;switchTab('followups');}]
+      ['overdueTasksCount',metrics.overdueTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='overdue';state.taskOffset=0;switchTab('tasks');}],
+      ['dueTodayCount',metrics.dueTodayTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='today';state.taskOffset=0;switchTab('tasks');}],
+      ['dueNext7Count',metrics.next7Tasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='';state.taskDueFilter='next7';state.taskOffset=0;switchTab('tasks');}],
+      ['overdueFollowups',metrics.overdueFollowups,()=>{state.followupQuery='';state.followupCustomerFilter='';state.followupProjectFilter='';state.followupStatus='pending';state.followupDueFilter='overdue';state.followupOffset=0;switchTab('followups');}]
     ];
     alerts.forEach(([key,value,action])=>{const card=button('', 'cw-overview-alert',action);card.append(node('span','',t(key)),node('strong','',String(value)));attention.append(card);});
     [['projects',t('recentProjects'),data.projects],['tasks',t('recentTasks'),data.tasks],['followups',t('recentFollowups'),data.followups]].forEach(([tab,label,records])=>{
       const section=node('section','cw-overview-recent-group');section.append(node('h4','',label));
-      renderOverviewList(section,[...records].sort((a,b)=>recordTimestamp(b)-recordTimestamp(a)),tab,t('noRecent'));recent.append(section);
+      renderOverviewList(section,getRecentBusinessRecords(records,3),tab,t('noRecent'));recent.append(section);
     });
   }
   async function loadOverview() {
