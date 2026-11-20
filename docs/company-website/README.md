@@ -4,19 +4,22 @@
 
 ## 当前状态
 
-- 当前阶段：阶段 1-B（数据库最小实现已完成）
+- 当前阶段：阶段 1-C（company-api Edge Function 已部署；客户 CRUD 真实凭据端到端验证待前端联调）
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改
 - 业务数据：第一版使用一张主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB
-- 认证：沿用慢慢计划现有自定义账号认证；下一阶段通过 Edge Function 作为服务端入口
+- 认证：沿用慢慢计划现有自定义账号认证；Edge Function 使用 Basic 凭据并在服务端再次验证
+- API：`company-api` 已部署，连接六个 company RPC，具备 CORS、请求校验、IP 限流和统一错误响应
 - 文件：后续使用独立私有 Storage Bucket，通过短时签名 URL 上传和下载
 - 阶段 1-A：设计基线已完成
 - 阶段 1-B：数据库迁移已应用，表、权限、错误密码及基础 CRUD/约束完成最小验证
-- 下一阶段：阶段 1-C（Edge Function 业务 API）
+- 阶段 1-C：Edge Function 已部署 v2；真实密码下的客户 CRUD 验证待前端联调
+- 下一阶段：前端客户管理工作区接入（阶段 1-D/1-E 顺序可按实际实现调整）
 
 ## 文档
 
 - [阶段 1-A：数据库、RPC 认证与私有文件存储设计](./phase-1a-design.md)
 - [阶段 1-B：数据库最小实现](./phase-1b-database.md)
+- [阶段 1-C：company-api Edge Function](./phase-1c-edge-api.md)
 
 ## 维护规则
 
