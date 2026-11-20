@@ -1,3 +1,12 @@
+# V10.46 Company workspace: cross-module navigation — 2026-11-20
+
+- Added customer-card shortcuts to view the customer's projects and follow-ups.
+- Customer names in project cards link back to the customer; project details now link to the customer, project tasks, and project follow-ups.
+- Task cards open their parent project details; follow-up cards link to the related customer and project.
+- Customer/project navigation applies relationship-ID filters and reads across list pages so linked records are not limited to the currently visible page.
+- Customer navigation focuses the selected customer record while preserving existing CRUD, progress linkage, and authentication behavior.
+- Added Playwright mock-API coverage for cross-module navigation. No database schema or company-api changes.
+
 # V10.45 Project task and progress linkage — 2026-11-20
 
 - Added Manual and Automatic from tasks project progress modes.
