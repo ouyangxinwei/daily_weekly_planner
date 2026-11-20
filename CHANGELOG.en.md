@@ -1,3 +1,12 @@
+# V10.54 Company workspace: business trends and period review — 2026-11-20
+
+- Added weekly (last 8 weeks) and monthly (last 6 months) business trend views.
+- Summarizes new/completed projects, new/completed tasks and customer follow-up records, with absolute change versus the previous period.
+- Reads complete paginated project, task and follow-up records from company-api v5; switching period does not refetch data.
+- Clearly labels completion timing as an updated_at proxy for records currently marked completed; no exact completion timestamp or historical status snapshots are implied.
+- Added Chinese, English and Japanese labels with responsive layouts.
+- No database, RLS, Edge Function, authentication or production business data changes.
+
 # V10.53 Company workspace: project and customer overview — 2026-11-20
 
 - Added a dedicated project and customer overview with project status distribution, average progress, completed/overdue projects, customer project coverage and recent activity.
