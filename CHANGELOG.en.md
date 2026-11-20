@@ -1,3 +1,10 @@
+# V10.43 Company workspace: project details and progress — 2026-11-20
+
+- Added a project details dialog showing its customer, status, start date, target date, and description.
+- Added manually managed progress as an integer percentage from 0 to 100, displayed on project cards and in the details view. Legacy projects without a progress value display 0%.
+- Stores progress in the existing `company_records` project JSONB field `data.progress_percent` and reuses `company-api`; no database table, auth, RLS, RPC, or cloud-sync changes.
+- Added Chinese, English and Japanese labels, responsive details layout, and Playwright mock-API coverage for creating, viewing, and updating progress.
+
 # V10.42 Company workspace: projects and follow-ups — 2026-11-20
 
 - Added dedicated Projects and Business Follow-ups views alongside customer management.
