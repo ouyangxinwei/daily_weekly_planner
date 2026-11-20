@@ -24,7 +24,7 @@ test('company workspace manages projects and linked follow-ups through generic r
     if(method==='OPTIONS'){await cors(route,{status:204,headers:{'Access-Control-Allow-Methods':'GET, POST, PATCH, DELETE, OPTIONS','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info'}});return;}
     if(method==='POST'&&path==='/auth/verify'){await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:{authenticated:true,username:'oooo'}})});return;}
     if(method==='GET'&&path==='/customers'){await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:{items:customers,total:customers.length,limit:100,offset:0}})});return;}
-    const projectTasksMatch=path.match(/^\\/projects\\/([0-9a-f-]+)\\/tasks$/);
+    const projectTasksMatch=path.match(/^\/projects\/([0-9a-f-]+)\/tasks$/);
     if(method==='GET'&&projectTasksMatch){
       const projectId=projectTasksMatch[1], q=(url.searchParams.get('q')||'').toLowerCase(), status=url.searchParams.get('status')||'';
       const rows=records.filter(r=>r.record_type==='task'&&r.parent_record_id===projectId&&(!q||r.title.toLowerCase().includes(q))&&(!status||r.status===status));
