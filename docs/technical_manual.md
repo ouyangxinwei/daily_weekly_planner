@@ -52,9 +52,9 @@
 
 - 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`。
 - 后端：Supabase Edge Function `company-api`。
-- 业务表：`company_records`，通过 `record_type` 区分 customer、project、follow_up 等对象。
+- 业务表：`company_records`，通过 `record_type` 区分 customer、project、task、follow_up 等对象；任务通过 `parent_record_id` 关联项目，`due_date` 保存截止日期。
 - 前端复用当前登录会话，通过 HTTPS Basic Authorization 请求 API；不得把密码持久化到 LocalStorage，也不得暴露 service-role/secret key。
-- 客户、项目和跟进记录与计划模块 LocalStorage、云端快照隔离。
+- 客户、项目、项目任务和跟进记录与计划模块 LocalStorage、云端快照隔离。
 - 项目删除受下游关联保护，不应擅自改成级联删除。
 
 专项设计、数据库和 API 说明见 [公司网站开发文档](company-website/README.md)。

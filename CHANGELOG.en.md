@@ -1,3 +1,11 @@
+# V10.44 Company workspace: project task management — 2026-11-20
+
+- Added a Project Tasks workspace with project, title, and status filters plus pagination.
+- Tasks can be created, edited, and deleted. Every task must belong to a project and supports To do, In progress, Blocked, and Completed statuses, an optional due date, and a description.
+- Tasks reuse the existing `task` record type in `company_records`; `parent_record_id` points to the project and `due_date` stores the deadline. No new database table or authentication change.
+- Added a Manage Tasks entry in project details. Projects referenced by tasks or follow-ups remain protected from deletion.
+- Extended `company-api` with project task listing and server-side project/status validation; added Chinese, English, and Japanese UI plus Playwright mock-API CRUD coverage.
+
 # V10.43 Company workspace: project details and progress — 2026-11-20
 
 - Added a project details dialog showing its customer, status, start date, target date, and description.
