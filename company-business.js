@@ -128,6 +128,11 @@
         if(summaries[customerId])summaries[customerId].followups.push(record);
       });
     } catch(error) { console.warn('Unable to load company relationship summaries',error); }
+    Object.values(summaries).forEach(summary=>{
+      summary.projects.sort((a,b)=>new Date(b.record_date||0)-new Date(a.record_date||0));
+      summary.tasks.sort((a,b)=>new Date(a.due_date||'9999-12-31')-new Date(b.due_date||'9999-12-31'));
+      summary.followups.sort((a,b)=>new Date(b.record_date||0)-new Date(a.record_date||0));
+    });
     return summaries;
   }
   async function loadProjectRelations(projectId) {
@@ -398,7 +403,7 @@
     if (!root()) return;
     install();
     window.addEventListener('planner-workspace-change', () => { if (document.documentElement.dataset.workspace === 'company' && state.tab !== 'customers') loadActive(); });
-    window.addEventListener('planner-auth-change', () => { state.verified=''; if (state.tab !== 'customers' && document.documentElement.dataset.workspace === 'company') loadActive(); });
+    window.addEventListener('planner-auth-change', () => { state.verified=''; invalidateRelations(); if (state.tab !== 'customers' && document.documentElement.dataset.workspace === 'company') loadActive(); });
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
