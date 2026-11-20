@@ -16,7 +16,7 @@ const weekly = getBusinessTrendReport({
   followups: [
     { id: 'f1', record_date: '2025-12-31', created_at: '2026-01-06T11:00:00Z' },
     { id: 'f2', record_date: '', created_at: '2026-01-07T11:00:00Z' },
-    { id: 'f3', record_date: 'invalid', created_at: '2026-01-08T11:00:00Z' }
+    { id: 'f3', record_date: 'invalid', created_at: '2026-01-08T11:00:00Z' },\n    { id: 'f4', record_date: '2026-01-10', created_at: '2026-01-04T11:00:00Z' }
   ]
 }, 'week', '2026-01-05');
 
