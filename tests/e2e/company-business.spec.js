@@ -53,14 +53,25 @@ test('company workspace manages projects and linked follow-ups through generic r
   await page.locator('#cw-biz-customer').selectOption(CUSTOMER_ID);
   await page.locator('#cw-biz-status').selectOption('active');
   await page.locator('#cw-biz-description').fill('Build a customer portal');
+  await page.locator('#cw-biz-progress').fill('35');
   await page.locator('#cw-business-form button[type="submit"]').click();
   await expect(page.locator('#cw-business-list')).toContainText('E2E Website Redesign');
+  await expect(page.locator('#cw-business-list')).toContainText('35%');
   expect(records[0].parent_record_id).toBe(CUSTOMER_ID);
+  expect(records[0].data.progress_percent).toBe(35);
+  await page.locator('#cw-business-list button').filter({hasText:'查看详情'}).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
+  await expect(page.locator('#cw-project-details')).toContainText('35%');
+  await expect(page.locator('#cw-project-details')).toContainText('Build a customer portal');
+  await page.locator('#cw-project-details-close-action').click();
+  await expect(page.locator('#cw-project-details')).not.toBeVisible();
   await page.locator('#cw-business-list button').filter({hasText:'编辑'}).click();
   await page.locator('#cw-biz-title').fill('E2E Website Redesign Updated');
+  await page.locator('#cw-biz-progress').fill('70');
   await page.locator('#cw-business-form button[type="submit"]').click();
   await expect(page.locator('#cw-business-list')).toContainText('E2E Website Redesign Updated');
   expect(calls.some(c=>c.method==='PATCH'&&c.path==='/records/'+PROJECT_ID)).toBe(true);
+  expect(records[0].data.progress_percent).toBe(70);
 
   await page.locator('#cw-business-nav button[data-tab="followups"]').click();
   await page.locator('#cw-business-new').click();
