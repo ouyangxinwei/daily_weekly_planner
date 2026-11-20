@@ -41,7 +41,7 @@
   function createRoot(){
     if($(ROOT_ID))return $(ROOT_ID);
     const root=document.createElement('section');root.id=ROOT_ID;root.className='cw-root';root.setAttribute('aria-label','个人公司网站');
-    root.innerHTML = \`
+    root.innerHTML = `
       <div class="cw-shell">
         <header class="cw-header"><div><p class="cw-eyebrow">BUSINESS WORKSPACE</p><h2>个人公司网站</h2><p class="cw-subtitle">从客户资料开始，逐步管理贸易、软件开发与电商业务。</p></div><button class="secondary" id="cw-refresh" type="button">刷新</button></header>
         <div class="cw-session" id="cw-session" role="status" aria-live="polite"></div>
@@ -73,7 +73,7 @@
         </div>
         <p class="cw-form-error" id="cw-form-error" role="alert"></p>
         <div class="cw-dialog-actions"><button class="secondary" id="cw-cancel" type="button">取消</button><button class="primary" id="cw-save" type="submit">保存客户</button></div>
-      </form></dialog>\`;
+      </form></dialog>`;
     $('app-shell')?.querySelector('.top')?.insertAdjacentElement('afterend',root);
     return root;
   }
