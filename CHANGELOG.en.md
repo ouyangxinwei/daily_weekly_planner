@@ -1,3 +1,12 @@
+# V10.50 Company workspace: task due-date quick filters — 2026-11-20
+
+- Add quick task filters for overdue, due today, the next 7 calendar days (including today), and tasks without a due date.
+- Combine due-date filtering with task-name search, task status, and project filters.
+- Fetch the complete task set before applying filters and calculating the matching total/pagination, so matching tasks are not missed on other server pages; clamp the page when the result set shrinks.
+- Overdue means a due date before the browser's local today and a status other than completed. Other date filters continue to respect the selected status filter.
+- Add Simplified Chinese, English, and Japanese labels while preserving task CRUD, automatic project progress linkage, and relationship navigation.
+- Reuse the existing due_date and status fields. Frontend, styles, tests, version metadata, and docs only; no database schema, migrations, RLS, company-api v5, or production business-data changes.
+
 # V10.49 Company workspace: direct editing from relationship previews — 2026-11-20
 
 - Customer-card previews for projects, tasks, and follow-ups are now actionable and open the selected record in its editor.
