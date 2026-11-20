@@ -50,11 +50,11 @@ function makePeriods(mode, today) {
   });
 }
 
-function countByPeriod(records, periods, dateOf) {
+function countByPeriod(records, periods, dateOf, today) {
   const counts = Object.fromEntries(periods.map(period => [period.key, 0]));
   for (const record of Array.isArray(records) ? records : []) {
     const date = normalizeDate(dateOf(record));
-    if (!date || date > periods[periods.length - 1].end) continue;
+    if (!date || date > today) continue;
     const period = periods.find(item => date >= item.start && date <= item.end);
     if (period) counts[period.key] += 1;
   }
@@ -76,11 +76,11 @@ export function getBusinessTrendReport(data = {}, mode = 'month', today = '') {
   const projects = safeRecords(data.projects);
   const tasks = safeRecords(data.tasks);
   const followups = safeRecords(data.followups);
-  const projectCreated = countByPeriod(projects, periods, record => record?.created_at);
-  const projectCompleted = countByPeriod(projects.filter(record => record?.status === 'completed'), periods, record => record?.updated_at);
-  const taskCreated = countByPeriod(tasks, periods, record => record?.created_at);
-  const taskCompleted = countByPeriod(tasks.filter(record => record?.status === 'completed'), periods, record => record?.updated_at);
-  const followupRecorded = countByPeriod(followups, periods, record => normalizeDate(record?.record_date) ? record.record_date : record?.created_at);
+  const projectCreated = countByPeriod(projects, periods, record => record?.created_at, today);
+  const projectCompleted = countByPeriod(projects.filter(record => record?.status === 'completed'), periods, record => record?.updated_at, today);
+  const taskCreated = countByPeriod(tasks, periods, record => record?.created_at, today);
+  const taskCompleted = countByPeriod(tasks.filter(record => record?.status === 'completed'), periods, record => record?.updated_at, today);
+  const followupRecorded = countByPeriod(followups, periods, record => normalizeDate(record?.record_date) ? record.record_date : record?.created_at, today);
   const series = periods.map(period => ({
     ...period,
     projectsCreated: projectCreated[period.key],
