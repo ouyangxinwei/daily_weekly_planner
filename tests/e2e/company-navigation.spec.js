@@ -39,6 +39,9 @@ test('company workspace supports navigation between customers, projects, tasks a
 
   await page.locator('#workspace-company').click();
   await expect(page.locator('#company-workspace-root')).toBeVisible();
+  await expect(page.locator('.cw-customer-relations')).toContainText('Navigation Project');
+  await expect(page.locator('.cw-customer-relations')).toContainText('Navigation Task');
+  await expect(page.locator('.cw-customer-relations')).toContainText('Navigation Follow-up');
 
   // Customer -> projects and follow-ups.
   await page.getByRole('button',{name:'查看项目'}).click();
@@ -48,6 +51,8 @@ test('company workspace supports navigation between customers, projects, tasks a
   // Project -> customer.
   await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
   await expect(page.locator('#cw-project-details')).toBeVisible();
+  await expect(page.locator('#cw-project-related-tasks')).toContainText('Navigation Task');
+  await expect(page.locator('#cw-project-related-followups')).toContainText('Navigation Follow-up');
   await page.locator('#cw-project-details-customer-action').click();
   await expect(page.locator('#cw-customer-panel')).toBeVisible();
   await expect(page.locator('#cw-customer-list')).toContainText('Navigation Customer');

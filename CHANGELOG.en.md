@@ -1,3 +1,10 @@
+# V10.47 Company workspace: related information overview — 2026-11-20
+
+- Customer cards now summarize related project, task, and follow-up counts, with up to three records previewed in each group.
+- Project details now preview related tasks and follow-ups, including status, dates, task descriptions, and follow-up outcomes; up to six records per group are shown, with existing navigation retained for full lists.
+- Relationships use existing customer/project IDs and parent-record links. No database schema or company-api changes.
+- Added Chinese, English, and Japanese labels, responsive layouts, and Playwright mock-API assertions. Existing CRUD, cross-module navigation, and project progress linkage remain unchanged.
+
 # V10.46 Company workspace: cross-module navigation — 2026-11-20
 
 - Added customer-card shortcuts to view the customer's projects and follow-ups.
