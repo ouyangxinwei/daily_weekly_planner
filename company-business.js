@@ -248,6 +248,14 @@
   function showProjectFollowups(id) { state.followupProjectFilter = id || ''; state.followupCustomerFilter = ''; state.followupOffset = 0; switchTab('followups'); }
   function showProjectTasks(id) { state.taskProjectFilter = id || ''; state.taskOffset = 0; switchTab('tasks'); }
   function projectName(id) { return state.projects.find(p => p.id === id)?.title || '—'; }
+  async function openRelatedRecord(tab, record) {
+    if (!record?.id || !['projects','tasks','followups'].includes(tab)) return;
+    if (state.relationshipRecords?.projects) {
+      state.projects = [...new Map([...state.projects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()];
+    }
+    switchTab(tab);
+    await openEditor(record);
+  }
   function renderList(project, task, records, total, offset) {
     const host = $('cw-business-list'); host.replaceChildren();
     if (!records.length) {
@@ -437,5 +445,5 @@
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
-  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, loadCustomerRelations, invalidateRelations });
+  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations });
 })();
