@@ -4,8 +4,8 @@
 - 开发分支：`feat/company-task-progress-linkage`
 - Supabase 项目：`kopvznygsqsheibsjjvv`
 - 业务表：`public.company_records`
-- 数据库迁移：`20261120064000_company_project_progress_linkage_stage_1h.sql`
-- Edge Function：继续使用阶段 1-G 的 `company-api` v4；本阶段只增加进度字段校验，计划部署 v5
+- 数据库迁移：`20261120065100_company_project_progress_linkage_stage_1h.sql`
+- Edge Function：继续使用阶段 1-G 的 `company-api` v4；本阶段只增加进度字段校验，v5 已部署
 - 用户验收基线：阶段 1-G 已由用户确认真实浏览器验收通过
 
 ## 1. 业务规则
@@ -76,4 +76,4 @@ Playwright mock API 测试覆盖：
 
 ## 6. 部署与验收状态
 
-数据库迁移、company-api v5、Pages 部署、自动化测试和用户真实浏览器验收分开记录。未完成的项目不标记为已交付。真实验收使用测试项目和测试任务，不修改用户已有真实业务任务。
+数据库迁移已应用，company-api v5 已部署。Pages 部署、自动化测试和用户真实浏览器验收仍需分别确认。未完成的项目不标记为已交付。真实验收使用测试项目和测试任务，不修改用户已有真实业务任务。
