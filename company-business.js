@@ -126,7 +126,7 @@
         });
         total = records.length;
         const pageRecords = records.slice(offset, offset + PAGE_SIZE);
-        if (project) state.projects = all.filter(item => item.record_type === 'project');
+        if (project) state.projects = [...new Map([...state.projects, ...all.filter(item => item.record_type === 'project')].map(item => [item.id, item])).values()];
         else state.followups = records;
         $('cw-business-feedback').textContent = total ? t('loaded') + ' · ' + total : '';
         renderList(project, task, pageRecords, total, offset);
@@ -137,7 +137,7 @@
         const result = await api(endpoint);
         records = Array.isArray(result?.items) ? result.items : [];
         total = Number(result?.total || 0);
-        if (project) state.projects = records; else if (task) state.tasks = records; else state.followups = records;
+        if (project) state.projects = [...new Map([...state.projects, ...records].map(item => [item.id, item])).values()]; else if (task) state.tasks = records; else state.followups = records;
         $('cw-business-feedback').textContent = total ? t('loaded') + ' · ' + total : '';
         renderList(project, task, records, total, offset);
       }
