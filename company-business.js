@@ -163,8 +163,9 @@
       if (project) { const customerLink = button(customerName(record.parent_record_id),'cw-tag cw-relation-link',()=>openCustomer(record.parent_record_id)); meta.append(customerLink,node('span','cw-status',t(record.status)||record.status)); }
       else if (task) { const projectLink = button(projectName(record.parent_record_id),'cw-tag cw-relation-link',()=>openProjectById(record.parent_record_id)); meta.append(projectLink,node('span','cw-status',t(record.status)||record.status)); }
       else {
-        const cid = data.customer_id || (record.related_record_ids || [])[0] || record.parent_record_id;
-        meta.append(button(customerName(cid),'cw-tag cw-relation-link',()=>openCustomer(cid)),node('span','cw-status',t(record.status)||record.status),node('span','cw-tag',t(data.method || 'other')));
+        const cid = data.customer_id || (record.related_record_ids || []).find(id => state.customers.some(c => c.id === id)) || (state.customers.some(c => c.id === record.parent_record_id) ? record.parent_record_id : '');
+        if (cid) meta.append(button(customerName(cid),'cw-tag cw-relation-link',()=>openCustomer(cid)));
+        meta.append(node('span','cw-status',t(record.status)||record.status),node('span','cw-tag',t(data.method || 'other')));
       }
       main.append(meta);
       const details = node('div','cw-business-details');
@@ -189,7 +190,7 @@
       const actions = node('div','cw-card-actions');
       if (project) actions.append(button(t('viewDetails'),'secondary',()=>openProjectDetails(record)));
       if (task) actions.append(button(t('viewProject'),'secondary',()=>openProjectById(record.parent_record_id)));
-      if (!project && !task) { const cid = data.customer_id || (record.related_record_ids || [])[0] || (state.customers.some(c=>c.id===record.parent_record_id) ? record.parent_record_id : ''); const pid = data.project_id || (state.projects.some(p=>p.id===record.parent_record_id) ? record.parent_record_id : ''); if (cid) actions.append(button(t('viewCustomer'),'secondary',()=>openCustomer(cid))); if (pid) actions.append(button(t('viewProject'),'secondary',()=>openProjectById(pid))); }
+      if (!project && !task) { const cid = data.customer_id || (record.related_record_ids || []).find(id => state.customers.some(c => c.id === id)) || (state.customers.some(c=>c.id===record.parent_record_id) ? record.parent_record_id : ''); const pid = data.project_id || (state.projects.some(p=>p.id===record.parent_record_id) ? record.parent_record_id : ''); if (cid) actions.append(button(t('viewCustomer'),'secondary',()=>openCustomer(cid))); if (pid) actions.append(button(t('viewProject'),'secondary',()=>openProjectById(pid))); }
       actions.append(button(t('edit'),'secondary',()=>openEditor(record)),button(t('delete'),'cw-delete',()=>removeRecord(record,project,task)));
       card.append(actions); host.append(card);
     });
