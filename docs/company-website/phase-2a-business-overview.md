@@ -58,7 +58,7 @@
 
 ## 当前交付状态
 
-- 版本：V10.51.0（开发分支）。
+- 版本：V10.51.0（已合并、已部署并通过用户真实浏览器验收）。
 - 数据库/API：无变更，继续使用 company-api v5。
 - PR #51：https://github.com/ouyangxinwei/daily_weekly_planner/pull/51，已 squash merge。
 - 合并提交：58c25171286a9bf6cf3f6f710bddfcd6bf2d6adc。
