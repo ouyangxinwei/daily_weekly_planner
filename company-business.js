@@ -40,7 +40,7 @@
     const shell = host.querySelector('.cw-shell');
     const nav = node('nav', 'cw-business-nav'); nav.id = 'cw-business-nav'; nav.setAttribute('aria-label', 'Company sections');
     [['customers',t('customers')],['projects',t('projects')],['tasks',t('tasks')],['followups',t('followups')]].forEach(([key,label]) => {
-      const b = button(label, 'cw-business-tab', () => switchTab(key)); b.dataset.tab = key; nav.append(b);
+      const b = button(label, 'cw-business-tab', () => { switchTab(key); if (key === 'customers') window.CompanyWebsite?.refresh?.(); }); b.dataset.tab = key; nav.append(b);
     });
     const customerPanel = host.querySelector('.cw-panel'); customerPanel.id = 'cw-customer-panel';
     const business = node('section', 'cw-panel cw-business-panel'); business.id = 'cw-business-panel';
