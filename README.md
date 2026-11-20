@@ -4,6 +4,10 @@ V10.42 在客户管理基础上增加项目管理和业务跟进。项目可关�
 
 详细设计与阶段记录：`docs/company-website/`。
 
+## 开发协作规范
+
+Git 分支命名、PR 合并及临时分支清理统一遵循 [`docs/git-branching-workflow.md`](docs/git-branching-workflow.md)：`main` 为唯一永久稳定分支；每项新功能使用独立的 `feat/<功能名称>` 分支；PR 合并到 `main` 后删除对应远程临时分支。
+
 ## V10.40 · 首页天气看板
 
 首页固定显示东京与横滨天气，使用 Open-Meteo，无需 API Key。采用 Asia/Tokyo、两天逐小时预报、未来 12 小时降雨/大风提醒；本地缓存 10 分钟，支持立即刷新和离线缓存降级。天气数据独立保存，不进入 Supabase 同步。详见 `docs/home-weather-dashboard.md`。
