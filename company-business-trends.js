@@ -80,7 +80,7 @@ export function getBusinessTrendReport(data = {}, mode = 'month', today = '') {
   const projectCompleted = countByPeriod(projects.filter(record => record?.status === 'completed'), periods, record => record?.updated_at);
   const taskCreated = countByPeriod(tasks, periods, record => record?.created_at);
   const taskCompleted = countByPeriod(tasks.filter(record => record?.status === 'completed'), periods, record => record?.updated_at);
-  const followupRecorded = countByPeriod(followups, periods, record => record?.record_date || record?.created_at);
+  const followupRecorded = countByPeriod(followups, periods, record => normalizeDate(record?.record_date) ? record.record_date : record?.created_at);
   const series = periods.map(period => ({
     ...period,
     projectsCreated: projectCreated[period.key],
