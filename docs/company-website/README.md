@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 当前阶段：阶段 1-D（V10.41.0 客户管理前端已部署到 GitHub Pages；真实账号 CRUD 待用户浏览器验证）
+- 当前阶段：阶段 1-E（V10.42.0 项目管理与业务跟进开发中；等待自动测试、合并、部署及真实账号 CRUD 验证）
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改
 - 业务数据：第一版使用一张主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB
 - 认证：沿用慢慢计划现有自定义账号认证；Edge Function 使用 Basic 凭据并在服务端再次验证
@@ -14,15 +14,15 @@
 - 阶段 1-A：设计基线已完成
 - 阶段 1-B：数据库迁移已应用，表、权限、错误密码及基础 CRUD/约束完成最小验证
 - 阶段 1-C：Edge Function 已部署 v3；真实密码下的客户 CRUD 验证待浏览器联调
-- 阶段 1-D：客户管理前端已完成并部署；Playwright mock API 测试已加入（GitHub Actions 结果另行记录）；真实账号 CRUD 待用户浏览器验证
-- 下一阶段：根据实际使用增加项目/跟进管理，随后实现私有文件 Storage
+- 阶段 1-D：客户管理前端已完成并部署；用户已反馈真实功能测试 OK
+- 阶段 1-E：新增项目管理和业务跟进页面，复用通用 records API；无数据库迁移\n- 下一阶段：按实际使用情况补充项目详情、任务管理，再评估私有文件 Storage
 
 ## 文档
 
 - [阶段 1-A：数据库、RPC 认证与私有文件存储设计](./phase-1a-design.md)
 - [阶段 1-B：数据库最小实现](./phase-1b-database.md)
 - [阶段 1-C：company-api Edge Function](./phase-1c-edge-api.md)
-- [阶段 1-D：客户管理前端工作区](./phase-1d-customer-workspace.md)
+- [阶段 1-D：客户管理前端工作区](./phase-1d-customer-workspace.md)\n- [阶段 1-E：项目管理与业务跟进](./phase-1e-project-follow-up.md)
 
 ## 维护规则
 
