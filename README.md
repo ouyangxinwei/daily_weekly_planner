@@ -2,7 +2,7 @@
 
 个人计划与工作管理 PWA，持续演进为包含学习、资料整理和个人公司业务管理的综合工作区。
 
-- **当前仓库版本：** `10.53.0`（以根目录 `VERSION` 为准）
+- **当前仓库版本：** `10.55.0`（以根目录 `VERSION` 为准）
 - **在线入口：** https://ouyangxinwei.github.io/daily_weekly_planner/
 - **主要技术形态：** 静态 HTML / CSS / JavaScript，部署到 GitHub Pages，支持 PWA。
 - **开发主分支：** `main`。
@@ -47,3 +47,5 @@
 ## 开发协作
 
 所有正式变更均通过独立临时分支和 PR 合并到 `main`。合并后按规范清理临时远程分支。详细规则见 [Git 分支工作流](docs/git-branching-workflow.md)。
+
+- **美股七巨头行情：** 天气预报下方展示最近交易周的七只美股行情，细节见 [股票看板说明](docs/stock-dashboard.md)。

@@ -29,6 +29,7 @@ jobs:
           node --check company-todo-center.js
           node --check company-project-customer-overview.js
           node --check company-business-trends.js
+          node --check stock-dashboard.js
           node --check scripts/validate-v10.54.mjs
           node --check scripts/validate-v10.53.mjs
           node --check scripts/validate-v10.52.mjs

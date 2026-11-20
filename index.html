@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./weather-dashboard.css">
+  <link rel="stylesheet" href="./stock-dashboard.css">
   <link rel="stylesheet" href="./company-website.css">
   <link rel="stylesheet" href="./company-business.css">
   <title>慢慢计划</title>
@@ -159,6 +160,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
     </section>
     <p class="storage-note"><span aria-hidden="true">◉</span><span id="storage-note-text">计划保存在此浏览器；删除的计划在回收站保留 30 天，登录后可手动备份到 Supabase</span></p>
     <section class="weather-dashboard" id="weather-dashboard" aria-label="东京与横滨天气"><div class="weather-dashboard-head"><h2 class="weather-dashboard-title">东京 · 横滨天气</h2><div class="weather-dashboard-meta"><span data-weather-status role="status" aria-live="polite">正在准备天气数据…</span><span data-weather-time>时区：Asia/Tokyo</span><button class="secondary" type="button" data-weather-refresh>立即刷新</button></div></div><div class="weather-city-grid" data-weather-cities><p class="weather-loading">正在读取东京与横滨天气…</p></div></section>
+    <section class="stock-dashboard" id="stock-dashboard" aria-label="美股七巨头行情"><div class="stock-dashboard-head"><h2 class="stock-dashboard-title" data-stock-title>美股七巨头</h2><div class="stock-dashboard-meta"><span data-stock-status role="status" aria-live="polite">正在读取最近交易周行情…</span><span data-stock-time></span><button class="secondary" type="button" data-stock-refresh>立即刷新</button></div></div><p class="stock-period" data-stock-period></p><div class="stock-grid" data-stock-grid><p class="stock-loading">正在读取七只股票行情…</p></div><p class="stock-note" data-stock-note>日线行情可能延迟或暂时不可用，仅供信息参考，不构成投资建议。</p></section>
   </main>
   <dialog id="trash-dialog" aria-labelledby="trash-title"><div class="dialog-inner"><div class="dialog-head"><h2 id="trash-title">回收站</h2><button type="button" class="close-btn" id="trash-close" aria-label="关闭">×</button></div><p class="field-hint" id="trash-hint">删除的计划保留 30 天，之后自动永久清理。恢复后会回到原计划周期。</p><div class="manage-toolbar"><button class="secondary" id="trash-select-all">全选</button><button class="secondary" id="trash-restore-selected">恢复所选</button><button class="clear-btn" id="trash-delete-selected">永久删除所选</button></div><div class="manage-list" id="trash-list"></div><div class="dialog-actions"><button class="secondary" id="trash-empty">清空回收站</button><button class="secondary" id="trash-done">完成</button></div></div></dialog>
   <dialog id="archive-dialog" aria-labelledby="archive-title"><div class="dialog-inner"><div class="dialog-head"><h2 id="archive-title">已归档计划</h2><button type="button" class="close-btn" id="archive-close" aria-label="关闭">×</button></div><p class="field-hint" id="archive-hint">归档不会删除计划；可以随时取消归档。归档计划不参与普通列表进度统计。</p><div class="manage-list" id="archive-list"></div><div class="dialog-actions"><button class="secondary" id="archive-done">完成</button></div></div></dialog>
@@ -219,6 +221,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <script src="./runtime-logs.js"></script>
   <script src="./health-check.js"></script>
   <script src="./weather-dashboard.js"></script>
+  <script src="./stock-dashboard.js"></script>
   <script>
   (()=>{
     'use strict';
