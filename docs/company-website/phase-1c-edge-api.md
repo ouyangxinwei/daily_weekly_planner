@@ -5,7 +5,7 @@
 - 实施分支：`company-website-phase-1c-edge-api`
 - Supabase 项目：`kopvznygsqsheibsjjvv`
 - Function：`company-api`
-- 当前部署版本：v2（ACTIVE）
+- 当前部署版本：v3（ACTIVE）
 - 部署模式：`verify_jwt = false`，由函数内部执行现有自定义账号密码验证
 
 ---
@@ -70,6 +70,7 @@ Supabase 新式 `sb_secret_*` Key 仅通过服务端 `apikey` 请求头调用 Po
 - 校验 JSON 对象、允许字段、标题长度、业务类型、状态、UUID、关联 ID 数量、日期、金额/币种和 JSONB 类型。
 - 拒绝客户端提交 owner、id、created_at、updated_at 等不可变字段。
 - 列表 limit/offset 和筛选参数在 Edge Function 层检查。
+- 通用记录更新也执行独立字段白名单校验，拒绝修改 record_type 等不可变字段。
 - 对外统一返回 `{ error, request_id }`，不泄露数据库内部错误文本或堆栈。
 - 主要 HTTP 状态：400 参数错误、401 认证失败、403 来源不允许、404 记录不存在、409 关联冲突、413 请求过大、415 内容类型错误、429 超出限流、500 内部错误、503 数据库/配置不可用。
 - 日志仅记录 RPC 名称、HTTP 状态、数据库错误代码和 request_id，不记录密码或请求正文。
@@ -91,6 +92,7 @@ Supabase 新式 `sb_secret_*` Key 仅通过服务端 `apikey` 请求头调用 Po
 新增技术表 `company_api_rate_limits`，它只存放 IP 限流技术数据，不存储客户、项目或交易数据，不改变“一张业务主表”的设计。
 
 - 每个来源 IP 每 60 秒最多 30 次请求。
+- 只信任 Supabase 边缘代理提供的 `cf-connecting-ip`；缺失时统一使用 unknown 桶，不采信可伪造的 `x-forwarded-for`。
 - 使用服务端密钥对 IP 做 HMAC-SHA256，数据库只存哈希，不保存原始 IP。
 - 使用原子 UPSERT 计数，适用于多个 Edge Function 实例。
 - 仅 service_role 可执行限流 RPC，客户端无表访问权限。

@@ -46,7 +46,7 @@ function getConfig() {
   return { url: url.replace(/\/+$/, ""), secretKey };
 }
 
-function corsHeaders(origin: string | null): HeadersInit {
+function corsHeaders(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -111,9 +111,7 @@ async function sha256Hmac(value: string, secret: string): Promise<string> {
 
 function requestIp(req: Request): string {
   // Supabase's edge proxy provides cf-connecting-ip. Fall back only when absent.
-  const candidate = req.headers.get("cf-connecting-ip")
-    ?? req.headers.get("x-real-ip")
-    ?? "unknown";
+  const candidate = req.headers.get("cf-connecting-ip") ?? "unknown";
   return candidate.slice(0, 128) || "unknown";
 }
 
@@ -340,6 +338,10 @@ function validateRecordCreate(body: JsonObject): JsonObject {
 
 function validateRecordPatch(body: JsonObject): JsonObject {
   if (Object.keys(body).length === 0) throw new ApiError(400, "VALIDATION_ERROR");
+  assertAllowedKeys(body, [
+    "business_type", "title", "status", "parent_record_id",
+    "related_record_ids", "amount", "currency", "record_date", "due_date", "data",
+  ]);
   validateCommonFields(body, false);
   return body;
 }
