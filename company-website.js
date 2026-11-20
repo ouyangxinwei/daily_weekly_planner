@@ -3,6 +3,7 @@
   const ROOT_ID = 'company-workspace-root';
   const PAGE_SIZE = 20;
   const API_NAME = 'company-api';
+  const COMPANY_PROJECT_URL = 'https://kopvznygsqsheibsjjvv.supabase.co';
   const state = { verifiedFor:'', items:[], total:0, offset:0, query:'', businessType:'', status:'', editingId:null, busy:false };
   const $ = id => document.getElementById(id);
   function authContext(){ return window.PlannerCompanyContext?.getAuth?.() ?? null; }
@@ -28,6 +29,7 @@
   async function request(path,method='GET',body){
     const auth=authContext();
     if(!auth)throw new Error('请先在计划工作区登录现有账号，再进入个人公司网站。');
+    if(auth.url.replace(/\/+$/,'')!==COMPANY_PROJECT_URL)throw new Error('个人公司网站固定使用慢慢计划的 Supabase 项目。请恢复正确的项目 URL 后重新登录。');
     const headers={apikey:auth.key,Authorization:'Basic '+basicToken(auth.username,auth.password)};
     const options={method,headers,cache:'no-store'};
     if(body!==undefined){headers['Content-Type']='application/json';options.body=JSON.stringify(body)}
