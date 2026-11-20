@@ -435,7 +435,7 @@ Deno.serve(async (req: Request) => {
       p_password: credentials.password,
     };
 
-    const projectTasksMatch = route.match(/^\\/projects\\/([0-9a-f-]{36})\\/tasks$/i);
+    const projectTasksMatch = route.match(/^\/projects\/([0-9a-f-]{36})\/tasks$/i);
     const customerMatch = route.match(/^\/customers(?:\/([0-9a-f-]{36}))?$/i);
     const recordMatch = route.match(/^\/records(?:\/([0-9a-f-]{36}))?$/i);
 
