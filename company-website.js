@@ -119,11 +119,13 @@
           else{
             const list=document.createElement('ul');
             entries.slice(0,3).forEach(record=>{
-              const li=document.createElement('li');li.textContent=record.title||'—';
-              if(key==='projects'&&record.data?.progress_percent!==undefined)li.textContent+=' · '+record.data.progress_percent+'%';
-              else if(key==='tasks')li.textContent+=' · '+(record.status||'');
-              else if(key==='followups'&&record.record_date)li.textContent+=' · '+new Date(record.record_date).toLocaleDateString();
-              list.append(li);
+              const li=document.createElement('li'),shortcut=document.createElement('button');shortcut.type='button';shortcut.className='cw-related-preview-button';shortcut.dataset.relatedRecordId=String(record.id);shortcut.dataset.relatedRecordType=key;shortcut.textContent=record.title||'—';
+              if(key==='projects'&&record.data?.progress_percent!==undefined)shortcut.textContent+=' · '+record.data.progress_percent+'%';
+              else if(key==='tasks')shortcut.textContent+=' · '+(record.status||'');
+              else if(key==='followups'&&record.record_date)shortcut.textContent+=' · '+new Date(record.record_date).toLocaleDateString();
+              shortcut.setAttribute('aria-label',shortcut.textContent);
+              shortcut.addEventListener('click',()=>window.CompanyBusiness?.openRelatedRecord(key,record));
+              li.append(shortcut);list.append(li);
             });
             group.append(list);
             if(entries.length>3){const more=document.createElement('span');more.className='cw-related-more';more.textContent='+'+(entries.length-3);group.append(more);}
