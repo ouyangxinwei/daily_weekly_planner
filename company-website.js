@@ -95,7 +95,7 @@
         const main=document.createElement('div');main.className='cw-customer-main';addText(main,'h3','cw-customer-title',customer.title);
         const meta=document.createElement('div');meta.className='cw-customer-meta';addText(meta,'span','cw-tag',businessLabel(customer.business_type));addText(meta,'span','cw-status status-'+(customer.status||'none'),statusLabel(customer.status));
         const data=customer.data&&typeof customer.data==='object'?customer.data:{};
-        if(data.contact_name)addText(meta,'span','','联系人：'+data.contact_name);main.append(meta);
+        if(data.contact_name){const contactLabel=window.PlannerI18n?.t('联系人：')||'联系人：';addText(meta,'span','',contactLabel+data.contact_name)}main.append(meta);
         const details=document.createElement('div');details.className='cw-customer-details';
         if(data.email)addText(details,'span','',data.email);if(data.phone)addText(details,'span','',data.phone);if(data.website)addText(details,'span','',data.website);
         card.append(main,details);
@@ -119,7 +119,7 @@
     if(!auth){state.verifiedFor='';setSessionMessage('请先在计划工作区使用现有账号登录，再进入个人公司网站。','warning');setFeedback('公司网站使用慢慢计划现有账号，不需要重新注册。');$('cw-customer-list').replaceChildren();return false}
     if(state.verifiedFor===auth.username)return true;
     setSessionMessage('正在验证当前账号…');setFeedback('');
-    try{const result=await request('/auth/verify','POST',{});if(!result?.authenticated)throw new Error('账号验证失败，请重新登录。');state.verifiedFor=auth.username;setSessionMessage('已连接公司业务数据库 · '+auth.username,'success');return true}
+    try{const result=await request('/auth/verify','POST',{});if(!result?.authenticated)throw new Error('账号验证失败，请重新登录。');state.verifiedFor=auth.username;const connectedLabel=window.PlannerI18n?.t('已连接公司业务数据库')||'已连接公司业务数据库';setSessionMessage(connectedLabel+' · '+auth.username,'success');return true}
     catch(error){state.verifiedFor='';setSessionMessage(error.message||'账号验证失败。','warning');return false}
   }
   async function loadCustomers(){
