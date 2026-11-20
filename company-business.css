@@ -144,3 +144,26 @@ html[data-theme="dark"] .cw-related-row-action:hover,html[data-theme="dark"] .cw
 .cw-todo-open,.cw-todo-status{flex:none;font-size:10px;color:var(--brand)}
 .cw-todo-group-empty,.cw-todo-empty{margin:0;padding:7px 0;color:var(--muted);font-size:11px}
 @media(max-width:480px){.cw-todo-heading{align-items:flex-start}.cw-todo-item{align-items:flex-start;gap:7px;padding:9px}.cw-todo-open{max-width:64px;text-align:right}}
+
+/* Phase 2-C: project and customer overview */
+.cw-project-customer-panel[hidden]{display:none!important}
+.cw-pc-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.cw-pc-heading h3{margin:0 0 5px;font-size:18px}.cw-pc-heading p{margin:0;color:var(--muted);font-size:12px}
+.cw-pc-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0 18px}
+.cw-pc-kpi,.cw-pc-status-card{display:grid;gap:7px;text-align:left;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);min-width:0}
+.cw-pc-kpi span,.cw-pc-status-card span{font-size:11px;color:var(--muted)}
+.cw-pc-kpi strong,.cw-pc-status-card strong{font-size:21px;font-variant-numeric:tabular-nums}
+.cw-pc-section{margin:18px 0}.cw-pc-section h4{font-size:13px;margin:0 0 9px}
+.cw-pc-status-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.cw-pc-status-card{padding:10px}.cw-pc-status-card strong{font-size:18px}
+.cw-pc-progress-list,.cw-pc-customer-list,.cw-pc-activity-list{display:grid;gap:8px}
+.cw-pc-project,.cw-pc-customer,.cw-pc-activity-item{display:grid;gap:7px;width:100%;padding:11px 12px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-width:0}
+.cw-pc-project-top{display:flex;justify-content:space-between;gap:10px}.cw-pc-project-top strong,.cw-pc-customer strong,.cw-pc-activity-item strong{font-size:12px;overflow-wrap:anywhere}
+.cw-pc-project-top span{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.cw-pc-track{height:7px;display:block;overflow:hidden;border-radius:99px;background:var(--line)}
+.cw-pc-fill{height:100%;display:block;border-radius:inherit;background:var(--brand)}
+.cw-pc-meta,.cw-pc-customer span,.cw-pc-activity-item span,.cw-pc-empty{margin:0;font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.cw-pc-kpi:hover,.cw-pc-status-card:hover,.cw-pc-project:hover,.cw-pc-customer:hover,.cw-pc-activity-item:hover{border-color:var(--brand);background:var(--brand-soft)}
+html[data-theme="dark"] .cw-pc-fill{background:#9b8cff}
+@media(max-width:700px){.cw-pc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-pc-status-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.cw-pc-heading{align-items:flex-start}.cw-pc-kpi{padding:10px}.cw-pc-kpi strong{font-size:18px}.cw-pc-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
