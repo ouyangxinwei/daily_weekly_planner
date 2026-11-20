@@ -199,7 +199,7 @@
   }
   function bindEvents(root){
     root.addEventListener('click',event=>{
-      if(event.target.id==='cw-new')openEditor();if(event.target.id==='cw-refresh')loadCustomers();
+      if(event.target.id==='cw-new')openEditor();if(event.target.id==='cw-refresh'){window.CompanyBusiness?.invalidateRelations();loadCustomers();}
       if(event.target.id==='cw-editor-close'||event.target.id==='cw-cancel')closeEditor();
       if(event.target===$('cw-editor'))closeEditor();
     });
@@ -222,7 +222,7 @@
       if(!customer?.id)throw new Error('Customer not found');
       state.query='';state.businessType='';state.status='';state.offset=0;
       $('cw-search').value='';$('cw-business-filter').value='';$('cw-status-filter').value='';
-      state.items=[customer];state.total=1;renderCustomers();
+      state.items=[customer];state.total=1;state.relationSummaries=await (window.CompanyBusiness?.loadCustomerRelations([customer])||Promise.resolve({}));renderCustomers();
       setFeedback('');
       requestAnimationFrame(()=>document.querySelector('[data-customer-id="'+CSS.escape(String(id))+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}));
     }catch(error){setFeedback(error.message||'读取客户资料失败。','error')}
