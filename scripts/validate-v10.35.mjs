@@ -15,7 +15,7 @@ const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 assert.match(html, /APP_VERSION='V10\.(3[5-9]|40)_[a-z0-9_]+'/);
 assert.match(html, /type="module" src="\.\/language-workspace\.js\?v=2\.\d+\.\d+"/);
 assert.match(sw, /daily-weekly-planner-v10-(3[5-9]|40)-/);
-assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.3[5-9]\.\d+$/);
+assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.(3[5-9]|40)\.\d+$/);
 assert.ok(zh.includes('# V10.35') && en.includes('# V10.35') && ja.includes('# V10.35'));
 
 // 工作区切换
