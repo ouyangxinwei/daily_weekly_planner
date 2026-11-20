@@ -203,3 +203,244 @@ Renamed documentation files whose archive names were garbled into descriptive En
 
 ## 验证说明
 本次已完成代码与文档修改。目标浏览器、移动设备、实际 PWA 安装环境及用户 Supabase 项目的端到端验证尚需部署后执行，详见验收清单。
+
+
+---
+
+## 原文件：`DELIVERY_NOTES_V10.6.md`
+
+# V10.6 交付说明
+
+## 本次实现
+- 统一候选状态保存入口 `commitState()`。
+- 修复计划新建／编辑、完成状态、删除、批量删除、归档、取消归档、恢复、永久删除、批量操作、撤销、JSON 导入、云端下载及自动清理的失败处理。
+- 更新用户说明、技术手册、部署说明、需求规格、验收测试、影响分析和迁移说明。
+- Service Worker 缓存版本更新为 `daily-weekly-planner-v10-6-transactional-save`。
+
+## 数据兼容
+保持 `schemaVersion: 1`，无需数据库迁移。
+
+## 验证状态
+已完成 GitHub 源码更新及静态代码路径检查。当前环境未运行真实浏览器，LocalStorage 配额异常注入和 UI 端到端测试尚未执行；请按 `docs/acceptance_V10.6_transactional_save.md` 验收。
+
+
+---
+
+## 原文件：`DELIVERY_NOTES_V10.7.md`
+
+# 慢慢计划 V10.7 交付说明
+
+## 本次内容
+
+新增「快速添加计划」：
+- 计划列表进度条下方新增常驻输入框。
+- 支持 Enter 和点击按钮提交。
+- 默认加入每日计划，未完成、未分类、1 星，不设置提醒。
+- 保存成功后切换至每日视图，清除搜索词与分类筛选，清空输入框并保持焦点，支持连续录入。
+- 空名称不提交。
+- 事务保存失败时保留输入内容，不显示成功提示。
+
+## 技术影响
+
+- 复用 V10.6 `commitState()`。
+- 不修改计划数据结构及 `schemaVersion: 1`。
+- 无需 Supabase SQL 或数据迁移。
+- Service Worker 缓存名更新为 `daily-weekly-planner-v10-7-quick-add`。
+
+## 修改文件
+
+- `index.html`
+- `sw.js`
+- `README.md`
+- `CHANGELOG.md`
+- `docs/feature_and_system_guide.md`
+- `docs/technical_manual.md`
+- `docs/deployment_and_troubleshooting.md`
+- 新增 `docs/requirements_V10.7_quick_add.md`
+- 新增 `docs/acceptance_V10.7_quick_add.md`
+
+## 验证说明
+
+需区分静态代码检查与真实浏览器验收。交付前应验证 Enter、按钮、连续添加、空输入、保存失败、刷新持久化、移动端布局及原有完整表单。未实际运行的浏览器测试不得标记为通过。
+
+## 部署
+
+上传完整仓库文件。已部署的 GitHub Pages 等待发布完成后刷新；已安装 PWA 建议完全关闭后重新打开。无需数据库迁移。
+
+
+---
+
+## 原文件：`DELIVERY_NOTES_V10.8.md`
+
+# 慢慢计划 V10.8 交付说明
+
+## 新增功能
+首页顶部新增「版本与更新记录」按钮。打开后显示：
+- 当前运行版本；
+- GitHub main 分支 CHANGELOG 的完整历史版本；
+- GitHub Pages 部署状态；
+- 对应 main 提交短 SHA、更新时间及 Actions 运行记录链接；
+- 手动刷新部署状态。
+
+## 部署状态含义
+系统从公开 GitHub API 读取 main 最新 commit，并与 Pages build and deployment workflow 的 head_sha 比对。仅当对应当前 main SHA 的工作流成功完成时显示「部署成功」。未匹配时显示等待记录，运行中或失败则分别显示对应状态。网络或 API 限流时显示检查失败。
+
+注意：GitHub Actions 成功表示 Pages 构建部署工作流成功，不保证所有浏览器或 PWA 缓存已经更新。
+
+## 修改文件
+- index.html
+- sw.js
+- README.md
+- CHANGELOG.md
+- docs/feature_and_system_guide.md
+- docs/technical_manual.md
+- docs/deployment_and_troubleshooting.md
+- docs/requirements_V10.8_release_history.md
+- docs/acceptance_V10.8_release_history.md
+
+## 数据与兼容
+不修改计划 schema、LocalStorage 业务数据、Supabase 表或 RPC，无数据库迁移。V10.6 事务保存机制不变。
+
+## 验证
+静态语法检查和部署状态分支逻辑模拟待执行；真实浏览器／手机 PWA 验收待用户设备执行。
+
+
+---
+
+## 原文件：`DELIVERY_NOTES_V10.9.md`
+
+# 慢慢计划 V10.9 交付说明
+
+## 新增与调整
+- 默认排序改为「优先级（未完成优先）」。
+- 未完成任务优先于已完成任务；各自分组内部按五星至一星排列。
+- 同星级保持筛选后原列表顺序。
+- 保留原始顺序、名称 A–Z、最近添加、最早添加。
+- 排序模式单独保存并在刷新后恢复。
+- 普通周期及随机临时计划视图统一使用规则。
+
+## 影响范围
+只改变显示顺序及独立排序偏好，不修改计划业务数据、完成记录、撤销机制、JSON schema、Supabase 快照或数据库结构。无 SQL 迁移。
+
+## 修改文件
+- index.html
+- sw.js
+- README.md
+- CHANGELOG.md
+- docs/feature_and_system_guide.md
+- docs/technical_manual.md
+- docs/deployment_and_troubleshooting.md
+- docs/requirements_V10.9_priority_sorting.md
+- docs/acceptance_V10.9_priority_sorting.md
+- docs/impact_analysis_V10.9_priority_sorting.md
+- DELIVERY_NOTES_V10.9.md
+
+## 验证
+- JavaScript 语法检查：通过。
+- 五星优先、完成状态置底、同星稳定顺序模拟：通过。
+- 筛选后排序、偏好恢复、现有排序模式模拟：通过。
+- 真实浏览器／手机 PWA 端到端测试：尚待用户设备验收。
+
+GitHub Pages 部署成功与否以本次提交 SHA 对应的 pages build and deployment workflow 为准。
+
+
+---
+
+## 原文件：`docs/V10.20_full_backup_module_colors_spec.md`
+
+# V10.20 改修规格：四模块整体 JSON 导出与入口按钮颜色
+
+## 状态
+实现版本：V10.20；基于 V10.19 增量修改。
+
+## 目标
+1. 增加独立「整体导出 JSON」入口，一次导出计划、工作、外语学习、整理四模块。
+2. 四个模块入口按钮分别使用柔和蓝、绿、紫、橙背景色。
+3. 保留既有单模块导出与导入；不增加整体导入。
+
+## 整体导出格式与数据范围
+- 本机读取四个模块 LocalStorage 分区：`personal-planner:v1`、`personal-work:v1`、`personal-language:v1`、`personal-organizer:v1`。
+- 使用现有模块状态校验/规范化规则；每个模块完整包含当前备份支持的数据：schemaVersion、categories、plans、completions、trash。
+- 每个模块对象附带 moduleType、appVersion、exportedAt。
+- 顶层包含 app=manman-planner、backupType=full、backupVersion=1、appVersion、exportedAt、modules。
+- 文件名：`manman_planner_full_backup_YYYYMMDD_HHmmss.json`，按本地时间生成。
+- 任一模块读取或 JSON 解析/结构校验失败，整体导出取消；不会静默生成缺失模块的备份。
+- 空分区按现有整体快照逻辑导出该模块空状态。
+- 导出仅读取本地数据，不请求 Supabase、不修改 LocalStorage。
+- 不包含 IndexedDB 运行日志、语言偏好/系统设置或其他系统级数据。
+
+## UI
+- 在现有 JSON 导出入口附近增加独立按钮「整体导出 JSON」。
+- 四模块按钮分别使用蓝、绿、紫、橙柔和色系；保持现有文案、图标、尺寸、顺序和行为。
+- 新按钮提供简体中文、English、日本語文案。
+
+## 兼容与约束
+- 不修改四个业务 LocalStorage 键及 schemaVersion。
+- 不改变单模块 JSON 导出格式、单模块导入校验或恢复行为。
+- 不修改 Supabase RPC、数据库结构、登录及同步流程。
+- 不增加整体导入。
+- 不进行无关重构。
+- 更新 Service Worker cache 名称。
+
+## 版本
+V10.20 · full_backup_module_colors。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.10_star_dashboard_jump.md`
+
+# V10.10 验收标准
+
+- [ ] 首页显示 1–5 星统计和未完成任务数量。
+- [ ] 只统计每日、每周、每月、每年正式计划。
+- [ ] 已完成任务、已归档任务、随机临时计划均不计入。
+- [ ] 完成状态按当前日／周／月／年周期记录判断。
+- [ ] 零数量星级禁用；非零星级可点击。
+- [ ] 某星级数量最多的周期被选中。
+- [ ] 周期数量并列时按每日、每周、每月、每年选择。
+- [ ] 点击后搜索和分类筛选被清空，排序模式保持原值。
+- [ ] 列表定位到该星级第一条未完成任务并短暂高亮。
+- [ ] 完成／取消完成、新建、编辑、归档／取消归档、恢复、导入、云端下载后统计随 render 更新。
+- [ ] 不改变任务数据、schemaVersion、JSON 备份或 Supabase 快照。
+- [ ] 桌面和手机布局可用；浏览器真实端到端验收仍需执行。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.11_multilingual_ui.md`
+
+# V10.11 验收标准
+
+- [ ] 首次访问无语言偏好时显示简体中文。
+- [ ] 登录页和主界面均可选择中文、English、日本語。
+- [ ] 切换语言立即生效，两个选择器同步。
+- [ ] 刷新网页、重新打开浏览器和 PWA 后保留上次语言。
+- [ ] 主界面、计划周期、分类、搜索筛选排序、表单、弹窗、回收站、归档、同步及动态反馈均按当前语言显示。
+- [ ] 日期、时间、通知和 PDF 导出使用当前语言。
+- [ ] 版本履历按语言读取对应 CHANGELOG，V0 至 V10.11 历史条目齐全。
+- [ ] 用户输入的计划标题、备注、URL、用户名不被翻译。
+- [ ] 切换语言不改变任务数据、完成状态、分类枚举、JSON 备份或云端快照。
+- [ ] 离线加载后可切换三种语言。
+- [ ] V10.10 的新增、编辑、删除、排序、星级统计定位、备份和同步功能不回归。
+- [ ] JS 语法、字典完整性、翻译覆盖及真实浏览器/PWA 测试通过；未执行的测试需明确标注。
+
+
+---
+
+## 原文件：`docs/acceptance_V10.12_custom_category_management.md`
+
+# V10.12 验收清单：自定义分类管理
+
+- [ ] 旧数据升级后计划、完成状态、归档及回收站记录保留。
+- [ ] 原有七个分类及顺序保留。
+- [ ] 添加、改名、删除正常；空名、超长、重复名称被拒绝。
+- [ ] 新建与快速添加默认使用第一分类。
+- [ ] 改名同步普通、归档和回收站计划。
+- [ ] 删除最后一个分类被禁止。
+- [ ] 删除使用中分类必须选择目标；取消后数据不变。
+- [ ] 确认后关联计划先转移再删除，操作可撤销。
+- [ ] LocalStorage 写入失败时无部分修改。
+- [ ] JSON 与 Supabase 同步包含分类；旧备份兼容。
+- [ ] 三种语言正常，自定义分类名称保持原样。
+- [ ] 手机与桌面布局正常；schemaVersion: 1，无 SQL 迁移。
