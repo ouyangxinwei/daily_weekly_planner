@@ -1,5 +1,5 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-51-business-overview';
-const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './runtime-logs.js', './health-check.js', './language-workspace.js', './language-workspace.css', './company-website.js', './company-website.css', './company-business.js', './company-task-date-filter.js', './company-overview-metrics.js', './company-business.css', './weather-dashboard.js', './weather-dashboard.css', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'daily-weekly-planner-v10-52-todo-center';
+const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './runtime-logs.js', './health-check.js', './language-workspace.js', './language-workspace.css', './company-website.js', './company-website.css', './company-business.js', './company-task-date-filter.js', './company-overview-metrics.js', './company-todo-center.js', './company-business.css', './weather-dashboard.js', './weather-dashboard.css', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
   self.skipWaiting();

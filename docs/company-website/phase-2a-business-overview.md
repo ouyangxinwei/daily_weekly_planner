@@ -58,11 +58,11 @@
 
 ## 当前交付状态
 
-- 版本：V10.51.0（开发分支）。
+- 版本：V10.51.0（已合并、已部署并通过用户真实浏览器验收）。
 - 数据库/API：无变更，继续使用 company-api v5。
 - PR #51：https://github.com/ouyangxinwei/daily_weekly_planner/pull/51，已 squash merge。
 - 合并提交：58c25171286a9bf6cf3f6f710bddfcd6bf2d6adc。
 - GitHub Actions 验证 run 44725923075：completed / success。
 - GitHub Pages run 44725921635：completed / success；build、deploy、report-build-status 均成功，V10.51.0 已部署。
 - Playwright 未作为合并前提，不记录为通过。
-- 用户真实浏览器验收：等待用户确认。
+- 用户于 2026-11-20 明确确认生产环境真实浏览器验收 OK，阶段 2-A 正式完成。
