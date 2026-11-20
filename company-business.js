@@ -124,7 +124,6 @@
       card.append(main,details);
       const actions = node('div','cw-card-actions');
       actions.append(button(t('edit'),'secondary',()=>openEditor(record)),button(t('delete'),'cw-delete',()=>removeRecord(record,project)));
-      if (project) actions.append(button(t('followups'),'secondary',()=>{ state.followupProjectFilter = record.id; switchTab('followups'); $('cw-business-query').value = ''; }));
       card.append(actions); host.append(card);
     });
     const pager = $('cw-business-pagination'); pager.replaceChildren();
