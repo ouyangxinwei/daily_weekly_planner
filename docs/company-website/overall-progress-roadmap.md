@@ -8,9 +8,9 @@
 - 子系统：个人公司网站。
 - 当前整体阶段：**Phase 2——业务总览与工作台**。
 - Phase 1：当前定义的 13 个核心工作项均已完成并通过阶段验收，核心业务工作区目标达成。
-- 当前子阶段：**2-C——项目与客户业务概况（V10.53.0 开发中）**。
+- 当前子阶段：**2-C——项目与客户业务概况（V10.53.0 已合并、已部署，等待用户真实浏览器验收）**。
 - Phase 2 目标：从分散的业务记录管理，升级为统一的日常业务决策与执行工作台。
-- 当前 main 生产应用版本：**V10.52.0**。
+- 当前 main 生产应用版本：**V10.53.0**。
 - 生产 API：Supabase Edge Function company-api v5。
 - 生产数据库：慢慢计划 Supabase 项目中的 public.company_records；Phase 2 沿用现有结构。
 
@@ -62,7 +62,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 |---|---|---|
 | 2-A | 业务总览首页：核心 KPI、需要关注、近期业务及快捷导航 | **已完成、已部署并通过用户真实浏览器验收** |
 | 2-B | 待办事项中心：统一处理逾期任务、今日/未来任务和待跟进事项 | **已完成、已部署并通过用户真实浏览器验收** |
-| 2-C | 项目与客户业务概况：项目状态分布、进度、客户项目关联及近期活动 | **开发中（V10.53.0）** |
+| 2-C | 项目与客户业务概况：项目状态分布、进度、客户项目关联及近期活动 | **已合并、已部署，等待用户真实浏览器验收** |
 | 2-D | 业务趋势与周期复盘：按周/月观察项目、任务和客户跟进趋势 | 后续阶段 |
 
 ### 2-A：业务总览首页（已完成并验收）
@@ -164,7 +164,8 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - PR 验证 workflow run 44728547467：completed / success；V10.52 待办分组规则及既有回归验证通过。
 - main 验证 workflow run 44728617816：completed / success。
 - Pages workflow run 44728617320：completed / success；build、deploy、report-build-status 均成功。
-- 用户真实浏览器验收：等待用户确认。
+- 用户于 2026-11-20 明确确认生产真实浏览器验收 OK，2-B 正式完成。
+- 交付文档 PR #54 已合并；验证 run 44728893273 success；Pages run 44728968290 的 build/deploy/report-build-status 均成功。
 - 数据库、RLS、company-api v5、认证和生产业务数据均未修改。
 
 ## 11. Phase 2-C 开发状态（2026-11-20）
@@ -174,4 +175,11 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - 目标版本：V10.53.0。
 - 实施范围：独立项目与客户概况入口，项目状态分布/进度、客户项目组合、任务完成情况和近期业务活动。
 - 沿用 company-api v5 与 public.company_records，不修改数据库、RLS、Edge Function、认证或生产业务数据。
-- 当前尚未合并、部署或完成用户验收；以 PR 和 Actions 的后续结果更新。
+- 功能 PR #55：https://github.com/ouyangxinwei/daily_weekly_planner/pull/55，已 squash merge。
+- 合并提交：5bc006224f2e179b83d9cdde06c43c4dc7855f46。
+- PR 验证 run 44747122154：completed / success；JavaScript 语法与 V10.53 项目/客户汇总验证通过。
+- main 验证 run 44747206317：completed / success。
+- Pages run 44747206274：completed / success；build、deploy、report-build-status 均成功，V10.53.0 已部署。
+- Playwright run 44747121956 尚未取得通过结论；不作为合并前提，不记录为通过。
+- 用户真实浏览器验收：等待用户确认。
+- 数据库、RLS、company-api v5、认证和生产业务数据均未修改。
