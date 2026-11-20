@@ -54,7 +54,7 @@ function countByPeriod(records, periods, dateOf) {
   const counts = Object.fromEntries(periods.map(period => [period.key, 0]));
   for (const record of Array.isArray(records) ? records : []) {
     const date = normalizeDate(dateOf(record));
-    if (!date) continue;
+    if (!date || date > periods[periods.length - 1].end) continue;
     const period = periods.find(item => date >= item.start && date <= item.end);
     if (period) counts[period.key] += 1;
   }
