@@ -8,9 +8,9 @@
   const root = () => $('company-workspace-root');
   const locale = () => (document.documentElement.lang || 'zh-CN').toLowerCase().startsWith('ja') ? 'ja' : ((document.documentElement.lang || '').toLowerCase().startsWith('en') ? 'en' : 'zh');
   const words = {
-    zh: { customers:'客户', projects:'项目管理', followups:'业务跟进', project:'项目', followup:'跟进记录', newProject:'新增项目', newFollowup:'新增跟进', searchProject:'搜索项目名称', searchFollowup:'搜索跟进内容', allStatus:'全部状态', customer:'所属客户', chooseCustomer:'选择客户', status:'项目状态', planned:'计划中', active:'进行中', on_hold:'暂缓', completed:'已完成', cancelled:'已取消', prospect:'潜在客户', trade:'贸易', software:'软件开发', ecommerce:'电子商务', startDate:'开始日期', dueDate:'预计完成日期', description:'项目说明', save:'保存', cancel:'取消', edit:'编辑', delete:'删除', noProjects:'还没有项目', noFollowups:'还没有跟进记录', createProjectHint:'为客户建立第一个项目。', createFollowupHint:'记录一次电话、邮件或会议跟进。', confirmDeleteProject:'确定删除这个项目吗？此操作无法撤销。', confirmDeleteFollowup:'确定删除这条跟进记录吗？此操作无法撤销。', method:'跟进方式', phone:'电话', email:'邮件', meeting:'会议', message:'即时消息', other:'其他', followupDate:'跟进时间', outcome:'跟进结果', nextDate:'下次跟进日期', notes:'备注', linkedProject:'关联项目（可选）', noProject:'不关联项目', pending:'待跟进', done:'已完成', next:'下一页', previous:'上一页', loading:'正在加载…', loaded:'已加载', failed:'操作失败，请稍后重试。', relationError:'该项目仍有关联的跟进记录，请先调整或删除跟进记录。', required:'请填写必填项目并选择客户。', customerMissing:'请先创建客户，再创建项目或跟进记录。', refresh:'刷新', allProjects:'全部项目', filterProject:'按项目筛选', projectTitle:'项目名称', followupTitle:'跟进主题' },
-    en: { customers:'Customers', projects:'Projects', followups:'Business follow-ups', project:'Project', followup:'Follow-up', newProject:'New project', newFollowup:'New follow-up', searchProject:'Search project name', searchFollowup:'Search follow-up', allStatus:'All statuses', customer:'Customer', chooseCustomer:'Select customer', status:'Project status', planned:'Planned', active:'In progress', on_hold:'On hold', completed:'Completed', cancelled:'Cancelled', prospect:'Prospect', trade:'Trade', software:'Software', ecommerce:'E-commerce', startDate:'Start date', dueDate:'Target date', description:'Description', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete', noProjects:'No projects yet', noFollowups:'No follow-ups yet', createProjectHint:'Create the first project for a customer.', createFollowupHint:'Record a call, email or meeting.', confirmDeleteProject:'Delete this project? This cannot be undone.', confirmDeleteFollowup:'Delete this follow-up? This cannot be undone.', method:'Method', phone:'Phone', email:'Email', meeting:'Meeting', message:'Message', other:'Other', followupDate:'Follow-up time', outcome:'Outcome', nextDate:'Next follow-up date', notes:'Notes', linkedProject:'Related project (optional)', noProject:'No project', pending:'Pending', done:'Completed', next:'Next', previous:'Previous', loading:'Loading…', loaded:'Loaded', failed:'Operation failed. Please try again.', relationError:'This project still has linked follow-ups. Reassign or delete them first.', required:'Complete required fields and select a customer.', customerMissing:'Create a customer before adding projects or follow-ups.', refresh:'Refresh', allProjects:'All projects', filterProject:'Filter by project', projectTitle:'Project name', followupTitle:'Follow-up subject' },
-    ja: { customers:'顧客', projects:'プロジェクト管理', followups:'業務フォロー', project:'プロジェクト', followup:'フォロー記録', newProject:'プロジェクト追加', newFollowup:'フォロー追加', searchProject:'プロジェクト名を検索', searchFollowup:'フォロー内容を検索', allStatus:'すべての状態', customer:'顧客', chooseCustomer:'顧客を選択', status:'プロジェクト状態', planned:'予定', active:'進行中', on_hold:'保留', completed:'完了', cancelled:'中止', prospect:'見込み顧客', trade:'貿易', software:'ソフトウェア開発', ecommerce:'EC', startDate:'開始日', dueDate:'完了予定日', description:'説明', save:'保存', cancel:'キャンセル', edit:'編集', delete:'削除', noProjects:'プロジェクトはまだありません', noFollowups:'フォロー記録はまだありません', createProjectHint:'顧客の最初のプロジェクトを作成します。', createFollowupHint:'電話、メール、会議の内容を記録します。', confirmDeleteProject:'このプロジェクトを削除しますか？元に戻せません。', confirmDeleteFollowup:'この記録を削除しますか？元に戻せません。', method:'方法', phone:'電話', email:'メール', meeting:'会議', message:'メッセージ', other:'その他', followupDate:'フォロー日時', outcome:'結果', nextDate:'次回フォロー日', notes:'メモ', linkedProject:'関連プロジェクト（任意）', noProject:'プロジェクトなし', pending:'未対応', done:'完了', next:'次へ', previous:'前へ', loading:'読み込み中…', loaded:'読み込み完了', failed:'処理に失敗しました。もう一度お試しください。', relationError:'フォロー記録が関連付けられています。先に関連を変更または削除してください。', required:'必須項目を入力し、顧客を選択してください。', customerMissing:'先に顧客を登録してください。', refresh:'更新', allProjects:'すべてのプロジェクト', filterProject:'プロジェクトで絞り込み', projectTitle:'プロジェクト名', followupTitle:'フォロー件名' }
+    zh: { customers:'客户', projects:'项目管理', followups:'业务跟进', project:'项目', followup:'跟进记录', newProject:'新增项目', newFollowup:'新增跟进', searchProject:'搜索项目名称', searchFollowup:'搜索跟进内容', allStatus:'全部状态', customer:'所属客户', chooseCustomer:'选择客户', status:'项目状态', planned:'计划中', active:'进行中', on_hold:'暂缓', completed:'已完成', cancelled:'已取消', prospect:'潜在客户', trade:'贸易', software:'软件开发', ecommerce:'电子商务', startDate:'开始日期', dueDate:'预计完成日期', description:'项目说明', save:'保存', cancel:'取消', edit:'编辑', delete:'删除', noProjects:'还没有项目', noFollowups:'还没有跟进记录', createProjectHint:'为客户建立第一个项目。', createFollowupHint:'记录一次电话、邮件或会议跟进。', confirmDeleteProject:'确定删除这个项目吗？此操作无法撤销。', confirmDeleteFollowup:'确定删除这条跟进记录吗？此操作无法撤销。', method:'跟进方式', phone:'电话', email:'邮件', meeting:'会议', message:'即时消息', other:'其他', followupDate:'跟进时间', outcome:'跟进结果', nextDate:'下次跟进日期', notes:'备注', linkedProject:'关联项目（可选）', noProject:'不关联项目', pending:'待跟进', done:'已完成', next:'下一页', previous:'上一页', loading:'正在加载…', loaded:'已加载', failed:'操作失败，请稍后重试。', relationError:'该项目仍有关联的跟进记录，请先调整或删除跟进记录。', required:'请填写必填项目并选择客户。', customerMissing:'请先创建客户，再创建项目或跟进记录。', refresh:'刷新', allProjects:'全部项目', filterProject:'按项目筛选', projectTitle:'项目名称', followupTitle:'跟进主题', progress:'项目进度', progressPercent:'项目进度（0–100%）', viewDetails:'查看详情', projectDetails:'项目详情', invalidProgress:'项目进度必须是 0 到 100 之间的整数。', close:'关闭' },
+    en: { customers:'Customers', projects:'Projects', followups:'Business follow-ups', project:'Project', followup:'Follow-up', newProject:'New project', newFollowup:'New follow-up', searchProject:'Search project name', searchFollowup:'Search follow-up', allStatus:'All statuses', customer:'Customer', chooseCustomer:'Select customer', status:'Project status', planned:'Planned', active:'In progress', on_hold:'On hold', completed:'Completed', cancelled:'Cancelled', prospect:'Prospect', trade:'Trade', software:'Software', ecommerce:'E-commerce', startDate:'Start date', dueDate:'Target date', description:'Description', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete', noProjects:'No projects yet', noFollowups:'No follow-ups yet', createProjectHint:'Create the first project for a customer.', createFollowupHint:'Record a call, email or meeting.', confirmDeleteProject:'Delete this project? This cannot be undone.', confirmDeleteFollowup:'Delete this follow-up? This cannot be undone.', method:'Method', phone:'Phone', email:'Email', meeting:'Meeting', message:'Message', other:'Other', followupDate:'Follow-up time', outcome:'Outcome', nextDate:'Next follow-up date', notes:'Notes', linkedProject:'Related project (optional)', noProject:'No project', pending:'Pending', done:'Completed', next:'Next', previous:'Previous', loading:'Loading…', loaded:'Loaded', failed:'Operation failed. Please try again.', relationError:'This project still has linked follow-ups. Reassign or delete them first.', required:'Complete required fields and select a customer.', customerMissing:'Create a customer before adding projects or follow-ups.', refresh:'Refresh', allProjects:'All projects', filterProject:'Filter by project', projectTitle:'Project name', followupTitle:'Follow-up subject', progress:'Project progress', progressPercent:'Project progress (0–100%)', viewDetails:'View details', projectDetails:'Project details', invalidProgress:'Progress must be a whole number from 0 to 100.', close:'Close' },
+    ja: { customers:'顧客', projects:'プロジェクト管理', followups:'業務フォロー', project:'プロジェクト', followup:'フォロー記録', newProject:'プロジェクト追加', newFollowup:'フォロー追加', searchProject:'プロジェクト名を検索', searchFollowup:'フォロー内容を検索', allStatus:'すべての状態', customer:'顧客', chooseCustomer:'顧客を選択', status:'プロジェクト状態', planned:'予定', active:'進行中', on_hold:'保留', completed:'完了', cancelled:'中止', prospect:'見込み顧客', trade:'貿易', software:'ソフトウェア開発', ecommerce:'EC', startDate:'開始日', dueDate:'完了予定日', description:'説明', save:'保存', cancel:'キャンセル', edit:'編集', delete:'削除', noProjects:'プロジェクトはまだありません', noFollowups:'フォロー記録はまだありません', createProjectHint:'顧客の最初のプロジェクトを作成します。', createFollowupHint:'電話、メール、会議の内容を記録します。', confirmDeleteProject:'このプロジェクトを削除しますか？元に戻せません。', confirmDeleteFollowup:'この記録を削除しますか？元に戻せません。', method:'方法', phone:'電話', email:'メール', meeting:'会議', message:'メッセージ', other:'その他', followupDate:'フォロー日時', outcome:'結果', nextDate:'次回フォロー日', notes:'メモ', linkedProject:'関連プロジェクト（任意）', noProject:'プロジェクトなし', pending:'未対応', done:'完了', next:'次へ', previous:'前へ', loading:'読み込み中…', loaded:'読み込み完了', failed:'処理に失敗しました。もう一度お試しください。', relationError:'フォロー記録が関連付けられています。先に関連を変更または削除してください。', required:'必須項目を入力し、顧客を選択してください。', customerMissing:'先に顧客を登録してください。', refresh:'更新', allProjects:'すべてのプロジェクト', filterProject:'プロジェクトで絞り込み', projectTitle:'プロジェクト名', followupTitle:'フォロー件名', progress:'進捗', progressPercent:'プロジェクト進捗（0～100%）', viewDetails:'詳細を見る', projectDetails:'プロジェクト詳細', invalidProgress:'進捗は0～100の整数で入力してください。', close:'閉じる' }
   };
   const t = key => words[locale()][key] || words.zh[key] || key;
   function auth(){ return window.PlannerCompanyContext?.getAuth?.() || null; }
@@ -49,6 +49,13 @@
     const dialog = document.createElement('dialog'); dialog.className = 'cw-dialog'; dialog.id = 'cw-business-editor';
     dialog.innerHTML = '<form id="cw-business-form" class="cw-editor-form"><div class="cw-dialog-head"><div><p class="cw-eyebrow">BUSINESS RECORD</p><h2 id="cw-business-editor-title"></h2></div><button class="close-btn" id="cw-business-close" type="button" aria-label="Close">×</button></div><div id="cw-business-fields" class="cw-form-grid"></div><p class="cw-form-error" id="cw-business-error" role="alert"></p><div class="cw-dialog-actions"><button class="secondary" id="cw-business-cancel" type="button">' + escape(t('cancel')) + '</button><button class="primary" type="submit">' + escape(t('save')) + '</button></div></form>';
     host.append(dialog);
+    const details = document.createElement('dialog'); details.className = 'cw-dialog cw-project-details-dialog'; details.id = 'cw-project-details';
+    details.innerHTML = '<div class="cw-editor-form"><div class="cw-dialog-head"><div><p class="cw-eyebrow">PROJECT DETAILS</p><h2 id="cw-project-details-title"></h2></div><button class="close-btn" id="cw-project-details-close" type="button" aria-label="Close">×</button></div><div class="cw-project-detail-progress"><div class="cw-project-progress-label"><span id="cw-project-details-progress-label"></span><strong id="cw-project-details-progress-value"></strong></div><div class="cw-project-progress-track"><div class="cw-project-progress-fill" id="cw-project-details-progress-fill"></div></div></div><dl class="cw-project-detail-grid"><div><dt id="cw-project-details-customer-label"></dt><dd id="cw-project-details-customer"></dd></div><div><dt id="cw-project-details-status-label"></dt><dd id="cw-project-details-status"></dd></div><div><dt id="cw-project-details-start-label"></dt><dd id="cw-project-details-start"></dd></div><div><dt id="cw-project-details-due-label"></dt><dd id="cw-project-details-due"></dd></div><div class="cw-project-detail-description"><dt id="cw-project-details-description-label"></dt><dd id="cw-project-details-description"></dd></div></dl><div class="cw-dialog-actions"><button class="secondary" id="cw-project-details-edit" type="button"></button><button class="primary" id="cw-project-details-close-action" type="button"></button></div></div>';
+    host.append(details);
+    $('cw-project-details-close').addEventListener('click', () => details.close());
+    $('cw-project-details-close-action').addEventListener('click', () => details.close());
+    $('cw-project-details-edit').addEventListener('click', () => { const record = state.projects.find(p => p.id === details.dataset.projectId); details.close(); if (record) openEditor(record); });
+    details.addEventListener('click', e => { if (e.target === details) details.close(); });
     $('cw-business-search').addEventListener('submit', e => { e.preventDefault(); const q = $('cw-business-query').value.trim(); if (state.tab === 'projects') state.projectQuery = q; else state.followupQuery = q; setOffset(0); loadActive(); });
     $('cw-business-status').addEventListener('change', () => { if (state.tab === 'projects') state.projectStatus = $('cw-business-status').value; else state.followupStatus = $('cw-business-status').value; setOffset(0); loadActive(); });
     $('cw-business-new').addEventListener('click', () => openEditor());
@@ -119,16 +126,52 @@
       }
       main.append(meta);
       const details = node('div','cw-business-details');
-      if (project) { if (data.description) details.append(node('p','',data.description)); if (record.record_date) details.append(node('span','',t('startDate')+': '+dateText(record.record_date))); if (record.due_date) details.append(node('span','',t('dueDate')+': '+dateText(record.due_date))); }
+      if (project) {
+        if (data.description) details.append(node('p','',data.description));
+        if (record.record_date) details.append(node('span','',t('startDate')+': '+dateText(record.record_date)));
+        if (record.due_date) details.append(node('span','',t('dueDate')+': '+dateText(record.due_date)));
+        const rawProgress = Number(data.progress_percent ?? 0);
+        const progress = Number.isInteger(rawProgress) && rawProgress >= 0 && rawProgress <= 100 ? rawProgress : 0;
+        const progressWrap = node('div','cw-project-progress');
+        const progressLabel = node('div','cw-project-progress-label');
+        progressLabel.append(node('span','',t('progress')),node('strong','',progress+'%'));
+        const track = node('div','cw-project-progress-track'), fill = node('div','cw-project-progress-fill');
+        fill.style.width = progress + '%'; track.append(fill); progressWrap.append(progressLabel,track); details.append(progressWrap);
+      }
       else { if (data.outcome) details.append(node('p','',data.outcome)); if (data.next_follow_up_date) details.append(node('span','',t('nextDate')+': '+dateText(data.next_follow_up_date))); if (data.project_id) details.append(node('span','',t('project')+': '+(projectName(data.project_id) === '—' ? data.project_title || '—' : projectName(data.project_id)))); }
       card.append(main,details);
       const actions = node('div','cw-card-actions');
+      if (project) actions.append(button(t('viewDetails'),'secondary',()=>openProjectDetails(record)));
       actions.append(button(t('edit'),'secondary',()=>openEditor(record)),button(t('delete'),'cw-delete',()=>removeRecord(record,project)));
       card.append(actions); host.append(card);
     });
     const pager = $('cw-business-pagination'); pager.replaceChildren();
     const pages = Math.max(1,Math.ceil(total/PAGE_SIZE)), current = Math.floor(offset/PAGE_SIZE)+1;
     if (pages > 1) pager.append(button(t('previous'),'secondary',()=>{setOffset(Math.max(0,offset-PAGE_SIZE));loadActive();}),node('span','',current+' / '+pages),button(t('next'),'secondary',()=>{setOffset(offset+PAGE_SIZE);loadActive();}));
+  }
+  function openProjectDetails(record) {
+    const data = record?.data && typeof record.data === 'object' ? record.data : {};
+    const rawProgress = Number(data.progress_percent ?? 0);
+    const progress = Number.isInteger(rawProgress) && rawProgress >= 0 && rawProgress <= 100 ? rawProgress : 0;
+    const dialog = $('cw-project-details');
+    dialog.dataset.projectId = record.id;
+    $('cw-project-details-title').textContent = record.title || t('projectDetails');
+    $('cw-project-details-progress-label').textContent = t('progress');
+    $('cw-project-details-progress-value').textContent = progress + '%';
+    $('cw-project-details-progress-fill').style.width = progress + '%';
+    $('cw-project-details-customer-label').textContent = t('customer');
+    $('cw-project-details-customer').textContent = customerName(record.parent_record_id);
+    $('cw-project-details-status-label').textContent = t('status');
+    $('cw-project-details-status').textContent = t(record.status) || record.status || '—';
+    $('cw-project-details-start-label').textContent = t('startDate');
+    $('cw-project-details-start').textContent = dateText(record.record_date) || '—';
+    $('cw-project-details-due-label').textContent = t('dueDate');
+    $('cw-project-details-due').textContent = dateText(record.due_date) || '—';
+    $('cw-project-details-description-label').textContent = t('description');
+    $('cw-project-details-description').textContent = data.description || '—';
+    $('cw-project-details-edit').textContent = t('edit');
+    $('cw-project-details-close-action').textContent = t('close');
+    dialog.showModal();
   }
   function field(label,id,type,value,wide,extra) {
     const wrap = node('div','field'+(wide?' cw-field-wide':''));
@@ -156,6 +199,10 @@
       fields.append(field(t('status'),'cw-biz-status','select',record?.status || 'planned',false,selectOptions([['planned',t('planned')],['active',t('active')],['on_hold',t('on_hold')],['completed',t('completed')],['cancelled',t('cancelled')]],record?.status || 'planned')));
       fields.append(field(t('startDate'),'cw-biz-start','date',record?.record_date?.slice(0,10) || ''));
       fields.append(field(t('dueDate'),'cw-biz-due','date',record?.due_date?.slice(0,10) || ''));
+      const progressField = field(t('progressPercent'),'cw-biz-progress','number',String(data.progress_percent ?? 0));
+      const progressInput = progressField.querySelector('input');
+      progressInput.min = '0'; progressInput.max = '100'; progressInput.step = '1'; progressInput.required = true;
+      fields.append(progressField);
       fields.append(field(t('description'),'cw-biz-description','textarea',data.description || '',true));
     } else {
       const customerId = data.customer_id || (record?.related_record_ids || [])[0] || record?.parent_record_id || '';
@@ -183,7 +230,9 @@
     if (!title || !customerId) { $('cw-business-error').textContent = t('required'); return; }
     const project = state.tab === 'projects'; let payload;
     if (project) {
-      payload = { record_type:'project', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:customerId, record_date:$('cw-biz-start').value || null, due_date:$('cw-biz-due').value || null, data:{ description:$('cw-biz-description').value.trim() } };
+      const progress = Number($('cw-biz-progress').value);
+      if (!Number.isInteger(progress) || progress < 0 || progress > 100) { $('cw-business-error').textContent = t('invalidProgress'); return; }
+      payload = { record_type:'project', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:customerId, record_date:$('cw-biz-start').value || null, due_date:$('cw-biz-due').value || null, data:{ description:$('cw-biz-description').value.trim(), progress_percent:progress } };
     } else {
       const projectId = $('cw-biz-project').value || null, when = $('cw-biz-date').value;
       payload = { record_type:'follow_up', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:projectId || customerId, related_record_ids:projectId ? [customerId] : [], record_date:when ? new Date(when).toISOString() : new Date().toISOString(), data:{ customer_id:customerId, project_id:projectId, project_title:projectId ? state.projects.find(p=>p.id===projectId)?.title || '' : '', method:$('cw-biz-method').value, outcome:$('cw-biz-outcome').value.trim(), next_follow_up_date:$('cw-biz-next').value || null, notes:$('cw-biz-notes').value.trim() } };
