@@ -32,6 +32,7 @@
 - 复用已有登录会话，刷新页面后按应用现有规则重新登录。
 - 密码仅存在 JavaScript 内存中的既有 `cloudSession`，用于 HTTPS Basic Authorization；不写 LocalStorage、不写 URL、不写日志。
 - 前端不访问 `company_records` 表或数据库 RPC，所有业务操作经过 Edge Function。
+- 前端固定校验 Supabase 项目 URL 为 `https://kopvznygsqsheibsjjvv.supabase.co`，避免用户修改计划连接设置后将账号密码发送到其他 Supabase 项目或任意 HTTPS 主机。
 - 计划模块及其他七个模块的本地存储、云端同步分区和备份格式不变。
 - 删除失败（例如记录被其他业务记录关联）时显示统一错误，不清理其他记录。
 
