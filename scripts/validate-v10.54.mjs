@@ -4,19 +4,19 @@ import { getBusinessTrendReport } from '../company-business-trends.js';
 const weekly = getBusinessTrendReport({
   projects: [
     { id: 'p1', status: 'active', created_at: '2026-01-05T09:00:00Z', updated_at: '2026-01-05T09:00:00Z' },
-    { id: 'p2', status: 'completed', created_at: '2025-12-20T09:00:00Z', updated_at: '2026-01-06T09:00:00Z' },
+    { id: 'p2', status: 'completed', created_at: '2025-12-20T09:00:00Z', updated_at: '2026-01-05T12:00:00Z' },
     { id: 'p3', status: 'planned', created_at: '2026-01-06T09:00:00Z', updated_at: '2026-01-06T09:00:00Z' },
     { id: 'p4', status: 'completed', created_at: '2025-12-01T09:00:00Z', updated_at: '2025-12-31T09:00:00Z' }
   ],
   tasks: [
     { id: 't1', status: 'todo', created_at: '2026-01-05T10:00:00Z', updated_at: '2026-01-05T10:00:00Z' },
-    { id: 't2', status: 'completed', created_at: '2025-12-20T10:00:00Z', updated_at: '2026-01-07T10:00:00Z' },
-    { id: 't3', status: 'in_progress', created_at: '2026-01-06T10:00:00Z', updated_at: '2026-01-07T10:00:00Z' }
+    { id: 't2', status: 'completed', created_at: '2025-12-20T10:00:00Z', updated_at: '2026-01-05T12:00:00Z' },
+    { id: 't3', status: 'in_progress', created_at: '2026-01-05T12:00:00Z', updated_at: '2026-01-07T10:00:00Z' }
   ],
   followups: [
     { id: 'f1', record_date: '2025-12-31', created_at: '2026-01-06T11:00:00Z' },
-    { id: 'f2', record_date: '', created_at: '2026-01-07T11:00:00Z' },
-    { id: 'f3', record_date: 'invalid', created_at: '2026-01-08T11:00:00Z' },
+    { id: 'f2', record_date: '', created_at: '2026-01-05T12:00:00Z' },
+    { id: 'f3', record_date: 'invalid', created_at: '2026-01-05T12:00:00Z' },
     { id: 'f4', record_date: '2026-01-10', created_at: '2026-01-04T11:00:00Z' }
   ]
 }, 'week', '2026-01-05');
@@ -25,6 +25,7 @@ assert.equal(weekly.periods.length, 8);
 assert.equal(weekly.periods[0].start, '2025-11-17');
 assert.equal(weekly.periods.at(-1).start, '2026-01-05');
 assert.equal(weekly.periods.at(-1).end, '2026-01-11');
+assert.equal(weekly.currentPeriod.end, '2026-01-05');
 assert.equal(weekly.periods.at(-1).projectsCreated, 2);
 assert.equal(weekly.periods.at(-1).projectsCompleted, 1);
 assert.equal(weekly.periods.at(-1).tasksCreated, 2);
