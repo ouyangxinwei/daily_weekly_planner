@@ -15,6 +15,7 @@ const RECORD_TYPES = new Set([
 ]);
 const BUSINESS_TYPES = new Set(["trade", "software", "ecommerce"]);
 const CURRENCIES = new Set(["JPY", "CNY", "USD"]);
+const TASK_STATUSES = new Set(["todo", "in_progress", "blocked", "completed"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 class ApiError extends Error {
@@ -331,8 +332,53 @@ function validateCustomerPatch(body: JsonObject): JsonObject {
   return body;
 }
 
+function validateTaskFields(body: JsonObject, creating: boolean) {
+  if (creating && (typeof body.parent_record_id !== "string" || !UUID_RE.test(body.parent_record_id))) {
+    throw new ApiError(400, "TASK_PROJECT_REQUIRED");
+  }
+  if (creating && (typeof body.status !== "string" || !TASK_STATUSES.has(body.status))) {
+    throw new ApiError(400, "INVALID_TASK_STATUS");
+  }
+  if (body.status !== undefined && (typeof body.status !== "string" || !TASK_STATUSES.has(body.status))) {
+    throw new ApiError(400, "INVALID_TASK_STATUS");
+  }
+  if (body.data !== undefined) {
+    const description = (body.data as JsonObject).description;
+    if (description !== undefined && (typeof description !== "string" || description.length > 5000)) {
+      throw new ApiError(400, "VALIDATION_ERROR");
+    }
+  }
+}
+
+async function assertTaskProject(auth: JsonObject, projectId: unknown, requestId: string) {
+  if (typeof projectId !== "string" || !UUID_RE.test(projectId)) {
+    throw new ApiError(400, "TASK_PROJECT_REQUIRED");
+  }
+  const project = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: projectId }, requestId);
+  if (project.record_type !== "project") throw new ApiError(400, "TASK_PROJECT_INVALID");
+}
+
+async function listProjectTasks(auth: JsonObject, projectId: string, url: URL, requestId: string) {
+  const args = listArguments(url, "task");
+  if (args.p_status !== null && !TASK_STATUSES.has(String(args.p_status))) throw new ApiError(400, "INVALID_TASK_STATUS");
+  const limit = Number(args.p_limit), offset = Number(args.p_offset), pageSize = 100;
+  let scanOffset = 0, total = 0;
+  const matches: Record<string, unknown>[] = [];
+  do {
+    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
+      ...auth, p_record_type: "task", p_business_type: null, p_status: args.p_status,
+      p_keyword: args.p_keyword, p_limit: pageSize, p_offset: scanOffset,
+    }, requestId);
+    total = Number(page.total || 0);
+    matches.push(...(Array.isArray(page.items) ? page.items.filter(item => item.parent_record_id === projectId) : []));
+    scanOffset += pageSize;
+  } while (scanOffset < total);
+  return { items: matches.slice(offset, offset + limit), total: matches.length, limit, offset };
+}
+
 function validateRecordCreate(body: JsonObject): JsonObject {
   validateCommonFields(body, true);
+  if (body.record_type === "task") validateTaskFields(body, true);
   return body;
 }
 
@@ -389,8 +435,18 @@ Deno.serve(async (req: Request) => {
       p_password: credentials.password,
     };
 
+    const projectTasksMatch = route.match(/^\\/projects\\/([0-9a-f-]{36})\\/tasks$/i);
     const customerMatch = route.match(/^\/customers(?:\/([0-9a-f-]{36}))?$/i);
     const recordMatch = route.match(/^\/records(?:\/([0-9a-f-]{36}))?$/i);
+
+    if (projectTasksMatch && req.method === "GET") {
+      const projectId = projectTasksMatch[1];
+      if (!UUID_RE.test(projectId)) throw new ApiError(400, "VALIDATION_ERROR");
+      const project = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: projectId }, requestId);
+      if (project.record_type !== "project") throw new ApiError(404, "RECORD_NOT_FOUND");
+      const result = await listProjectTasks(auth, projectId, url, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
 
     if (customerMatch) {
       const id = customerMatch[1];
@@ -442,6 +498,7 @@ Deno.serve(async (req: Request) => {
       if (!id && req.method === "GET") {
         const recordType = url.searchParams.get("record_type");
         if (recordType && !RECORD_TYPES.has(recordType)) throw new ApiError(400, "VALIDATION_ERROR");
+        if (recordType === "task" && url.searchParams.get("status") && !TASK_STATUSES.has(url.searchParams.get("status")!)) throw new ApiError(400, "INVALID_TASK_STATUS");
         const result = await rpc("company_list_records", {
           ...auth,
           ...listArguments(url, recordType),
@@ -450,6 +507,7 @@ Deno.serve(async (req: Request) => {
       }
       if (!id && req.method === "POST") {
         const body = validateRecordCreate(await readJson(req));
+        if (body.record_type === "task") await assertTaskProject(auth, body.parent_record_id, requestId);
         const result = await rpc("company_create_record", { ...auth, p_record: body }, requestId);
         return jsonResponse({ data: result }, 201, origin, { "X-Request-Id": requestId });
       }
@@ -460,6 +518,12 @@ Deno.serve(async (req: Request) => {
       }
       if (id && req.method === "PATCH") {
         const patch = validateRecordPatch(await readJson(req));
+        const existing = await rpc<Record<string, unknown>>("company_get_record", { ...auth, p_record_id: id }, requestId);
+        if (existing.record_type === "task") {
+          validateTaskFields(patch, false);
+          const nextProjectId = patch.parent_record_id === undefined ? existing.parent_record_id : patch.parent_record_id;
+          await assertTaskProject(auth, nextProjectId, requestId);
+        }
         const result = await rpc("company_update_record", {
           ...auth, p_record_id: id, p_patch: patch,
         }, requestId);
