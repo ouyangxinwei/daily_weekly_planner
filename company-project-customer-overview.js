@@ -89,7 +89,7 @@ export function getProjectCustomerOverview(data = {}, today = '') {
     .sort((a, b) => b.projectCount - a.projectCount || b.recentAt - a.recentAt)
     .slice(0, 8);
   const topProjects = [...projectRows]
-    .sort((a, b) => b.project.updated_at?.localeCompare?.(a.project.updated_at || '') || b.progress - a.progress)
+    .sort((a, b) => timestamp(b.project) - timestamp(a.project) || b.progress - a.progress)
     .slice(0, 8);
 
   return {
