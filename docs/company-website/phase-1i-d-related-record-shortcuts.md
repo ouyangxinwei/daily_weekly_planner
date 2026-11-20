@@ -35,4 +35,25 @@
 
 ## 5. 交付记录
 
-PR、合并提交、自动验证、Pages 部署和用户验收结果将在最终交付时补齐。
+- PR #45 已 squash merge 至 `main`。
+- PR：https://github.com/ouyangxinwei/daily_weekly_planner/pull/45
+- 合并提交：`7bad4ad89d0ce76cfc6390bddf13f5eceed0a123`。
+- 应用版本：V10.49.0。
+- 合并前 JavaScript 语法、模块隔离、旧数据迁移及同步保护验证 workflow run `44701573908`：completed / success。
+- GitHub Pages workflow run `44701645384`：build 与 deploy 均 completed / success。
+- Playwright 浏览器测试未作为合并前提，不记录为通过；用户真实浏览器验收待确认。
+- 数据库无迁移；Edge Function 未修改，继续使用生产 `company-api` v5。
+- 功能分支已在 PR 合并后自动删除。
+
+Pages：https://ouyangxinwei.github.io/daily_weekly_planner/
+
+### 用户浏览器验收
+
+刷新 Pages 页面并进入「个人公司网站」，重点检查：
+
+1. 客户卡片中的关联项目预览，点击后是否直接打开对应项目编辑窗口，客户字段是否预填。
+2. 客户卡片中的关联任务预览，点击后是否直接打开对应任务编辑窗口，所属项目是否预填。
+3. 客户卡片中的关联跟进预览，点击后是否直接打开对应跟进编辑窗口，客户和项目是否预填。
+4. 项目详情中的关联任务和跟进预览，点击后是否关闭详情弹窗并打开对应编辑窗口。
+5. 取消编辑不应修改任何数据；正常保存后原有 CRUD、项目进度联动和关联关系仍正常。
+6. 键盘 Tab 焦点、中英日文案及手机窄屏布局正常。
