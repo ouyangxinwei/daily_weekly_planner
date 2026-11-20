@@ -35,4 +35,25 @@
 
 ## 5. 交付记录
 
-PR、合并提交、自动验证、Pages 部署和用户验收结果将在最终交付时补齐。
+- PR #43 已 squash merge 至 `main`。
+- PR：https://github.com/ouyangxinwei/daily_weekly_planner/pull/43
+- 合并提交：`9db89fc9db9a7bf53c35272fc0e0aa9e2c1c19e3`。
+- 应用版本：V10.48.0。
+- 合并后 JavaScript/兼容性验证 workflow run `44700049027`：completed / success。
+- GitHub Pages workflow run `44700048137`：build 与 deploy 均 completed / success。
+- Playwright 浏览器测试未作为合并前提，不记录为通过；用户真实浏览器验收待确认。
+- 数据库无迁移；Edge Function 未修改，继续使用生产 `company-api` v5。
+- 功能分支已在 PR 合并后自动删除。
+
+Pages：https://ouyangxinwei.github.io/daily_weekly_planner/
+
+### 用户浏览器验收
+
+刷新 Pages 页面并进入「个人公司网站」，重点检查：
+
+1. 从客户卡片点击「查看项目」，项目列表上方是否显示当前客户，并且只显示该客户的项目。
+2. 点击「清除关联筛选」，是否恢复完整项目列表。
+3. 从项目详情进入任务列表，是否显示当前项目上下文；清除后是否恢复完整任务列表。
+4. 从项目详情进入跟进列表，是否显示当前项目上下文；清除后是否恢复完整跟进列表。
+5. 从客户进入跟进列表时，是否显示客户上下文；切换跟进项目筛选后，客户筛选是否自动解除。
+6. 中、英、日文案及窄屏布局是否正常。
