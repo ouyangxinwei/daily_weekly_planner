@@ -27,6 +27,8 @@ jobs:
           node --check company-task-date-filter.js
           node --check company-overview-metrics.js
           node --check company-todo-center.js
+          node --check company-project-customer-overview.js
+          node --check scripts/validate-v10.53.mjs
           node --check scripts/validate-v10.52.mjs
           node --check scripts/validate-v10.51.mjs
           node --check tests/e2e/company-navigation.spec.js
@@ -51,4 +53,5 @@ jobs:
           node scripts/validate-v10.50.mjs
           node scripts/validate-v10.51.mjs
           node scripts/validate-v10.52.mjs
+          node scripts/validate-v10.53.mjs
           node scripts/test-one-star-memo-migration.mjs

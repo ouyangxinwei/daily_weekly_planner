@@ -44,6 +44,11 @@
 - [阶段 1-I-D：关联记录快捷打开与编辑](./phase-1i-d-related-record-shortcuts.md)
 - [阶段 1-I-E：任务截止日期快速筛选](./phase-1i-e-task-due-date-filters.md)
 
+- [Phase 2：业务总览与工作台](./phase-2-overview-workbench.md)
+- [阶段 2-A：业务总览首页](./phase-2a-business-overview.md)
+- [阶段 2-B：待办事项中心](./phase-2b-todo-center.md)
+- [阶段 2-C：项目与客户业务概况](./phase-2c-project-customer-overview.md)
+
 ## 维护规则
 
 1. 每个阶段的关键决定、实施步骤和验收结果以 Markdown 记录。
