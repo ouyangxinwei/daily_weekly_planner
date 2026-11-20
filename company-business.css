@@ -85,3 +85,24 @@ html[data-theme="dark"] .cw-relation-context{background:#242834}
 .cw-related-row-action:hover,.cw-related-row-action:focus-visible{border-radius:8px;background:var(--brand-soft);outline:none}
 .cw-related-row-action:focus-visible,.cw-related-preview-button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 html[data-theme="dark"] .cw-related-row-action:hover,html[data-theme="dark"] .cw-related-row-action:focus-visible{background:#302b50}
+
+/* Phase 2-A: business overview dashboard */
+.cw-overview-panel[hidden]{display:none!important}
+.cw-overview-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.cw-overview-heading h3{margin:0 0 5px;font-size:18px}.cw-overview-heading p{margin:0;color:var(--muted);font-size:12px}
+.cw-overview-kpis,.cw-overview-attention{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0 18px}
+.cw-overview-kpi,.cw-overview-alert{display:grid;gap:8px;text-align:left;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);min-width:0}
+.cw-overview-kpi span,.cw-overview-alert span{font-size:11px;color:var(--muted)}
+.cw-overview-kpi strong,.cw-overview-alert strong{font-size:23px;font-variant-numeric:tabular-nums}
+.cw-overview-alert strong{font-size:20px}
+.cw-overview-kpi:hover,.cw-overview-alert:hover,.cw-overview-record:hover{border-color:var(--brand);background:var(--brand-soft)}
+.cw-overview-section-title{font-size:13px;margin:18px 0 9px}
+.cw-overview-recent{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cw-overview-recent-group{display:grid;align-content:start;gap:7px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px}
+.cw-overview-recent-group h4{font-size:12px;margin:0 0 2px}
+.cw-overview-record{display:grid;gap:5px;text-align:left;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);min-width:0}
+.cw-overview-record strong{font-size:12px;overflow-wrap:anywhere}
+.cw-overview-record-meta,.cw-overview-empty{font-size:10px;color:var(--muted)}
+.cw-overview-empty{margin:0;padding:8px 0}
+@media(max-width:700px){.cw-overview-kpis,.cw-overview-attention{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-overview-recent{grid-template-columns:1fr}}
+@media(max-width:420px){.cw-overview-heading{align-items:flex-start}.cw-overview-kpi,.cw-overview-alert{padding:11px}.cw-overview-kpi strong,.cw-overview-alert strong{font-size:19px}}
