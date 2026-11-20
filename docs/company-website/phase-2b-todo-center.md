@@ -9,7 +9,7 @@
 ### 任务
 - 逾期任务：due_date 早于浏览器本地今天，且 status 不为 completed。
 - 今日任务：due_date 等于浏览器本地今天，且 status 不为 completed。
-- 未来 7 天任务：明天至第 6 天（含第 6 天），且 status 不为 completed；今天单独归入今日任务，避免重复。
+- 未来 7 天任务：从明天起连续 7 个日历日（明天至今天 + 7 天，含第 7 天），且 status 不为 completed；今天单独归入今日任务，避免重复。
 - 未设置截止日期的任务：due_date 为空或不是有效 YYYY-MM-DD 日期，且 status 不为 completed。
 
 ### 客户跟进
