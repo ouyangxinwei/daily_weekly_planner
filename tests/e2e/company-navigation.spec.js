@@ -45,6 +45,26 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('.cw-customer-relations')).toContainText('Navigation Task');
   await expect(page.locator('.cw-customer-relations')).toContainText('Navigation Follow-up');
 
+  // Customer relation previews open the exact related record for editing.
+  await page.locator(`.cw-customer-relations [data-related-record-id="${PROJECT_ID}"]`).click();
+  await expect(page.locator('#cw-business-editor')).toBeVisible();
+  await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Project');
+  await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
+  await page.locator('#cw-business-cancel').click();
+
+  await page.locator(`.cw-customer-relations [data-related-record-id="${TASK_ID}"]`).click();
+  await expect(page.locator('#cw-business-editor')).toBeVisible();
+  await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Task');
+  await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
+  await page.locator('#cw-business-cancel').click();
+
+  await page.locator(`.cw-customer-relations [data-related-record-id="${FOLLOWUP_ID}"]`).click();
+  await expect(page.locator('#cw-business-editor')).toBeVisible();
+  await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Follow-up');
+  await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
+  await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
+  await page.locator('#cw-business-cancel').click();
+
   // Customer -> projects and follow-ups.
   await page.getByRole('button',{name:'查看项目'}).click();
   await expect(page.locator('#cw-business-nav button[data-tab="projects"]')).toHaveAttribute('aria-pressed','true');
@@ -60,6 +80,19 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-project-details')).toBeVisible();
   await expect(page.locator('#cw-project-related-tasks')).toContainText('Navigation Task');
   await expect(page.locator('#cw-project-related-followups')).toContainText('Navigation Follow-up');
+
+  // Project detail previews also open the related task and follow-up editor.
+  await page.locator(`#cw-project-related-tasks [data-related-record-id="${TASK_ID}"]`).click();
+  await expect(page.locator('#cw-business-editor')).toBeVisible();
+  await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Task');
+  await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
+  await page.locator('#cw-business-cancel').click();
+  await page.locator('#cw-project-related-followups [data-related-record-id="${FOLLOWUP_ID}"]`).click();
+  await expect(page.locator('#cw-business-editor')).toBeVisible();
+  await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Follow-up');
+  await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
+  await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
+  await page.locator('#cw-business-cancel').click();
   await page.locator('#cw-project-details-customer-action').click();
   await expect(page.locator('#cw-customer-panel')).toBeVisible();
   await expect(page.locator('#cw-customer-list')).toContainText('Navigation Customer');
