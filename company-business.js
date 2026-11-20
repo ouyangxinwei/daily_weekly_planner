@@ -181,7 +181,7 @@
     else if (type === 'textarea') input = document.createElement('textarea');
     else { input = document.createElement('input'); input.type = type; }
     input.id = id; if (value !== undefined && value !== null) input.value = value;
-    if (type !== 'select') input.maxLength = 5000;
+    if (type === 'text' || type === 'textarea') input.maxLength = 5000;
     wrap.append(input); return wrap;
   }
   async function openEditor(record) {
@@ -232,7 +232,7 @@
     if (project) {
       const progress = Number($('cw-biz-progress').value);
       if (!Number.isInteger(progress) || progress < 0 || progress > 100) { $('cw-business-error').textContent = t('invalidProgress'); return; }
-      payload = { record_type:'project', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:customerId, record_date:$('cw-biz-start').value || null, due_date:$('cw-biz-due').value || null, data:{ description:$('cw-biz-description').value.trim(), progress_percent:progress } };
+      payload = { record_type:'project', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:customerId, record_date:$('cw-biz-start').value || null, due_date:$('cw-biz-due').value || null, data:{ ...(state.editing?.data && typeof state.editing.data === 'object' ? state.editing.data : {}), description:$('cw-biz-description').value.trim(), progress_percent:progress } };
     } else {
       const projectId = $('cw-biz-project').value || null, when = $('cw-biz-date').value;
       payload = { record_type:'follow_up', title, business_type:state.customers.find(c=>c.id===customerId)?.business_type || null, status:$('cw-biz-status').value, parent_record_id:projectId || customerId, related_record_ids:projectId ? [customerId] : [], record_date:when ? new Date(when).toISOString() : new Date().toISOString(), data:{ customer_id:customerId, project_id:projectId, project_title:projectId ? state.projects.find(p=>p.id===projectId)?.title || '' : '', method:$('cw-biz-method').value, outcome:$('cw-biz-outcome').value.trim(), next_follow_up_date:$('cw-biz-next').value || null, notes:$('cw-biz-notes').value.trim() } };
