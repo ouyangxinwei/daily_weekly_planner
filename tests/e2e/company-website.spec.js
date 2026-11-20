@@ -19,6 +19,11 @@ test('company workspace creates, edits, searches and deletes a customer through 
     });
   });
 
+  const fulfillWithCors = (route, options) => route.fulfill({
+    ...options,
+    headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173', ...(options.headers || {}) }
+  });
+
   await page.route('**/functions/v1/company-api/**', async route => {
     const request = route.request();
     const url = new URL(request.url());
@@ -27,7 +32,7 @@ test('company workspace creates, edits, searches and deletes a customer through 
     calls.push({ method, path, auth: request.headers()['authorization'] });
 
     if (method === 'OPTIONS') {
-      await route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173', 'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info' } });
+      await fulfillWithCors(route, { status: 204, headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173', 'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info' } });
       return;
     }
     if (method === 'POST' && path === '/auth/verify') {
