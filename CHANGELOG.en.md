@@ -1,3 +1,10 @@
+# V10.48 Company workspace: relationship filter context — 2026-11-20
+
+- Clearly show the customer or project that scopes a list after cross-module navigation, so filtered results are not mistaken for missing records.
+- Add a consistent Clear relationship filter action to return to the full list; changing the follow-up project filter clears the previous customer scope.
+- Cover customer-to-project, customer/project-to-follow-up, and project-to-task contexts while preserving search, status filters, pagination, and CRUD.
+- Frontend, styles, version metadata, and documentation only. No database, company-api v5, authentication, or production business-data changes.
+
 # V10.47 Company workspace: related information overview — 2026-11-20
 
 - Customer cards now summarize related project, task, and follow-up counts, with up to three records previewed in each group.
