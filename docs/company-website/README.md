@@ -13,7 +13,8 @@
 - 阶段 1-B：数据库迁移已应用，表、权限、错误密码及基础 CRUD/约束完成最小验证。
 - 阶段 1-C：Edge Function 已部署 v3。
 - 阶段 1-D：客户管理前端已完成并部署；用户已反馈真实浏览器 CRUD 测试 OK。
-- 阶段 1-E：项目管理与业务跟进代码已通过 PR #32 合并至 main（merge commit `1c091293c03a8ff0d5718a8118380f7126f9ecc5`）；对应 Pages 部署和真实线上 CRUD 验证状态仍需以实际记录确认，不能仅凭合并认定已上线。
+- 阶段 1-E：项目管理与业务跟进代码已通过 PR #32 合并至 main；用户已确认项目管理基础功能可用。
+- 阶段 1-F：项目详情与手动进度管理（0–100%）已在 V10.43.0 功能分支实现；PR 合并、Pages 部署和真实进度保存验证待完成。
 - 后续方向：按实际使用情况评估项目详情、任务管理和私有文件 Storage，不视为当前已实现范围。
 
 ## 文档
@@ -23,6 +24,7 @@
 - [阶段 1-C：company-api Edge Function](./phase-1c-edge-api.md)
 - [阶段 1-D：客户管理前端工作区](./phase-1d-customer-workspace.md)
 - [阶段 1-E：项目管理与业务跟进](./phase-1e-project-follow-up.md)
+- [阶段 1-F：项目详情与进度管理](./phase-1f-project-details-progress.md)
 
 ## 维护规则
 
