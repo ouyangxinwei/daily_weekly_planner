@@ -46,6 +46,31 @@
 
 测试使用隔离的模拟数据，不访问或修改生产业务记录。
 
-## 5. 交付状态
+## 5. 最终交付状态
 
-本文件记录阶段 1-I-A 的实现范围。PR、CI、Pages 部署及用户真实浏览器验收结果将在最终交付时补充。Playwright 测试是否通过以实际执行结果为准，不以测试文件存在作为通过证明。
+**阶段 1-I-A 功能已合并并部署，等待用户真实浏览器验收。**
+
+- PR #40：已 squash merge 至 `main`。
+- PR：https://github.com/ouyangxinwei/daily_weekly_planner/pull/40
+- 合并提交：`1c8450284722a8b0aa7bbccf1576c0c499bcd5c8`。
+- 主分支版本：V10.46.0。
+- GitHub Pages 部署 workflow run `44694512910`：completed / success。
+- JavaScript 与兼容性验证 workflow run `44694513502`：completed / success；本阶段新增的 `company-website.js`、`company-business.js` 和导航测试文件均加入语法检查。
+- Playwright workflow run `44694513624`：最后检查时仍在执行完整浏览器测试，尚未取得最终结论；不标记为通过。
+- 数据库迁移：无。
+- Edge Function：未修改，继续使用 `company-api` v5。
+- 功能分支已在 PR 合并后自动删除。
+
+Pages 已部署地址：https://ouyangxinwei.github.io/daily_weekly_planner/
+
+### 用户浏览器验收
+
+请在部署后刷新页面，进入「个人公司网站」，重点检查：
+
+1. 客户卡片的「查看项目」「查看跟进」。
+2. 项目卡片所属客户链接，以及项目详情中的客户、任务、跟进入口。
+3. 任务卡片的「查看项目」。
+4. 跟进卡片的客户和项目跳转。
+5. 中文、英文、日文及移动端布局。
+
+用户真实浏览器验收完成后，再将阶段 1-I-A 标记为最终验收通过，并进入阶段 1-I-B。
