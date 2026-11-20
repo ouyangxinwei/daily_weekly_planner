@@ -7,9 +7,9 @@ const zh = fs.readFileSync('CHANGELOG.md', 'utf8');
 const en = fs.readFileSync('CHANGELOG.en.md', 'utf8');
 const ja = fs.readFileSync('CHANGELOG.ja.md', 'utf8');
 
-assert.match(html, /APP_VERSION='V10\.3[6-9]_[a-z0-9_]+'/);
-assert.match(sw, /daily-weekly-planner-v10-3[6-9]-/);
-assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.3[6-9]\.\d+$/);
+assert.match(html, /APP_VERSION='V10\.(3[6-9]|40)_[a-z0-9_]+'/);
+assert.match(sw, /daily-weekly-planner-v10-(3[6-9]|40)-/);
+assert.match(fs.readFileSync('VERSION', 'utf8').trim(), /^10\.(3[6-9]|40)\.\d+$/);
 assert.ok(zh.includes('# V10.36') && en.includes('# V10.36') && ja.includes('# V10.36'));
 
 // 两个上传入口都写入 _clientSyncMeta

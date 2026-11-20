@@ -1,3 +1,11 @@
+# V10.40 · Weekly Weather at the Bottom — 2026-11-20
+
+- Moved the weather dashboard from the main home content to the bottom of the planner page, keeping plans and tasks as the primary focus.
+- Shows seven days for Tokyo and Yokohama, including weekday/date, conditions, high/low temperatures, precipitation probability/amount, and maximum wind speed.
+- Sorts each city's days by outdoor suitability: clear, dry, and calm days first; mostly dry moderate days next; rainy or windy days remain visible but appear later.
+- Keeps a compact current-weather summary, 10-minute cache, manual refresh, and offline-cache fallback. Weather remains separate from planner data and Supabase sync.
+- Updated Open-Meteo daily fields, acceptance coverage, app version, and Service Worker cache.
+
 # V10.39 Homepage Weather Dashboard — 2026-11-20
 
 - Added Tokyo and Yokohama weather using the free Open-Meteo API, Asia/Tokyo timezone and a two-day hourly forecast.
