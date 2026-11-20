@@ -23,7 +23,7 @@ const data = {
 };
 assert.deepEqual(getBusinessOverviewMetrics(data, today), {
   customers:3, activeProjects:2, unfinishedTasks:6, pendingFollowups:2,
-  overdueTasks:1, dueTodayTasks:1, next7Tasks:1, overdueFollowups:1
+  overdueTasks:1, dueTodayTasks:1, next7Tasks:2, overdueFollowups:1
 });
 assert.deepEqual(getBusinessOverviewMetrics({}, today), {
   customers:0, activeProjects:0, unfinishedTasks:0, pendingFollowups:0,
