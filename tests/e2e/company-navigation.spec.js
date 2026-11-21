@@ -93,7 +93,17 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Task');
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
-  await page.locator('#cw-project-related-followups [data-related-record-id="' + FOLLOWUP_ID + '"]').click();
+  // Opening a related task intentionally closes the native project-details dialog.
+  // Reopen the project details before interacting with its follow-up previews.
+  await expect(page.locator('#cw-project-details')).toBeHidden();
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  const projectCard = page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`);
+  await expect(projectCard).toBeVisible();
+  await projectCard.getByRole('button', { name: '查看详情' }).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
+  const relatedFollowup = page.locator(`#cw-project-related-followups [data-related-record-id="${FOLLOWUP_ID}"]`);
+  await expect(relatedFollowup).toBeVisible();
+  await relatedFollowup.click();
   await expect(page.locator('#cw-business-editor')).toBeVisible();
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Follow-up');
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
