@@ -69,17 +69,17 @@
 - `tests/e2e/company-records.spec.js`：使用内存模拟的 company-api 与 Storage，覆盖交易新增/校验/编辑/删除、币种汇总与筛选、文档新增、附件类型拒绝、上传/下载/删除、有附件时禁止删除文档，以及返回项目标签后既有面板正常。本地（系统 Chrome，模拟 API）通过。
 - 既有 E2E 用例 `company-business`、`company-navigation`、`company-task-due-date` 在本地失败；在未修改的 V10.54.0 上运行结果相同，属既有问题，不是本阶段引入的回归，后续需单独排查。
 
-## 7. 部署状态（2026-11-21）
+## 7. 部署状态（2026-11-21，后端部署更新）
 
 | 项目 | 状态 |
 |---|---|
 | 代码 | 已提交到 `main`（本地提交，见 Git 历史） |
-| 数据库迁移（Storage Bucket） | **尚未执行** |
-| Edge Function `company-api` v6 | **尚未部署**（生产仍为 v5） |
-| GitHub Pages 前端 | 推送到 `main` 后由 Pages 工作流部署；以 Actions 结果为准 |
+| 数据库迁移（Storage Bucket） | **已执行并核验**：migration `20261121020047`；Bucket 私有、10 MiB、12 种 MIME 类型 |
+| Edge Function `company-api` v6 | **已部署并核验 ACTIVE，版本 6，verify_jwt=false，函数内部执行 Basic 认证** |
+| GitHub Pages 前端 | main 代码为 V10.57.0；本轮 Pages 对应提交的部署成功状态尚未取得可核验证据 |
 | 用户真实浏览器验收 | 未进行 |
 
-本次开发环境没有可用的 Supabase CLI / 管理工具，因此迁移和 Edge Function 需另行部署：
+后端已通过 Supabase 管理接口完成迁移与 Edge Function 部署。部署证据：Bucket 查询确认 `public=false`、`file_size_limit=10485760`、12 个 MIME 类型；Storage `pg_policies` 查询返回空；Edge Function 列表显示 `company-api` ACTIVE version 6；生产业务记录类型数量在部署前后保持 customer=1、follow_up=1、project=2、task=1，未产生交易、文档或附件测试数据。
 
 ```bash
 supabase link --project-ref kopvznygsqsheibsjjvv
@@ -89,7 +89,7 @@ supabase functions deploy company-api --no-verify-jwt
 
 （也可在 Supabase SQL Editor 执行上述迁移文件，并在控制台部署 `supabase/functions/company-api/index.ts`。）
 
-**部署顺序的影响：** company-api v5 已允许 `transaction` / `document` 记录，因此前端先上线时交易和文档的增删改查即可使用，但 v5 的金额/状态校验较宽；附件功能需要迁移和 v6 部署后才能使用，此前附件窗口会显示“操作失败”。
+**当前状态与限制：** 后端迁移和 v6 已部署，但尚未执行真实用户认证下的交易/文档 CRUD 与文件上传/下载/删除端到端测试；也尚未完成 Pages V10.57.0 对应部署证据核验和用户真实浏览器验收。Supabase Security Advisors 仍提示现有自定义登录模式下 `planner_diary_*`、`planner_login`、`planner_get_data`、`planner_put_data` 等 SECURITY DEFINER RPC 可由 anon/authenticated 调用（函数内部自行验证密码），此为现有认证架构的安全提示，不是本次 Storage 迁移新增的权限策略。
 
 ## 8. 验收清单（部署后）
 
