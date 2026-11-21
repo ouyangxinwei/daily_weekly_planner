@@ -82,7 +82,7 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-business-list')).toContainText('Unrelated Project');
 
   // Project -> customer.
-  await page.locator('.cw-business-card[data-record-id="${PROJECT_ID}"]').getByRole('button',{name:'查看详情'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
   await expect(page.locator('#cw-project-details')).toBeVisible();
   await expect(page.locator('#cw-project-related-tasks')).toContainText('Navigation Task');
   await expect(page.locator('#cw-project-related-followups')).toContainText('Navigation Follow-up');
@@ -119,7 +119,7 @@ test('company workspace supports navigation between customers, projects, tasks a
 
   // Project -> follow-ups; follow-up -> customer and project.
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
-  await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
   await page.locator('#cw-project-details-followups').click();
   await expect(page.locator('#cw-business-nav button[data-tab="followups"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Follow-up');
