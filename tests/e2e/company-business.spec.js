@@ -30,7 +30,7 @@ test('company workspace manages projects and linked follow-ups through generic r
   const cors = (route, options) => route.fulfill({ ...options, headers:{ 'Access-Control-Allow-Origin':'http://127.0.0.1:4173', ...(options.headers||{}) } });
   await page.route('**/functions/v1/company-api/**', async route => {
     const req=route.request(), url=new URL(req.url()), path=url.pathname.replace('/functions/v1/company-api',''), method=req.method();
-    calls.push({method,path,auth:req.headers().authorization,body:method==='POST'||method==='PATCH'?req.postDataJSON():null});
+    calls.push({method,path,query:url.searchParams.toString(),auth:req.headers().authorization,body:method==='POST'||method==='PATCH'?req.postDataJSON():null});
     if(method==='OPTIONS'){await cors(route,{status:204,headers:{'Access-Control-Allow-Methods':'GET, POST, PATCH, DELETE, OPTIONS','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info'}});return;}
     if(method==='POST'&&path==='/auth/verify'){await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:{authenticated:true,username:'oooo'}})});return;}
     if(method==='GET'&&path==='/customers'){await cors(route,{status:200,contentType:'application/json',body:JSON.stringify({data:{items:customers,total:customers.length,limit:100,offset:0}})});return;}
@@ -160,7 +160,7 @@ test('company workspace manages projects and linked follow-ups through generic r
   expect(taskRecord.data.description).toBe('Create responsive landing page');
   expect(records[0].data.progress_percent).toBe(0);
   expect(records[0].data.progress_task_total).toBe(1);
-  expect(calls.some(c=>c.method==='GET'&&c.path==='/projects/'+PROJECT_ID+'/tasks')).toBe(true);
+  expect(calls.some(c=>c.method==='GET'&&c.path==='/records'&&c.query.includes('record_type=task'))).toBe(true);
 
   await page.locator('#cw-business-new').click();
   await page.locator('#cw-biz-title').fill('Prepare launch checklist');

@@ -184,6 +184,11 @@ test('company workspace manages transactions, documents and private attachments'
   await expect(page.locator('#cw-files-feedback')).toContainText('不支持该文件类型');
   expect(calls.some(c => c.path === '/files/upload-url')).toBe(false);
 
+  await page.locator('#cw-files-input').setInputFiles({ name: 'oversized.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(10 * 1024 * 1024 + 1) });
+  await page.locator('#cw-files-upload').click();
+  await expect(page.locator('#cw-files-feedback')).toContainText('文件超过 10 MB');
+  expect(calls.some(c => c.path === '/files/upload-url')).toBe(false);
+
   await page.locator('#cw-files-input').setInputFiles({ name: 'contract.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 e2e contract') });
   await page.locator('#cw-files-upload').click();
   await expect(page.locator('#cw-files-feedback')).toContainText('附件已上传');
