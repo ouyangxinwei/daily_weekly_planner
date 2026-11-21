@@ -51,12 +51,16 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Project');
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
   await page.locator('#cw-business-cancel').click();
+  await page.locator('#cw-business-nav button[data-tab="customers"]').click();
+  await expect(page.locator('.cw-customer-relations')).toBeVisible();
 
   await page.locator(`.cw-customer-relations [data-related-record-id="${TASK_ID}"]`).click();
   await expect(page.locator('#cw-business-editor')).toBeVisible();
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Task');
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
+  await page.locator('#cw-business-nav button[data-tab="customers"]').click();
+  await expect(page.locator('.cw-customer-relations')).toBeVisible();
 
   await page.locator(`.cw-customer-relations [data-related-record-id="${FOLLOWUP_ID}"]`).click();
   await expect(page.locator('#cw-business-editor')).toBeVisible();
