@@ -20,6 +20,7 @@ test('workspace switcher swaps the main area, keeps plan state and restores afte
   expect(await page.evaluate(k => localStorage.getItem(k), ACTIVE_WORKSPACE_KEY)).toBe('language');
 
   await page.locator('#workspace-plan').click();
+  await expect(page.locator('html')).not.toHaveAttribute('data-workspace', 'language');
   await expect(page.locator('#language-workspace-root')).toBeHidden();
   await expect(page.locator('#task-list')).toBeVisible();
   await expect(page.locator('#search-input')).toHaveValue('keep-me');
@@ -174,7 +175,7 @@ test('content list filters by unit and status and paginates at 10 items', async 
   await page.locator('[data-filter="sort"]').selectOption('title');
   await expect(cards.first()).toContainText('Item 00');
   await page.locator('#lw-search').fill('Item 2');
-  await expect(cards).toHaveCount(4);
+  await expect(cards).toHaveCount(3);
   await expect(page.locator('#lw-search')).toBeFocused();
 
   await page.locator('.lw-nav [data-act="tab"][data-tab="mistakes"]').click();
