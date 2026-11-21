@@ -1,3 +1,13 @@
+# V10.56 Development Diary V1 — 2026-11-21
+
+- Added a standalone Development Diary entry, separate from plans and tasks, with no completion state or due date.
+- One activity per entry: activity date, title, details, fixed category, up to five tags and optional duration. Supports backdating, editing and deletion.
+- Weekly view shows all seven days including empty days; includes day view and week navigation.
+- Historical search covers titles, details and tags (up to 50 results), with category filtering.
+- Reuses the existing diary_entries table and planner_diary_* RPCs. Every RPC verifies the existing username/password credentials; passwords are not persisted in browser storage.
+- Diary data is excluded from planner JSON backups and cloud snapshots. Plans/tasks/company_records, weather and stock modules are untouched.
+- Supports Chinese, English, Japanese, dark theme and mobile layouts. Diary errors are contained within the diary area.
+
 # V10.55 Magnificent Seven stock dashboard — 2026-11-21
 
 - Added a Magnificent Seven stock dashboard directly below the homepage weather section for AAPL, MSFT, NVDA, AMZN, GOOGL, META and TSLA.
