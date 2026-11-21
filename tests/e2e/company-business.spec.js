@@ -140,7 +140,7 @@ test('company workspace manages projects and linked follow-ups through generic r
   expect(calls.some(c=>c.method==='PATCH'&&c.path==='/records/'+FOLLOWUP_ID)).toBe(true);
 
   page.once('dialog',dialog=>dialog.accept());
-  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
+  await page.locator('.cw-business-card').filter({hasText:'Discuss revised requirements'}).getByRole('button',{name:'删除'}).click();
   await expect(page.locator('#cw-business-list')).toContainText('还没有跟进记录');
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
   await page.locator('#cw-business-project-filter').selectOption(PROJECT_ID);
@@ -217,7 +217,7 @@ test('company workspace manages projects and linked follow-ups through generic r
 
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
   page.once('dialog',dialog=>dialog.accept());
-  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
+  await page.locator('.cw-business-card').filter({hasText:'E2E Website Redesign Updated'}).getByRole('button',{name:'删除'}).click();
   await expect(page.locator('#cw-business-feedback')).toContainText('该项目仍有关联的任务或跟进记录');
   expect(records.some(r=>r.record_type==='task'&&r.parent_record_id===PROJECT_ID)).toBe(true);
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
@@ -233,7 +233,7 @@ test('company workspace manages projects and linked follow-ups through generic r
 
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
   page.once('dialog',dialog=>dialog.accept());
-  await page.locator('#cw-business-list button').filter({hasText:'删除'}).click();
+  await page.locator('.cw-business-card').filter({hasText:'E2E Website Redesign Updated'}).getByRole('button',{name:'删除'}).click();
   await expect(page.locator('#cw-business-list')).toContainText('还没有项目');
   expect(calls.some(c=>c.method==='DELETE'&&c.path==='/records/'+PROJECT_ID)).toBe(true);
   expect(calls.some(c=>c.method==='POST'&&c.path==='/records')).toBe(true);
