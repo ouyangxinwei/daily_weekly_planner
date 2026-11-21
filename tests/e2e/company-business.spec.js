@@ -140,7 +140,7 @@ test('company workspace manages projects and linked follow-ups through generic r
   expect(calls.some(c=>c.method==='PATCH'&&c.path==='/records/'+FOLLOWUP_ID)).toBe(true);
 
   page.once('dialog',dialog=>dialog.accept());
-  await page.locator('.cw-business-card[data-record-id="${FOLLOWUP_ID}"]).getByRole('button',{name:'删除'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${FOLLOWUP_ID}"]`).getByRole('button',{name:'删除'}).click();
   await expect(page.locator('#cw-business-list')).toContainText('还没有跟进记录');
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
   await page.locator('#cw-business-project-filter').selectOption(PROJECT_ID);
@@ -188,7 +188,7 @@ test('company workspace manages projects and linked follow-ups through generic r
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
   await expect(page.locator('#cw-business-list')).toContainText('100%');
   await expect(page.locator('#cw-business-list')).toContainText('按任务自动计算');
-  await page.locator('.cw-business-card[data-record-id="${PROJECT_ID}"]).getByRole('button',{name:'编辑'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'编辑'}).click();
   await page.locator('#cw-biz-progress-mode').selectOption('manual');
   await expect(page.locator('#cw-biz-progress')).toBeEnabled();
   await expect(page.locator('#cw-biz-progress')).toHaveValue('70');
