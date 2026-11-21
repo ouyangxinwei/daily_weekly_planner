@@ -72,6 +72,7 @@ test('task due-date filters compose with search, status, project, and paginate t
 
   await dueFilter.selectOption('next7');
   await expect(page.locator('#cw-business-feedback')).toContainText('23');
+  await page.locator('#cw-business-pagination button').last().click();
   await expect(page.locator('#cw-business-list')).toContainText('Due in six days');
   await expect(page.locator('#cw-business-list')).not.toContainText('Due in seven days');
 
