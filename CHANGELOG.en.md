@@ -1,3 +1,13 @@
+# V10.57 Development Diary V1 — 2026-11-21
+
+- Added a standalone Development Diary module, separate from plans and tasks, with no completion state or due date.
+- Supports activity date, title, details, fixed category, up to five tags and optional duration; entries can be backdated, edited and deleted.
+- The default weekly view shows all seven days, including empty days; also supports day view, previous/next week navigation and return to the current week.
+- Search historical titles, details and tags (up to 50 results), with fixed-category filtering.
+- Reuses the existing custom account login. Every diary RPC validates the username/password and scopes operations to that user. Passwords remain in runtime memory only and are not persisted in browser storage.
+- Uses an isolated `diary_entries` table and is excluded from planner JSON backups and cloud snapshots. Plans, company data, weather and stock data are not modified.
+- Supports Chinese, English, Japanese, dark theme and mobile layouts; diary errors are contained within the diary area.
+
 # V10.56 Company workspace: transactions, business documents and private attachments — 2026-11-21
 
 - Added Transactions: income/expense, amount, currency (JPY/CNY/USD), status, date and category, optionally linked to a customer and project. Totals are calculated per currency (completed income/expense, net, planned) with no exchange-rate conversion.
