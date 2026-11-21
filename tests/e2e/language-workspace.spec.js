@@ -20,7 +20,7 @@ test('workspace switcher swaps the main area, keeps plan state and restores afte
   expect(await page.evaluate(k => localStorage.getItem(k), ACTIVE_WORKSPACE_KEY)).toBe('language');
 
   await page.locator('#workspace-plan').click();
-  await expect(page.locator('html')).not.toHaveAttribute('data-workspace', 'language');
+  await expect(page.locator('html')).not.toHaveAttribute('data-workspace');
   await expect(page.locator('#language-workspace-root')).toBeHidden();
   await expect(page.locator('#task-list')).toBeVisible();
   await expect(page.locator('#search-input')).toHaveValue('keep-me');
