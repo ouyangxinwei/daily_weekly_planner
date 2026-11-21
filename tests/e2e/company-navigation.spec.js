@@ -68,9 +68,11 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
+  await page.locator('#cw-business-nav button[data-tab="customers"]').click();
+  await expect(page.locator('#cw-customer-panel')).toBeVisible();
 
   // Customer -> projects and follow-ups.
-  await page.getByRole('button',{name:'查看项目'}).click();
+  await page.locator(`.cw-customer[data-customer-id="${CUSTOMER_ID}"]`).getByRole('button',{name:'查看项目'}).click();
   await expect(page.locator('#cw-business-nav button[data-tab="projects"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Project');
   await expect(page.locator('#cw-business-list')).not.toContainText('Unrelated Project');
@@ -102,8 +104,8 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-customer-list')).toContainText('Navigation Customer');
 
   // Project -> tasks -> project details.
-  await page.getByRole('button',{name:'查看项目'}).click();
-  await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
+  await page.locator('.cw-business-card').filter({hasText:'Navigation Task'}).getByRole('button',{name:'查看项目'}).click();
+  await page.locator('.cw-business-card').filter({hasText:'Navigation Project'}).getByRole('button',{name:'查看详情'}).click();
   await page.locator('#cw-project-details-tasks').click();
   await expect(page.locator('#cw-business-nav button[data-tab="tasks"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
