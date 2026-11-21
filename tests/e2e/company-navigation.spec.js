@@ -127,8 +127,11 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
 
   // Project -> tasks -> project details.
+  // The task's "view project" shortcut opens the project details dialog directly
+  // when the project is already present in the workspace cache.
   await page.locator(`.cw-business-card[data-record-id="${TASK_ID}"]`).getByRole('button',{name:'查看项目'}).click();
-  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
+  await expect(page.locator('#cw-project-details-title')).toHaveText('Navigation Project');
   await page.locator('#cw-project-details-tasks').click();
   await expect(page.locator('#cw-business-nav button[data-tab="tasks"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
