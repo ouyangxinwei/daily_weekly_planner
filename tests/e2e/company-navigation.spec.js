@@ -109,6 +109,14 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
+  // Opening a related follow-up also closes the native project-details dialog.
+  // Reopen it before using the project -> customer shortcut.
+  await expect(page.locator('#cw-project-details')).toBeHidden();
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  const projectCardAfterFollowup = page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`);
+  await expect(projectCardAfterFollowup).toBeVisible();
+  await projectCardAfterFollowup.getByRole('button', { name: '查看详情' }).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
   await page.locator('#cw-project-details-customer-action').click();
   await expect(page.locator('#cw-customer-panel')).toBeVisible();
   await expect(page.locator('#cw-customer-list')).toContainText('Navigation Customer');
