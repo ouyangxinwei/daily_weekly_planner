@@ -89,7 +89,7 @@ test('development diary supports weekly and daily views, create, edit, search, c
   await expect(root.locator('.diary-entry-toggle')).toContainText('E2E diary entry edited');
 
   await root.locator('[data-keyword]').fill('Updated diary detail');
-  await root.locator('[data-search] button[type="submit"]').click();
+  await root.locator('form[data-search] button').filter({ hasText: '搜索' }).click();
   await expect(root.locator('[data-label]')).toContainText('搜索结果');
   await expect(root.locator('.diary-entry-toggle')).toContainText('E2E diary entry edited');
   await root.locator('[data-category]').selectOption('tech');

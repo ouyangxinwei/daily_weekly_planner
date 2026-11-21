@@ -45,15 +45,39 @@ Run a shorter stability test while developing:
 STABILITY_DURATION_MINUTES=2 npm run test:stability
 ```
 
-## GitHub Actions
+## GitHub Actions workflow operations
 
-- Daily schedule: removed in V10.35 to keep maintenance light for a personal project.
-- Push and pull-request validation: 1-minute stability smoke duration plus all functional tests.
-- Manual run: Actions → Nightly Playwright E2E and Stability → Run workflow; default stability duration 10 minutes, can be changed.
-- Job timeout: 60 minutes.
-- HTML report, JSON results, screenshots, traces, and stability summary are uploaded as an artifact for 30 days.
+### Current operating decision
 
-There is no scheduled run. Re-add a `schedule` trigger to the workflow if nightly runs are needed again.
+- The Nightly Playwright workflow is **disabled manually in GitHub Actions** to avoid slowing down normal development.
+- This is a repository Actions setting, not a change to the workflow YAML. The workflow file and Playwright tests remain in the repository.
+- While disabled, new pushes and pull-request updates do not automatically start this workflow. Code Validation and other independent workflows continue to run normally.
+- Disabling a workflow does **not** reliably cancel a run that is already in progress. Open that run and use **Cancel workflow** separately if it should stop.
+- Do not treat the disabled state as evidence that browser tests passed. Report browser validation as not run unless a specific run has completed successfully.
+
+### Disable Nightly Playwright
+
+1. Open the repository on GitHub and select **Actions**.
+2. In the workflow list, select **Nightly Playwright E2E and Stability**.
+3. Open the workflow's `...` menu and select **Disable workflow**.
+4. Confirm the disabled state on the workflow page.
+5. If a run is already active, open its run page and select **Cancel workflow** separately.
+
+### Re-enable Nightly Playwright
+
+1. Open **Actions** in the repository.
+2. Select **Nightly Playwright E2E and Stability**.
+3. Open the workflow's `...` menu and select **Enable workflow**.
+4. After enabling, pushes and pull requests targeting `main` can trigger it again according to the workflow YAML.
+
+### Run manually when needed
+
+1. Re-enable the workflow first if GitHub does not offer the manual run action while it is disabled.
+2. Open **Actions → Nightly Playwright E2E and Stability → Run workflow**.
+3. Select the branch and stability duration, then start the run.
+4. Inspect the focused company navigation step and the full browser regression step separately in the run summary.
+
+The workflow has no daily schedule. The YAML currently defines push and pull-request triggers for `main`, plus `workflow_dispatch`. GitHub's disabled/enabled state is managed in the Actions UI and is not represented by a Git commit.
 
 ## Interpreting results
 

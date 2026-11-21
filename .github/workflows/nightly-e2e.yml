@@ -42,6 +42,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Run focused company navigation regression
+        run: npx playwright test tests/e2e/company-navigation.spec.js
+
       - name: Run browser regression and stability tests
         run: npm run test:e2e
 

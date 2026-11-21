@@ -34,6 +34,14 @@ export async function loginToLocalTestApp(page) {
 }
 
 export async function openLocalTestApp(page) {
+  await page.addInitScript(() => {
+    const marker = '__planner_e2e_workspace_baseline_v1';
+    if (sessionStorage.getItem(marker) !== 'ready') {
+      localStorage.setItem('personal-planner:active-workspace:v1', 'plan');
+      localStorage.setItem('personal-planner:active-module:v1', 'plan');
+      sessionStorage.setItem(marker, 'ready');
+    }
+  });
   await installCloudIsolation(page);
   await page.goto('/');
   await loginToLocalTestApp(page);

@@ -877,7 +877,8 @@ function currentWorkspace() {
 
 function setWorkspace(ws) {
   const next = ws === 'language' || ws === 'company' ? ws : 'plan';
-  document.documentElement.dataset.workspace = next;
+  if (next === 'plan') delete document.documentElement.dataset.workspace;
+  else document.documentElement.dataset.workspace = next;
   try { localStorage.setItem(WORKSPACE_KEY, next); } catch (e) {}
   $('workspace-plan')?.setAttribute('aria-pressed', String(next === 'plan'));
   $('workspace-language')?.setAttribute('aria-pressed', String(next === 'language'));

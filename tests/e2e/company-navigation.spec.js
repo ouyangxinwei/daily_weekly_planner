@@ -68,9 +68,11 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
+  await page.locator('#cw-business-nav button[data-tab="customers"]').click();
+  await expect(page.locator('#cw-customer-panel')).toBeVisible();
 
   // Customer -> projects and follow-ups.
-  await page.getByRole('button',{name:'查看项目'}).click();
+  await page.locator(`.cw-customer[data-customer-id="${CUSTOMER_ID}"]`).getByRole('button',{name:'查看项目'}).click();
   await expect(page.locator('#cw-business-nav button[data-tab="projects"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Project');
   await expect(page.locator('#cw-business-list')).not.toContainText('Unrelated Project');
@@ -80,7 +82,7 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-business-list')).toContainText('Unrelated Project');
 
   // Project -> customer.
-  await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
   await expect(page.locator('#cw-project-details')).toBeVisible();
   await expect(page.locator('#cw-project-related-tasks')).toContainText('Navigation Task');
   await expect(page.locator('#cw-project-related-followups')).toContainText('Navigation Follow-up');
@@ -91,19 +93,45 @@ test('company workspace supports navigation between customers, projects, tasks a
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Task');
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
-  await page.locator('#cw-project-related-followups [data-related-record-id="' + FOLLOWUP_ID + '"]').click();
+  // Opening a related task intentionally closes the native project-details dialog.
+  // Reopen the project details before interacting with its follow-up previews.
+  await expect(page.locator('#cw-project-details')).toBeHidden();
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  const projectCard = page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`);
+  await expect(projectCard).toBeVisible();
+  await projectCard.getByRole('button', { name: '查看详情' }).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
+  const relatedFollowup = page.locator(`#cw-project-related-followups [data-related-record-id="${FOLLOWUP_ID}"]`);
+  await expect(relatedFollowup).toBeVisible();
+  await relatedFollowup.click();
   await expect(page.locator('#cw-business-editor')).toBeVisible();
   await expect(page.locator('#cw-biz-title')).toHaveValue('Navigation Follow-up');
   await expect(page.locator('#cw-biz-customer')).toHaveValue(CUSTOMER_ID);
   await expect(page.locator('#cw-biz-project')).toHaveValue(PROJECT_ID);
   await page.locator('#cw-business-cancel').click();
+  // Opening a related follow-up also closes the native project-details dialog.
+  // Reopen it before using the project -> customer shortcut.
+  await expect(page.locator('#cw-project-details')).toBeHidden();
+  await page.locator('#cw-business-nav button[data-tab="projects"]').click();
+  const projectCardAfterFollowup = page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`);
+  await expect(projectCardAfterFollowup).toBeVisible();
+  await projectCardAfterFollowup.getByRole('button', { name: '查看详情' }).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
   await page.locator('#cw-project-details-customer-action').click();
   await expect(page.locator('#cw-customer-panel')).toBeVisible();
   await expect(page.locator('#cw-customer-list')).toContainText('Navigation Customer');
 
+  // Customer navigation switches the workspace tab; return to tasks before
+  // using the task card's project shortcut.
+  await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
+  await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
+
   // Project -> tasks -> project details.
-  await page.getByRole('button',{name:'查看项目'}).click();
-  await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
+  // The task's "view project" shortcut opens the project details dialog directly
+  // when the project is already present in the workspace cache.
+  await page.locator(`.cw-business-card[data-record-id="${TASK_ID}"]`).getByRole('button',{name:'查看项目'}).click();
+  await expect(page.locator('#cw-project-details')).toBeVisible();
+  await expect(page.locator('#cw-project-details-title')).toHaveText('Navigation Project');
   await page.locator('#cw-project-details-tasks').click();
   await expect(page.locator('#cw-business-nav button[data-tab="tasks"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
@@ -117,7 +145,7 @@ test('company workspace supports navigation between customers, projects, tasks a
 
   // Project -> follow-ups; follow-up -> customer and project.
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
-  await page.locator('.cw-business-card').getByRole('button',{name:'查看详情'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
   await page.locator('#cw-project-details-followups').click();
   await expect(page.locator('#cw-business-nav button[data-tab="followups"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Follow-up');
