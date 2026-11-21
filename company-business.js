@@ -641,6 +641,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
       const empty = node('div','cw-empty'); node('div','cw-empty-icon','◇'); empty.append(node('div','cw-empty-icon','◇'),node('h3','',hasTaskFilters ? t('noMatchingTasks') : t(project?'noProjects':task?'noTasks':'noFollowups')),node('p','',t(project?'createProjectHint':task?'createTaskHint':'createFollowupHint')),button('＋ '+t(project?'newProject':'newTask'),'primary',()=>openEditor())); host.append(empty);
     } else records.forEach(record => {
       const card = node('article','cw-business-card'), main = node('div','cw-business-main');
+      card.dataset.recordId = record.id;
       main.append(node('h3','cw-customer-title',record.title));
       const data = record.data && typeof record.data === 'object' ? record.data : {};
       const meta = node('div','cw-customer-meta');
