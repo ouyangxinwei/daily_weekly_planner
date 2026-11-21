@@ -217,7 +217,7 @@ test('company workspace manages projects and linked follow-ups through generic r
 
   await page.locator('#cw-business-nav button[data-tab="projects"]').click();
   page.once('dialog',dialog=>dialog.accept());
-  await page.locator('.cw-business-card').filter({hasText:'E2E Website Redesign Updated'}).getByRole('button',{name:'删除'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'删除'}).click();
   await expect(page.locator('#cw-business-feedback')).toContainText('该项目仍有关联的任务或跟进记录');
   expect(records.some(r=>r.record_type==='task'&&r.parent_record_id===PROJECT_ID)).toBe(true);
   await page.locator('#cw-business-nav button[data-tab="tasks"]').click();
