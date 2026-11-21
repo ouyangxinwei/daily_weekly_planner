@@ -105,7 +105,7 @@ test('company workspace supports navigation between customers, projects, tasks a
 
   // Project -> tasks -> project details.
   await page.locator('.cw-business-card').filter({hasText:'Navigation Task'}).getByRole('button',{name:'查看项目'}).click();
-  await page.locator('.cw-business-card[data-record-id="${PROJECT_ID}"]').getByRole('button',{name:'查看详情'}).click();
+  await page.locator(`.cw-business-card[data-record-id="${PROJECT_ID}"]`).getByRole('button',{name:'查看详情'}).click();
   await page.locator('#cw-project-details-tasks').click();
   await expect(page.locator('#cw-business-nav button[data-tab="tasks"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#cw-business-list')).toContainText('Navigation Task');
