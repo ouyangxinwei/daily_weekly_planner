@@ -111,9 +111,17 @@ import {
       if (!Number.isInteger(total) || total < 0 || (expected !== null && total !== expected)) throw new Error(t('failed'));
       expected = total; all.push(...page); offset += page.length;
       if (offset >= expected) break;
-      if (!page.length) throw new Error(t('failed'));
+      // V10.58: an empty or short page before `total` means the read is incomplete.
+      if (page.length < 100) throw new Error(t('failed'));
     }
+    if (all.length !== expected) throw new Error(t('failed'));
     return all;
+  }
+  // V10.58: customers and projects come from the shared, verified company-business cache
+  // when available, which saves requests under the company-api rate limit.
+  function fetchShared(recordType) {
+    const shared = window.CompanyBusiness?.loadRecords;
+    return typeof shared === 'function' ? shared(recordType, 15000) : fetchAll(recordType);
   }
 
   function el(tag, cls, text) { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; }
@@ -199,8 +207,8 @@ import {
     state.busy = true; feedback(t('loading')); $('cw-records-refresh').disabled = true;
     try {
       // Sequential reads keep well inside the company-api rate limit.
-      const customers = await fetchAll('customer');
-      const projects = await fetchAll('project');
+      const customers = await fetchShared('customer');
+      const projects = await fetchShared('project');
       const records = await fetchAll(tab === 'transactions' ? 'transaction' : 'document');
       const files = await fetchAll('file');
       state.customers = customers.sort((x, y) => String(x.title).localeCompare(String(y.title)));

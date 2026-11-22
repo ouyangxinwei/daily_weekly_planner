@@ -52,6 +52,7 @@
 - [阶段 2-C：项目与客户业务概况](./phase-2c-project-customer-overview.md)
 - [阶段 2-D：业务趋势与周期复盘](./phase-2d-business-trends.md)
 - [阶段 3-A：交易收支、业务文档与私有附件](./phase-3a-transactions-documents-files.md)
+- [V10.58：业务记录完整读取与限流保护（修复）](./v10-58-complete-reads.md)
 
 ## 维护规则
 

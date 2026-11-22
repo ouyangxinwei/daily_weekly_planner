@@ -1,0 +1,151 @@
+// V10.58: complete company record reads, shared cache and rate-limit handling.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { fetchCompleteList, createRecordCache, IncompleteDataError } from '../company-record-loader.js';
+
+function makeRecords(count, type = 'task') {
+  return Array.from({ length: count }, (_, index) => ({ id: type + '-' + index, record_type: type }));
+}
+
+// Fake company-api list endpoint. `tamper(page, offset)` may alter a page.
+function fakeApi(records, tamper = (page) => page) {
+  const calls = [];
+  const request = async (path) => {
+    calls.push(path);
+    const url = new URL('https://example.test' + path);
+    const limit = Number(url.searchParams.get('limit'));
+    const offset = Number(url.searchParams.get('offset'));
+    assert.ok(limit >= 1 && limit <= 100, 'limit must stay within the API range');
+    const page = { items: records.slice(offset, offset + limit), total: records.length, limit, offset };
+    return tamper(page, offset);
+  };
+  return { request, calls };
+}
+
+async function rejectsIncomplete(promise, reason) {
+  await assert.rejects(promise, error => error instanceof IncompleteDataError && error.code === 'INCOMPLETE_DATA' && error.reason === reason);
+}
+
+// --- complete reads -----------------------------------------------------------
+for (const count of [0, 1, 99, 100, 101, 250, 10001]) {
+  const { request, calls } = fakeApi(makeRecords(count));
+  const items = await fetchCompleteList(request, '/records?record_type=task', { label: 'tasks' });
+  assert.equal(items.length, count, 'reads every record: ' + count);
+  assert.equal(new Set(items.map(item => item.id)).size, count, 'no duplicates: ' + count);
+  assert.equal(calls.length, Math.max(1, Math.ceil(count / 100)), 'one request per page: ' + count);
+  assert.ok(calls.every(path => path.startsWith('/records?record_type=task&limit=100&offset=')));
+}
+
+// More than 10,000 records are no longer truncated (old fetchAllRecords default).
+{
+  const { request } = fakeApi(makeRecords(10250));
+  assert.equal((await fetchCompleteList(request, '/records?record_type=task')).length, 10250);
+}
+
+// --- incomplete reads are errors, never partial data ------------------------------
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offset) => offset === 100 ? { ...page, items: [] } : page).request, '/records?record_type=task'), 'empty-page');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offset) => offset === 100 ? { ...page, items: page.items.slice(0, 40) } : page).request, '/records?record_type=task'), 'short-page');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offset) => offset === 100 ? { ...page, total: 251 } : page).request, '/records?record_type=task'), 'total-changed');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(10), page => ({ ...page, total: 'x' })).request, '/records?record_type=task'), 'invalid-total');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(10), page => ({ ...page, items: null })).request, '/records?record_type=task'), 'invalid-page');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(150), (page, offset) => offset === 100 ? { ...page, items: [...page.items, ...makeRecords(5, 'extra')] } : page).request, '/records?record_type=task'), 'count-mismatch');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250)).request, '/records?record_type=task', { maxOffset: 150 }), 'offset-limit');
+
+// API errors (for example 429 RATE_LIMITED) are passed through unchanged.
+{
+  const rateLimited = Object.assign(new Error('Too many requests'), { code: 'RATE_LIMITED' });
+  await assert.rejects(fetchCompleteList(async () => { throw rateLimited; }, '/records?record_type=task'), error => error === rateLimited);
+}
+
+// --- cache ------------------------------------------------------------------------
+{
+  let clock = 1000;
+  const { request, calls } = fakeApi(makeRecords(150));
+  const cache = createRecordCache({ request, now: () => clock });
+  const path = '/records?record_type=task';
+
+  // Concurrent identical reads share one request sequence.
+  const [a, b] = await Promise.all([cache.load(path, { maxAgeMs: 0 }), cache.load(path, { maxAgeMs: 0 })]);
+  assert.equal(a.length, 150); assert.equal(b.length, 150);
+  assert.equal(calls.length, 2, 'two pages read once for concurrent callers');
+  assert.notEqual(a, b, 'callers receive their own array copies');
+  a.length = 0;
+
+  // Reused while younger than maxAgeMs; callers cannot corrupt the cached list.
+  clock += 10000;
+  assert.equal((await cache.load(path, { maxAgeMs: 15000 })).length, 150);
+  assert.equal(calls.length, 2, 'cached read issues no request');
+
+  // Older than maxAgeMs → read again.
+  clock += 6000;
+  await cache.load(path, { maxAgeMs: 15000 });
+  assert.equal(calls.length, 4, 'stale read issues new requests');
+
+  // maxAgeMs 0 (refresh) always reads again once the previous read finished.
+  await cache.load(path, { maxAgeMs: 0 });
+  assert.equal(calls.length, 6);
+
+  // invalidate() after a write forces the next read.
+  cache.invalidate();
+  assert.equal(cache.size, 0);
+  await cache.load(path, { maxAgeMs: 60000 });
+  assert.equal(calls.length, 8);
+
+  // Different paths (type, q, status) are cached separately.
+  await cache.load('/records?record_type=task&status=completed', { maxAgeMs: 60000 });
+  assert.equal(calls.length, 10);
+}
+
+// Failed reads are not cached.
+{
+  let fail = true;
+  const { request: inner } = fakeApi(makeRecords(5));
+  let requests = 0;
+  const cache = createRecordCache({ request: async path => { requests += 1; if (fail) throw new Error('network'); return inner(path); } });
+  await assert.rejects(cache.load('/records?record_type=task', { maxAgeMs: 60000 }));
+  fail = false;
+  assert.equal((await cache.load('/records?record_type=task', { maxAgeMs: 60000 })).length, 5);
+  assert.equal(requests, 2);
+}
+
+// --- front-end wiring (static contract) --------------------------------------------
+const business = fs.readFileSync('company-business.js', 'utf8');
+assert.match(business, /import \{ createRecordCache \} from '\.\/company-record-loader\.js';/);
+assert.doesNotMatch(business, /fetchAllRecords/, 'the unchecked reader is removed');
+assert.doesNotMatch(business, /\.map\(fetch/, 'no Array.map with a reader whose second parameter is a limit');
+assert.doesNotMatch(business, /limit=100&offset=0/, 'customers and projects are no longer read from the first page only');
+assert.doesNotMatch(business, /MAX_SAFE_INTEGER/);
+assert.match(business, /const ENTRY_MAX_AGE_MS = 15000;/);
+assert.match(business, /const LOOKUP_MAX_AGE_MS = 60000;/);
+assert.match(business, /function invalidateRelations\(\)\{state\.relationshipRecords=null;recordCache\.invalidate\(\);\}/);
+assert.match(business, /const allTasks = await loadRecords\('task', maxAgeMs\);/);
+assert.match(business, /const all = await loadRecords\(type, maxAgeMs, \{ q:query, status \}\);/);
+assert.match(business, /rateLimited:'请求过于频繁/);
+assert.match(business, /rateLimited:'Too many requests/);
+assert.match(business, /rateLimited:'リクエストが多すぎます/);
+assert.match(business, /response\.status === 429 \|\| payload\.error === 'RATE_LIMITED'/);
+for (const refresh of ['loadOverview(0)', 'loadTodoCenter(0)', 'loadProjectCustomerOverview(0)', 'loadBusinessTrends(0)', 'loadActive({ force:true })']) {
+  assert.ok(business.includes(refresh), 'refresh button forces a new read: ' + refresh);
+}
+assert.match(business, /summary\.failed=true/);
+assert.match(business, /loadRecords:\(type, maxAgeMs\) => loadRecords\(type, maxAgeMs\)/);
+
+const website = fs.readFileSync('company-website.js', 'utf8');
+assert.match(website, /relations\.failed\?'—':String\(relations\[key\]\?\.length\|\|0\)/);
+assert.match(website, /relationLoadFailed:\{zh:/);
+
+const workspace = fs.readFileSync('company-records-workspace.js', 'utf8');
+assert.match(workspace, /if \(all\.length !== expected\) throw new Error\(t\('failed'\)\);/);
+assert.match(workspace, /if \(page\.length < 100\) throw new Error\(t\('failed'\)\);/);
+assert.match(workspace, /const customers = await fetchShared\('customer'\);/);
+
+// --- version and service worker ---------------------------------------------------
+const html = fs.readFileSync('index.html', 'utf8');
+assert.match(html, /APP_VERSION='V10.58_company_complete_reads'/);
+const sw = fs.readFileSync('sw.js', 'utf8');
+assert.match(sw, /daily-weekly-planner-v10-58-company-complete-reads/);
+assert.ok(sw.includes("'./company-record-loader.js'"), 'service worker caches the loader module');
+assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.58.0');
+assert.equal(JSON.parse(fs.readFileSync('package.json', 'utf8')).version, '10.58.0');
+
+console.log('V10.58 complete company reads, cache and rate-limit validation passed.');

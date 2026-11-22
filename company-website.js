@@ -83,7 +83,7 @@
   function setSessionMessage(message,kind=''){const host=$('cw-session');if(!host)return;host.textContent=message;host.className='cw-session'+(kind?' '+kind:'')}
   function businessLabel(value){return({trade:'贸易',software:'软件开发',ecommerce:'电子商务'})[value]||'未分类'}
   function statusLabel(value){return({active:'合作中',prospect:'潜在客户',inactive:'暂停合作'})[value]||value||'未设置'}
-  function localeLabel(key){const lang=(document.documentElement.lang||'zh-CN').toLowerCase();const labels={viewProjects:{zh:'查看项目',en:'View projects',ja:'プロジェクト一覧'},viewFollowups:{zh:'查看跟进',en:'View follow-ups',ja:'フォローを見る'},relatedOverview:{zh:'关联概况',en:'Related overview',ja:'関連情報'},relatedProjects:{zh:'关联项目',en:'Related projects',ja:'関連プロジェクト'},relatedTasks:{zh:'关联任务',en:'Related tasks',ja:'関連タスク'},relatedFollowups:{zh:'跟进记录',en:'Follow-ups',ja:'フォロー記録'},noRelatedRecords:{zh:'暂无关联记录',en:'No related records',ja:'関連記録はありません'}};return labels[key]?.[lang.startsWith('ja')?'ja':lang.startsWith('en')?'en':'zh']||key}
+  function localeLabel(key){const lang=(document.documentElement.lang||'zh-CN').toLowerCase();const labels={viewProjects:{zh:'查看项目',en:'View projects',ja:'プロジェクト一覧'},viewFollowups:{zh:'查看跟进',en:'View follow-ups',ja:'フォローを見る'},relatedOverview:{zh:'关联概况',en:'Related overview',ja:'関連情報'},relatedProjects:{zh:'关联项目',en:'Related projects',ja:'関連プロジェクト'},relatedTasks:{zh:'关联任务',en:'Related tasks',ja:'関連タスク'},relatedFollowups:{zh:'跟进记录',en:'Follow-ups',ja:'フォロー記録'},noRelatedRecords:{zh:'暂无关联记录',en:'No related records',ja:'関連記録はありません'},relationLoadFailed:{zh:'关联信息暂时无法读取，请稍后刷新。',en:'Related information is temporarily unavailable. Please refresh later.',ja:'関連情報を一時的に読み込めません。後で更新してください。'}};return labels[key]?.[lang.startsWith('ja')?'ja':lang.startsWith('en')?'en':'zh']||key}
   function addText(parent,tag,className,value){const node=document.createElement(tag);if(className)node.className=className;node.textContent=value??'';parent.append(node);return node}
   function renderCustomers(){
     const host=$('cw-customer-list');if(!host)return;host.replaceChildren();
@@ -108,14 +108,14 @@
         const counts=document.createElement('div');counts.className='cw-relation-counts';
         for(const [key,label] of [['projects',localeLabel('relatedProjects')],['tasks',localeLabel('relatedTasks')],['followups',localeLabel('relatedFollowups')]]){
           const item=document.createElement('span');item.className='cw-relation-count';
-          const number=document.createElement('strong');number.textContent=String(relations[key]?.length||0);
+          const number=document.createElement('strong');number.textContent=relations.failed?'—':String(relations[key]?.length||0);
           item.append(number,document.createTextNode(' '+label));counts.append(item);
         }
         panel.append(counts);
         for(const [key,label] of [['projects',localeLabel('relatedProjects')],['tasks',localeLabel('relatedTasks')],['followups',localeLabel('relatedFollowups')]]){
           const entries=relations[key]||[],group=document.createElement('div');group.className='cw-customer-relation-group';
           const title=document.createElement('strong');title.textContent=label;group.append(title);
-          if(!entries.length){const empty=document.createElement('span');empty.className='cw-related-empty';empty.textContent=localeLabel('noRelatedRecords');group.append(empty);}
+          if(!entries.length){const empty=document.createElement('span');empty.className='cw-related-empty';empty.textContent=localeLabel(relations.failed?'relationLoadFailed':'noRelatedRecords');group.append(empty);}
           else{
             const list=document.createElement('ul');
             entries.slice(0,3).forEach(record=>{

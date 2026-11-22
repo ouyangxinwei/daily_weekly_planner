@@ -127,10 +127,10 @@ assert.match(business, /button:not\(\[data-company-extension\]\)/);
 
 const html = fs.readFileSync('index.html', 'utf8');
 assert.ok(html.indexOf('company-business.js') < html.indexOf('company-records-workspace.js'), 'records module loads after company-business');
-assert.match(html, /APP_VERSION='V10.57_development_diary'/);
+assert.match(html, /APP_VERSION='V10.58_company_complete_reads'/);
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.match(sw, /daily-weekly-planner-v10-57-/);
+assert.match(sw, /daily-weekly-planner-v10-58-/);
 assert.ok(sw.includes("'./company-records-rules.js'") && sw.includes("'./company-records-workspace.js'"));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.57.0');
+assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.58.0');
 
 console.log('V10.56 company transactions, documents and attachments validation passed.');
