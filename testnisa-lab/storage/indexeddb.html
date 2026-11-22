@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EXP-005 IndexedDB 本地数据库技术实验">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta name="theme-color" content="#101827">
+  <title>EXP-005 IndexedDB · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <script type="module" src="./indexeddb-page.js"></script>
+</head>
+<body>
+  <main class="container narrow">
+    <header class="hero">
+      <p class="eyebrow">EXP-005 / LOCAL STORAGE</p>
+      <h1>IndexedDB 本地数据库实验</h1>
+      <p class="lead">验证浏览器本地数据库初始化、记录 CRUD、设置保存、事务提交与失败回滚。</p>
+      <div class="notice"><strong>实验隔离：</strong>只使用独立数据库 <code>testnisa-technical-lab</code>，不访问正式系统数据、不连接网络、不保存真实账户或投资信息。清空按钮只删除本实验的 records store。</div>
+    </header>
+    <section class="panel">
+      <h2>数据库状态</h2>
+      <div id="db-status" class="status pending" role="status" aria-live="polite">正在打开本地数据库…</div>
+      <p class="small muted">数据库版本：2 · 对象仓库：records、settings、schema_meta · 数据仅保存在当前浏览器配置文件中。</p>
+    </section>
+    <section class="panel">
+      <h2>记录 CRUD</h2>
+      <form id="record-form">
+        <div class="form-grid">
+          <div class="field"><label for="record-id">记录 ID</label><input id="record-id" maxlength="80" required value="demo-001"></div>
+          <div class="field"><label for="record-type">类型</label><select id="record-type"><option value="note">note</option><option value="asset">asset</option><option value="transaction">transaction (仅实验)</option></select></div>
+          <div class="field full"><label for="record-name">名称</label><input id="record-name" maxlength="200" required value="IndexedDB 示例记录"></div>
+          <div class="field full"><label for="record-notes">备注</label><input id="record-notes" maxlength="4000" value="仅用于本地技术实验"></div>
+        </div>
+        <div class="actions">
+          <button class="button primary" type="submit">保存 / 更新记录</button>
+          <button class="button" id="read-record" type="button">按 ID 查询</button>
+          <button class="button" id="delete-record" type="button">删除当前 ID</button>
+          <button class="button" id="list-records" type="button">列出全部记录</button>
+        </div>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>事务验证</h2>
+      <p class="small muted">一次事务写入两条实验记录；第二次演示故意传入无效记录，检查整组写入是否回滚。</p>
+      <div class="actions">
+        <button class="button" id="transaction-success" type="button">执行双记录事务</button>
+        <button class="button" id="transaction-abort" type="button">验证失败回滚</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>设置保存</h2>
+      <div class="form-grid">
+        <div class="field"><label for="setting-key">设置 Key</label><input id="setting-key" value="lab-theme" maxlength="120"></div>
+        <div class="field"><label for="setting-value">设置 Value</label><input id="setting-value" value="dark" maxlength="200"></div>
+      </div>
+      <div class="actions">
+        <button class="button" id="save-setting" type="button">保存设置</button>
+        <button class="button" id="read-setting" type="button">读取设置</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>输出结果</h2>
+      <div id="operation-status" class="status" role="status" aria-live="polite">等待操作。</div>
+      <pre id="output" aria-label="数据库操作结果">尚无操作结果</pre>
+      <div class="actions"><button class="button" id="clear-records" type="button">清空实验记录</button><button class="button" id="refresh-records" type="button">刷新记录</button></div>
+      <p class="small muted">注意：清空操作不可撤销，只作用于本实验 records 仓库；settings 不会被清除。</p>
+    </section>
+    <p class="small muted">Schema 升级与迁移历史请查看 <a href="./migrations.html">EXP-010 数据版本与迁移</a>。</p>
+    <footer class="footer"><a href="../index.html">返回实验室</a> · <a href="../../index.html">项目入口</a></footer>
+  </main>
+</body>
+</html>

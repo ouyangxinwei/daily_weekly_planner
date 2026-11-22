@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EXP-008 浏览器请求治理 · testNisa</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<script type="module" src="./request-governance-page.js"></script>
+</head>
+<body>
+<main class="container">
+<header class="hero">
+<p class="eyebrow"><a href="../index.html">实验室</a> / EXP-008</p>
+<h1>浏览器请求治理</h1>
+<p class="lead">通过模拟请求演示并发上限、超时、取消、429/503 重试和错误分类。</p>
+<div class="notice">本页只运行本地模拟请求，不访问外部 API、不保存数据或密钥。真实网络 API 的行为仍需在目标浏览器环境验证。</div>
+</header>
+<section class="panel">
+<h2>模拟场景</h2>
+<div class="form-grid">
+<div class="field"><label for="scenario">请求场景</label><select id="scenario"><option value="success">正常响应</option><option value="429">429 限流后恢复</option><option value="503">503 服务暂时不可用</option><option value="timeout">请求超时</option><option value="network">网络错误后恢复</option><option value="parallel">并发 8 个请求（上限 2）</option></select></div>
+<div class="field"><label for="timeout">超时（毫秒）</label><input id="timeout" type="number" min="100" max="10000" value="800"></div>
+</div>
+<div class="actions"><button class="button primary" id="run" type="button">运行模拟</button><button class="button" id="cancel" type="button" disabled>取消</button><button class="button" id="clear" type="button">清除结果</button></div>
+<div id="status" class="status" role="status" aria-live="polite">尚未运行。</div>
+<div id="metrics" class="result-grid"></div>
+<h3>执行日志</h3><pre id="log">暂无日志</pre>
+</section>
+<footer class="footer">EXP-008 · 默认超时 10 秒 · 并发上限 4 · 最多重试 2 次 · <a href="../index.html">返回实验目录</a></footer>
+</main>
+</body>
+</html>
