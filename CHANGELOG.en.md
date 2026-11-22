@@ -6,6 +6,8 @@
 - Too many requests (429) now shows a clear message; a failed related-information read shows "unavailable" instead of 0.
 - Project & customer overview: the follow-up count on customer rows is now labelled "Follow-ups"; clicking "Overdue projects" opens the project list filtered to overdue projects (new "Overdue only" project filter).
 - company-api internal task and attachment scans also verify pagination completeness (takes effect after redeploying company-api).
+- Attachments: the server checks that file content matches its type (a renamed .exe is rejected); if registering an uploaded file fails, the browser asks the server to delete it so no orphaned file is left.
+- Transaction amounts: the server also rejects more than 6 decimal places.
 - Aligned phase statuses and version numbers across the company website docs.
 - No database, RLS or record format changes.
 

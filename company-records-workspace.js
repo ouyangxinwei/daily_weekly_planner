@@ -39,7 +39,7 @@ import {
       saved: '已保存。', deleted: '已删除。', failed: '操作失败，请稍后重试。', hasAttachments: '该记录仍有附件，请先删除附件再删除记录。', relationError: '该记录仍被其他业务记录关联，暂时不能删除。', authFailed: '账号验证失败，请重新登录。', loginRequired: '请先在计划工作区登录现有账号。',
       attachments: '附件', attachmentsTitle: '私有附件', upload: '上传附件', uploading: '正在上传…', download: '下载', noAttachments: '还没有附件', attachmentLimit: '单个文件最大 10 MB；支持 PDF、图片（PNG/JPEG/WebP）、TXT/CSV 和常见 Office 文档。文件保存在私有存储中，下载链接 5 分钟后失效。',
       chooseFile: '请先选择文件。', fileTooLarge: '文件超过 10 MB。', fileEmpty: '文件为空。', fileTypeNotAllowed: '不支持该文件类型。', fileNameInvalid: '文件名无效。', uploaded: '附件已上传。', confirmDeleteFile: '确定删除这个附件吗？文件将从私有存储中删除，无法恢复。',
-      storageUnavailable: '文件存储暂时不可用，请稍后重试。', fileMissing: '文件已不存在，可删除此附件记录后重新上传。', uploadFailed: '上传失败，请检查网络后重试。', rateLimited: '请求过于频繁，请稍后再试。', viewCustomer: '查看客户', viewProject: '查看项目', footnote: '交易、文档和附件元数据保存在公司业务数据库；附件内容保存在私有 Storage，不进入计划模块备份。'
+      storageUnavailable: '文件存储暂时不可用，请稍后重试。', fileMissing: '文件已不存在，可删除此附件记录后重新上传。', uploadFailed: '上传失败，请检查网络后重试。', fileContentMismatch: '文件内容与文件类型不符，已拒绝上传。', rateLimited: '请求过于频繁，请稍后再试。', viewCustomer: '查看客户', viewProject: '查看项目', footnote: '交易、文档和附件元数据保存在公司业务数据库；附件内容保存在私有 Storage，不进入计划模块备份。'
     },
     en: {
       transactions: 'Transactions', documents: 'Documents', newTransaction: 'New transaction', newDocument: 'New document', editTransaction: 'Edit transaction', editDocument: 'Edit document',
@@ -55,7 +55,7 @@ import {
       saved: 'Saved.', deleted: 'Deleted.', failed: 'Operation failed. Please try again.', hasAttachments: 'This record still has attachments. Delete them first.', relationError: 'This record is still referenced by other records.', authFailed: 'Authentication failed. Please sign in again.', loginRequired: 'Sign in from the planner workspace first.',
       attachments: 'Attachments', attachmentsTitle: 'Private attachments', upload: 'Upload', uploading: 'Uploading…', download: 'Download', noAttachments: 'No attachments yet', attachmentLimit: 'Up to 10 MB per file: PDF, images (PNG/JPEG/WebP), TXT/CSV and common Office files. Files are stored privately; download links expire after 5 minutes.',
       chooseFile: 'Choose a file first.', fileTooLarge: 'The file is larger than 10 MB.', fileEmpty: 'The file is empty.', fileTypeNotAllowed: 'This file type is not supported.', fileNameInvalid: 'Invalid file name.', uploaded: 'Attachment uploaded.', confirmDeleteFile: 'Delete this attachment? The file will be removed from private storage permanently.',
-      storageUnavailable: 'File storage is temporarily unavailable.', fileMissing: 'The stored file is missing. Delete this attachment and upload it again.', uploadFailed: 'Upload failed. Check your connection and try again.', rateLimited: 'Too many requests. Please wait a moment.', viewCustomer: 'View customer', viewProject: 'View project', footnote: 'Transactions, documents and attachment metadata are stored in the business database; file contents live in private Storage and are not part of planner backups.'
+      storageUnavailable: 'File storage is temporarily unavailable.', fileMissing: 'The stored file is missing. Delete this attachment and upload it again.', uploadFailed: 'Upload failed. Check your connection and try again.', fileContentMismatch: 'The file content does not match its type, so the upload was rejected.', rateLimited: 'Too many requests. Please wait a moment.', viewCustomer: 'View customer', viewProject: 'View project', footnote: 'Transactions, documents and attachment metadata are stored in the business database; file contents live in private Storage and are not part of planner backups.'
     },
     ja: {
       transactions: '取引・収支', documents: '業務文書', newTransaction: '取引を追加', newDocument: '文書を追加', editTransaction: '取引を編集', editDocument: '文書を編集',
@@ -71,14 +71,14 @@ import {
       saved: '保存しました。', deleted: '削除しました。', failed: '処理に失敗しました。もう一度お試しください。', hasAttachments: '添付ファイルが残っています。先に添付を削除してください。', relationError: '他の業務記録から参照されているため削除できません。', authFailed: '認証に失敗しました。再ログインしてください。', loginRequired: '先に計画ワークスペースでログインしてください。',
       attachments: '添付', attachmentsTitle: '非公開の添付ファイル', upload: 'アップロード', uploading: 'アップロード中…', download: 'ダウンロード', noAttachments: '添付ファイルはありません', attachmentLimit: '1ファイル最大10 MB。PDF、画像（PNG/JPEG/WebP）、TXT/CSV、一般的なOfficeファイルに対応。ファイルは非公開ストレージに保存され、ダウンロードリンクは5分で失効します。',
       chooseFile: 'ファイルを選択してください。', fileTooLarge: 'ファイルが10 MBを超えています。', fileEmpty: 'ファイルが空です。', fileTypeNotAllowed: 'このファイル形式には対応していません。', fileNameInvalid: 'ファイル名が無効です。', uploaded: '添付ファイルをアップロードしました。', confirmDeleteFile: 'この添付ファイルを削除しますか？非公開ストレージから完全に削除されます。',
-      storageUnavailable: 'ファイルストレージを一時的に利用できません。', fileMissing: '保存済みファイルが見つかりません。この添付を削除して再アップロードしてください。', uploadFailed: 'アップロードに失敗しました。通信状況を確認してください。', rateLimited: 'リクエストが多すぎます。しばらくお待ちください。', viewCustomer: '顧客を見る', viewProject: 'プロジェクトを見る', footnote: '取引・文書・添付のメタデータは業務データベースに、ファイル本体は非公開Storageに保存され、計画モジュールのバックアップには含まれません。'
+      storageUnavailable: 'ファイルストレージを一時的に利用できません。', fileMissing: '保存済みファイルが見つかりません。この添付を削除して再アップロードしてください。', uploadFailed: 'アップロードに失敗しました。通信状況を確認してください。', fileContentMismatch: 'ファイルの内容が種類と一致しないため、アップロードを拒否しました。', rateLimited: 'リクエストが多すぎます。しばらくお待ちください。', viewCustomer: '顧客を見る', viewProject: 'プロジェクトを見る', footnote: '取引・文書・添付のメタデータは業務データベースに、ファイル本体は非公開Storageに保存され、計画モジュールのバックアップには含まれません。'
     }
   };
   const t = key => words[locale()][key] || words.zh[key] || key;
   const ERROR_KEYS = {
     AUTHENTICATION_FAILED: 'authFailed', RATE_LIMITED: 'rateLimited', FILE_TOO_LARGE: 'fileTooLarge', FILE_TYPE_NOT_ALLOWED: 'fileTypeNotAllowed', INVALID_FILE_NAME: 'fileNameInvalid',
     STORAGE_UNAVAILABLE: 'storageUnavailable', STORAGE_SIGN_FAILED: 'storageUnavailable', STORAGE_DELETE_FAILED: 'storageUnavailable', FILE_OBJECT_MISSING: 'fileMissing',
-    FILE_NOT_UPLOADED: 'uploadFailed', FILE_VERIFICATION_FAILED: 'uploadFailed', INVALID_TRANSACTION_AMOUNT: 'invalidAmount'
+    FILE_NOT_UPLOADED: 'uploadFailed', FILE_VERIFICATION_FAILED: 'uploadFailed', FILE_CONTENT_MISMATCH: 'fileContentMismatch', INVALID_TRANSACTION_AMOUNT: 'invalidAmount'
   };
 
   function auth() { return window.PlannerCompanyContext?.getAuth?.() || null; }
@@ -469,7 +469,14 @@ import {
         response = await fetch(signed.upload_url, { method: 'PUT', headers: { apikey: a.key, 'Content-Type': check.mimeType, 'x-upsert': 'false' }, body: file, cache: 'no-store' });
       } catch { throw new Error(t('uploadFailed')); }
       if (!response.ok) throw new Error(response.status === 413 ? t('fileTooLarge') : t('uploadFailed'));
-      await api('/files', 'POST', { ...descriptor, path: signed.path });
+      try {
+        await api('/files', 'POST', { ...descriptor, path: signed.path });
+      } catch (failure) {
+        // V10.58: the object is already in Storage. Ask the server to remove it unless metadata
+        // references it, so a failed confirmation does not leave an orphaned file. Best effort.
+        try { await api('/files/abort', 'POST', { parent_record_id: record.id, path: signed.path }); } catch {}
+        throw failure;
+      }
       input.value = '';
       await refreshAttachments();
       filesFeedback(t('uploaded'), 'success');

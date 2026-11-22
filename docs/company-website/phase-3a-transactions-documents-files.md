@@ -44,7 +44,8 @@
 | 方法与路径 | 说明 |
 |---|---|
 | `POST /files/upload-url` | 校验账号、文件名、MIME、大小（≤10 MB）和所属记录（customer/project/task/follow_up/transaction/document），生成路径并返回短时签名上传 URL |
-| `POST /files` | 上传完成后调用；校验路径属于该记录，用 Storage list 确认对象存在且大小/类型一致，再创建 `record_type='file'` 元数据。元数据写入失败时删除对象，避免孤儿文件 |
+| `POST /files` | 上传完成后调用；校验路径属于该记录，用 Storage list 确认对象存在且大小/类型一致，再创建 `record_type='file'` 元数据。元数据写入失败时删除对象，避免孤儿文件；V10.58 起还会读取对象开头 64 字节，检查文件内容与声明的类型一致（例如改名成 .pdf 的 .exe 会被拒绝，返回 `FILE_CONTENT_MISMATCH` 并删除对象） |
+| `POST /files/abort` | V10.58 新增：浏览器上传到签名 URL 成功、但 `POST /files` 失败时调用；只删除该记录下、且没有任何附件元数据引用的对象（`POST /files` 实际成功但响应丢失时不会误删） |
 | `GET /files?parent_record_id=` | 列出某条记录的附件 |
 | `GET /files/:id/download-url` | 签发 300 秒签名下载 URL（带 `download=原始文件名`） |
 | `DELETE /files/:id` | 先删 Storage 对象，成功后再删元数据；Storage 删除失败时保留元数据并返回可重试错误 |
@@ -52,7 +53,7 @@
 同时：
 
 - `POST /records` 不再允许直接创建 `file`；`PATCH`/`DELETE /records/:id` 对 file 记录返回 `FILE_ENDPOINT_REQUIRED`，附件只能经 `/files` 管理。
-- 交易：状态必须为 planned/completed/cancelled，金额必须大于 0 且小于 10^14，`data.direction` 必须为 income/expense。
+- 交易：状态必须为 planned/completed/cancelled，金额必须大于 0 且小于 10^14、最多 6 位小数（V10.58 起服务端也拒绝超过 6 位小数的金额，不再由数据库静默四舍五入），`data.direction` 必须为 income/expense。
 - 文档：状态必须为 draft/issued/completed/void，`data.document_type` 必须为允许值。
 - 签名 URL 不写入日志、LocalStorage 或业务记录；前端只接受以本项目 `/storage/v1/` 开头的签名 URL。
 
@@ -89,7 +90,7 @@ supabase db push
 supabase functions deploy company-api --no-verify-jwt
 ```
 
-（也可在 Supabase SQL Editor 执行上述迁移文件，并在控制台部署 `supabase/functions/company-api/` 下的 `index.ts` 和 `list-all.ts`（V10.58 起函数由两个文件组成）。）
+（也可在 Supabase SQL Editor 执行上述迁移文件，并在控制台部署 `supabase/functions/company-api/` 下的 `index.ts`、`list-all.ts` 和 `validation.ts`（V10.58 起函数由三个文件组成）。）
 
 **验收结果：** 用户于 2026-11-21 确认生产环境验收 OK，Phase 3-A 正式完成。日常使用中仍建议关注附件上传失败、签名 URL 过期和大文件网络中断等边界情况。Supabase Security Advisors 仍提示现有自定义登录模式下 `planner_diary_*`、`planner_login`、`planner_get_data`、`planner_put_data` 等 SECURITY DEFINER RPC 可由 anon/authenticated 调用（函数内部自行验证密码），此为现有认证架构的安全提示，不是本次 Storage 迁移新增的权限策略。
 

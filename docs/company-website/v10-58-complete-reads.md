@@ -53,7 +53,10 @@
 - **2-C**：客户行标签改为「关联跟进」；「逾期项目」点击后自动应用新的项目「仅逾期」筛选，KPI 与列表共用 `isOverdueProject()`。
 - **文档状态与版本号**：产品规范、功能说明中 2-D 和 3-A 改为已实现并验收；路线图 §13 的 2-D 状态、「下一步」编号；3-A 文档标题改为 V10.56.0（V10.57.0 是开发日记）；README 和路线图的 main 版本改为 V10.58.0；2-D 第 9 节的验收状态。
 
-## 6. 仍未包含
+## 6. 3-A 附件与金额的服务端校验（同一 PR）
 
-- 3-A 附件：浏览器上传成功但随后 `POST /files` 失败时，Storage 中会留下孤儿对象（需要清理机制，例如定期扫描）。
-- 3-A 金额：服务端不拒绝超过 6 位小数的金额（数据库会四舍五入）；服务端不检查文件内容（只核对声明的类型和大小）。
+- **孤儿文件清理**：新增 `POST /files/abort`。浏览器把文件上传到签名 URL 后，如果 `POST /files` 失败，会请求服务端删除该对象；服务端只删除属于该记录、且没有任何附件元数据引用的对象（防止 `POST /files` 实际成功但响应丢失时误删）。清理本身失败（如断网、限流）时仍可能留下对象，属于尽力而为。
+- **文件内容检查**：`POST /files` 读取对象开头 64 字节，检查与声明的 MIME 类型一致：PDF、PNG/JPEG/WebP（图片之间互相接受，照顾改了扩展名的图片）、Office 新格式（ZIP）、旧格式（OLE；.doc 也接受 RTF，.xls 也接受文本导出）、TXT/CSV（不能含 NUL 字节）。不一致时删除对象并返回 `400 FILE_CONTENT_MISMATCH`，前端显示「文件内容与文件类型不符，已拒绝上传」。
+- **金额**：服务端用 `isValidTransactionAmount()` 要求大于 0、整数部分最多 14 位、小数最多 6 位、普通十进制写法（拒绝 `1e-7` 之类）。
+- 纯函数在 `supabase/functions/company-api/validation.ts`，由 `validate-v10.58.mjs` 直接测试；E2E 新增「登记失败后清理对象、内容不符时提示」用例。
+- **以上都需要重新部署 company-api 才会生效**；函数现在由 `index.ts`、`list-all.ts`、`validation.ts` 三个文件组成：`supabase functions deploy company-api --no-verify-jwt`。

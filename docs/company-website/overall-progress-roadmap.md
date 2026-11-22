@@ -226,6 +226,6 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 
 - 详见 [V10.58](./v10-58-complete-reads.md)。PR #66：https://github.com/ouyangxinwei/daily_weekly_planner/pull/66。
 - 修复关联记录只读前 100 条、客户/项目选项只读前 100 条、任务截止日期筛选和关联筛选不校验分页完整性的问题；新增短时缓存与 429 提示。
-- company-api 内部的任务/附件分页扫描同样改为严格校验（`list-all.ts`），**需要重新部署 company-api 才会生效**。
+- company-api 内部的任务/附件分页扫描同样改为严格校验（`list-all.ts`）；3-A 服务端新增文件内容检查、孤儿文件清理接口 `POST /files/abort`、金额最多 6 位小数校验（`validation.ts`）。**这些都需要重新部署 company-api 才会生效。**
 - 2-C：客户行「关联跟进」标签修正；「逾期项目」点击进入已筛选逾期的项目列表。2-B 验收标准中「未来 7 天」的笔误修正。
 - 状态：PR 待合并；合并部署后需要用户真实浏览器验收。

@@ -10,13 +10,15 @@ const PROJECT_ID = '00000000-0000-4000-8000-000000000552';
 let nextId = 0x560;
 const newId = () => '00000000-0000-4000-8000-' + String(nextId++).padStart(12, '0');
 
-async function mockCompanyApi(page) {
+async function mockCompanyApi(page, extraRecords = []) {
   const records = [
     { id: CUSTOMER_ID, record_type: 'customer', title: 'E2E Trading Co', business_type: 'trade', status: 'active', data: {}, created_at: '2026-11-01T00:00:00Z', updated_at: '2026-11-01T00:00:00Z' },
     { id: PROJECT_ID, record_type: 'project', title: 'E2E Import Order', business_type: 'trade', status: 'active', parent_record_id: CUSTOMER_ID, data: {}, created_at: '2026-11-01T00:00:00Z', updated_at: '2026-11-01T00:00:00Z' }
-  ];
+  , ...extraRecords];
   const stored = new Map();
   const calls = [];
+  // V10.58: set control.failNextComplete to make the next POST /files fail with that error code.
+  const control = { failNextComplete: null };
   const cors = (route, options) => route.fulfill({ ...options, headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:4173', 'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info, x-upsert', ...(options.headers || {}) } });
   const json = (route, status, data) => cors(route, { status, contentType: 'application/json', body: JSON.stringify(data) });
   await page.route('**/functions/v1/company-api/**', async route => {
@@ -46,7 +48,17 @@ async function mockCompanyApi(page) {
       const objectPath = body.parent_record_id + '/' + newId();
       return json(route, 200, { data: { path: objectPath, upload_url: SUPABASE + '/storage/v1/object/upload/sign/company-documents/' + objectPath + '?token=e2e', max_bytes: 10485760 } });
     }
+    if (method === 'POST' && path === '/files/abort') {
+      const referenced = records.some(r => r.record_type === 'file' && r.data?.file?.path === body.path);
+      if (!referenced) stored.delete(body.path);
+      return json(route, 200, { data: { removed: !referenced } });
+    }
     if (method === 'POST' && path === '/files') {
+      if (control.failNextComplete) {
+        const code = control.failNextComplete; control.failNextComplete = null;
+        if (code === 'FILE_CONTENT_MISMATCH') stored.delete(body.path); // the server removes the object itself
+        return json(route, code === 'FILE_CONTENT_MISMATCH' ? 400 : 500, { error: code });
+      }
       if (!stored.has(body.path)) return json(route, 409, { error: 'FILE_NOT_UPLOADED' });
       const row = { id: newId(), record_type: 'file', title: body.file_name, status: 'stored', parent_record_id: body.parent_record_id, data: { file: { bucket: 'company-documents', path: body.path, fileName: body.file_name, mimeType: body.mime_type, fileSize: body.file_size, uploadedAt: new Date().toISOString() } }, created_at: new Date().toISOString() };
       records.push(row); return json(route, 201, { data: row });
@@ -78,7 +90,7 @@ async function mockCompanyApi(page) {
     }
     return cors(route, { status: 200, contentType: 'application/pdf', body: '%PDF-1.4', headers: { 'Content-Disposition': 'attachment' } });
   });
-  return { records, calls, stored };
+  return { records, calls, stored, control };
 }
 
 test('company workspace manages transactions, documents and private attachments', async ({ page }) => {
@@ -233,4 +245,43 @@ test('company workspace manages transactions, documents and private attachments'
   const storedCompanyKeys = await page.evaluate(() => Object.keys(localStorage).filter(key => /company|transaction|document/i.test(key)));
   expect(storedCompanyKeys).toEqual([]);
   for (const call of calls.filter(c => !c.storage)) expect(call.auth).toMatch(/^Basic /);
+});
+
+test('V10.58: failed upload confirmation removes the stored object and content mismatches are reported', async ({ page }) => {
+  await openLocalTestApp(page);
+  await page.evaluate(() => {
+    window.PlannerCompanyContext = Object.freeze({ getAuth: () => ({ url: 'https://kopvznygsqsheibsjjvv.supabase.co', key: 'playwright-public-key', username: 'oooo', password: 'not-a-real-password' }) });
+  });
+  const DOCUMENT_ID = '00000000-0000-4000-8000-000000000599';
+  const document = { id: DOCUMENT_ID, record_type: 'document', title: 'Seeded invoice', status: 'issued', parent_record_id: PROJECT_ID, related_record_ids: [CUSTOMER_ID], data: { document_type: 'invoice', customer_id: CUSTOMER_ID, project_id: PROJECT_ID }, created_at: '2026-11-02T00:00:00Z', updated_at: '2026-11-02T00:00:00Z' };
+  const { records, calls, stored, control } = await mockCompanyApi(page, [document]);
+
+  await page.locator('#workspace-company').click();
+  await page.locator('#cw-business-nav button[data-tab="documents"]').click();
+  await page.locator('.cw-records-card', { hasText: 'Seeded invoice' }).getByRole('button', { name: '附件 (0)' }).click();
+  await expect(page.locator('#cw-records-files')).toBeVisible();
+
+  // POST /files fails after the object was uploaded → the browser asks the server to remove it.
+  control.failNextComplete = 'INTERNAL_ERROR';
+  await page.locator('#cw-files-input').setInputFiles({ name: 'invoice.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 invoice') });
+  await page.locator('#cw-files-upload').click();
+  await expect(page.locator('#cw-files-feedback')).toHaveClass(/error/);
+  const abort = calls.find(c => c.method === 'POST' && c.path === '/files/abort');
+  expect(abort?.body?.parent_record_id).toBe(DOCUMENT_ID);
+  expect(abort?.body?.path).toMatch(new RegExp('^' + DOCUMENT_ID + '/'));
+  expect(stored.size).toBe(0);
+  expect(records.some(r => r.record_type === 'file')).toBe(false);
+
+  // Server rejects content that does not match the declared type → clear message.
+  control.failNextComplete = 'FILE_CONTENT_MISMATCH';
+  await page.locator('#cw-files-input').setInputFiles({ name: 'fake.pdf', mimeType: 'application/pdf', buffer: Buffer.from('MZ not a pdf') });
+  await page.locator('#cw-files-upload').click();
+  await expect(page.locator('#cw-files-feedback')).toContainText('文件内容与文件类型不符');
+  expect(stored.size).toBe(0);
+
+  // A normal upload still works afterwards.
+  await page.locator('#cw-files-input').setInputFiles({ name: 'invoice.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 invoice') });
+  await page.locator('#cw-files-upload').click();
+  await expect(page.locator('#cw-files-feedback')).toContainText('附件已上传');
+  await expect(page.locator('#cw-files-list')).toContainText('invoice.pdf');
 });

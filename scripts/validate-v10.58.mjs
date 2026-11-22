@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { fetchCompleteList, createRecordCache, IncompleteDataError } from '../company-record-loader.js';
 import { isOverdueProject, getProjectCustomerOverview } from '../company-project-customer-overview.js';
 import { collectAllPages, IncompleteListError } from '../supabase/functions/company-api/list-all.ts';
+import { isValidTransactionAmount, matchesFileSignature } from '../supabase/functions/company-api/validation.ts';
 
 function makeRecords(count, type = 'task') {
   return Array.from({ length: count }, (_, index) => ({ id: type + '-' + index, record_type: type }));
@@ -180,6 +181,32 @@ assert.match(business, /if \(state\.projectDueFilter === 'overdue'\) return isOv
 assert.match(business, /const relationFiltered = \(project && \(state\.projectCustomerFilter \|\| state\.projectDueFilter\)\)/);
 assert.match(business, /t\('relatedFollowupCount'\)\+': '\+row\.followupCount/);
 for (const label of ["relatedFollowupCount:'关联跟进'", "relatedFollowupCount:'Follow-ups'", "relatedFollowupCount:'関連フォロー'"]) assert.ok(business.includes(label), label);
+
+// --- 3-A server checks (validation.ts) ------------------------------------------------
+for (const ok of ['1', '0.1', '0.000001', '123.456789', '99999999999999.999999', 0.1, 50000, ' 12.5 ']) assert.equal(isValidTransactionAmount(ok), true, 'valid amount ' + JSON.stringify(ok));
+for (const bad of ['0', '0.000000', '-1', '1.0000001', '0.1234567', '100000000000000', '1e3', '1,000', '', 'abc', 1e-7, 1e21, -5, 0, NaN, Infinity, null, undefined, {}]) assert.equal(isValidTransactionAmount(bad), false, 'invalid amount ' + JSON.stringify(bad));
+const bytes = (...parts) => Uint8Array.from(parts.flatMap(part => typeof part === 'string' ? Array.from(part, c => c.charCodeAt(0)) : part));
+const PDF = bytes('%PDF-1.7'), PNG = bytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]), JPG = bytes([0xff, 0xd8, 0xff, 0xe0]), WEBP = bytes('RIFF', [0, 0, 0, 0], 'WEBPVP8 ');
+const ZIP = bytes([0x50, 0x4b, 0x03, 0x04, 0x14, 0]), OLE = bytes([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]), RTF = bytes('{', [0x5c], 'rtf1'), EXE = bytes('MZ', [0x90, 0, 3, 0]), TEXT = bytes('name,amount;');
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+const accepted = [['application/pdf', PDF], ['image/png', PNG], ['image/jpeg', JPG], ['image/webp', WEBP], ['image/jpeg', PNG], ['text/plain', TEXT], ['text/csv', TEXT],
+  [DOCX, ZIP], [XLSX, ZIP], [PPTX, ZIP], ['application/msword', OLE], ['application/msword', RTF], ['application/vnd.ms-excel', OLE], ['application/vnd.ms-excel', TEXT], ['application/vnd.ms-powerpoint', OLE]];
+for (const [mime, content] of accepted) assert.equal(matchesFileSignature(mime, content), true, 'accepts ' + mime);
+const rejected = [['application/pdf', EXE], ['application/pdf', bytes('')], ['image/png', PDF], ['text/plain', EXE], ['text/csv', bytes('')], [DOCX, OLE], [DOCX, EXE], ['application/msword', ZIP], ['application/vnd.ms-powerpoint', TEXT], ['application/x-msdownload', EXE]];
+for (const [mime, content] of rejected) assert.equal(matchesFileSignature(mime, content), false, 'rejects ' + mime);
+
+assert.match(edge, /import \{ isValidTransactionAmount, matchesFileSignature, SIGNATURE_BYTES \} from "\.\/validation\.ts";/);
+assert.match(edge, /if \(!isValidTransactionAmount\(body\.amount\)\) \{/);
+assert.doesNotMatch(edge, /MAX_TRANSACTION_AMOUNT/);
+assert.match(edge, /"\/storage\/v1\/object\/authenticated\/" \+ FILE_BUCKET/);
+assert.match(edge, /if \(!matchesFileSignature\(String\(body\.mime_type\), prefix\)\) \{\s*await removeStoredObject\(path, requestId\);\s*throw new ApiError\(400, "FILE_CONTENT_MISMATCH"\);/);
+assert.match(edge, /route === "\/files\/abort" && req\.method === "POST"/);
+assert.match(edge, /if \(referenced\) return \{ removed: false, reason: "IN_USE" \};/, 'abort never removes an object that metadata references');
+assert.match(workspace, /await api\('\/files\/abort', 'POST', \{ parent_record_id: record\.id, path: signed\.path \}\)/);
+assert.match(workspace, /FILE_CONTENT_MISMATCH: 'fileContentMismatch'/);
+for (const label of ["fileContentMismatch: '文件内容与文件类型不符", "fileContentMismatch: 'The file content does not match", "fileContentMismatch: 'ファイルの内容が"]) assert.ok(workspace.includes(label), label);
 
 // --- version and service worker ---------------------------------------------------
 const html = fs.readFileSync('index.html', 'utf8');
