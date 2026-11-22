@@ -1,3 +1,16 @@
+# V10.58 Complete company record reads — 2026-11-21
+
+- Fixed related projects, tasks and follow-ups on customer cards and project details being limited to the first 100 records (an `Array.map` index was passed as the record limit).
+- Task due-date filters, follow-up/project relation filters and customer/project choices in editors now read complete data. Incomplete pagination (empty page, short page, changing total, count mismatch) shows an error instead of silently using partial data.
+- Added a short-lived cache: changing filters or pages no longer repeats requests; opening a page reuses data up to 15 seconds old; Refresh reads again; any create/edit/delete clears the cache. This reduces the chance of hitting the company-api limit of 30 requests per minute.
+- Too many requests (429) now shows a clear message; a failed related-information read shows "unavailable" instead of 0.
+- Project & customer overview: the follow-up count on customer rows is now labelled "Follow-ups"; clicking "Overdue projects" opens the project list filtered to overdue projects (new "Overdue only" project filter).
+- company-api internal task and attachment scans also verify pagination completeness (takes effect after redeploying company-api).
+- Attachments: the server checks that file content matches its type (a renamed .exe is rejected); if registering an uploaded file fails, the browser asks the server to delete it so no orphaned file is left.
+- Transaction amounts: the server also rejects more than 6 decimal places.
+- Aligned phase statuses and version numbers across the company website docs.
+- No database, RLS or record format changes.
+
 # V10.57 Development Diary V1 — 2026-11-21
 
 - Added a standalone Development Diary module, separate from plans and tasks, with no completion state or due date.

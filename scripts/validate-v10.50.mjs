@@ -17,7 +17,7 @@ assert.equal(matchesTaskDueDate(task(''), 'none', today), true);
 assert.equal(matchesTaskDueDate(task('2026-11-20'), '', today), true);
 assert.equal(matchesTaskDueDate(task('2026-02-30'), 'none', today), true);
 const businessSource = readFileSync(new URL('../company-business.js', import.meta.url), 'utf8');
-for (const marker of ["fetchAllRecords('task', Number.MAX_SAFE_INTEGER)", 'matchesTaskDueDate(record, state.taskDueFilter', "id=\"cw-business-due-filter\"", "state.taskDueFilter = $('cw-business-due-filter').value"]) {
+for (const marker of ["const allTasks = await loadRecords('task', maxAgeMs);", 'matchesTaskDueDate(record, state.taskDueFilter', "id=\"cw-business-due-filter\"", "state.taskDueFilter = $('cw-business-due-filter').value"]) {
   assert.ok(businessSource.includes(marker), 'Missing task due-date UI integration: ' + marker);
 }
 for (const label of ["overdueTasks:'逾期任务'", "overdueTasks:'Overdue'", "overdueTasks:'期限超過'"]) {

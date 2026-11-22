@@ -1,3 +1,6 @@
+import { collectAllPages, IncompleteListError, type ListPage } from "./list-all.ts";
+import { isValidTransactionAmount, matchesFileSignature, SIGNATURE_BYTES } from "./validation.ts";
+
 type JsonObject = Record<string, unknown>;
 
 const ALLOWED_ORIGINS = new Set([
@@ -20,7 +23,6 @@ const TRANSACTION_STATUSES = new Set(["planned", "completed", "cancelled"]);
 const TRANSACTION_DIRECTIONS = new Set(["income", "expense"]);
 const DOCUMENT_STATUSES = new Set(["draft", "issued", "completed", "void"]);
 const DOCUMENT_TYPES = new Set(["quote", "contract", "invoice", "order", "receipt", "other"]);
-const MAX_TRANSACTION_AMOUNT = 100_000_000_000_000; // numeric(20,6) upper bound
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // Stage 3-A private attachments. Must match the bucket created by
@@ -388,19 +390,26 @@ async function assertTaskProject(auth: JsonObject, projectId: unknown, requestId
 async function listProjectTasks(auth: JsonObject, projectId: string, url: URL, requestId: string) {
   const args = listArguments(url, "task");
   if (args.p_status !== null && !TASK_STATUSES.has(String(args.p_status))) throw new ApiError(400, "INVALID_TASK_STATUS");
-  const limit = Number(args.p_limit), offset = Number(args.p_offset), pageSize = 100;
-  let scanOffset = 0, total = 0;
-  const matches: Record<string, unknown>[] = [];
-  do {
-    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
-      ...auth, p_record_type: "task", p_business_type: null, p_status: args.p_status,
-      p_keyword: args.p_keyword, p_limit: pageSize, p_offset: scanOffset,
-    }, requestId);
-    total = Number(page.total || 0);
-    matches.push(...(Array.isArray(page.items) ? page.items.filter(item => item.parent_record_id === projectId) : []));
-    scanOffset += pageSize;
-  } while (scanOffset < total);
+  const limit = Number(args.p_limit), offset = Number(args.p_offset);
+  const all = await listAllRecords(auth, {
+    p_record_type: "task", p_business_type: null, p_status: args.p_status, p_keyword: args.p_keyword,
+  }, requestId);
+  const matches = all.filter(item => item.parent_record_id === projectId);
   return { items: matches.slice(offset, offset + limit), total: matches.length, limit, offset };
+}
+
+// V10.58: every internal scan reads all pages and verifies them (see list-all.ts).
+async function listAllRecords(auth: JsonObject, filters: JsonObject, requestId: string): Promise<Record<string, unknown>[]> {
+  try {
+    return await collectAllPages<Record<string, unknown>>((offset, limit) =>
+      rpc<ListPage>("company_list_records", { ...auth, ...filters, p_limit: limit, p_offset: offset }, requestId));
+  } catch (error) {
+    if (error instanceof IncompleteListError) {
+      console.error("company-api list scan incomplete", { reason: error.reason, requestId });
+      throw new ApiError(503, "LIST_INCOMPLETE");
+    }
+    throw error;
+  }
 }
 
 function validateProjectProgressFields(body: JsonObject) {
@@ -429,8 +438,8 @@ function validateTransactionFields(body: JsonObject, creating: boolean) {
     throw new ApiError(400, "INVALID_TRANSACTION_STATUS");
   }
   if (creating || body.amount !== undefined) {
-    const amount = Number(body.amount);
-    if (body.amount === null || !Number.isFinite(amount) || amount <= 0 || amount >= MAX_TRANSACTION_AMOUNT) {
+    // V10.58: > 0, < 10^14 and at most 6 decimals (numeric(20,6) would silently round more).
+    if (!isValidTransactionAmount(body.amount)) {
       throw new ApiError(400, "INVALID_TRANSACTION_AMOUNT");
     }
   }
@@ -573,6 +582,27 @@ async function removeStoredObject(path: string, requestId: string): Promise<bool
   return true;
 }
 
+// V10.58: read the first bytes of a stored object to check its content signature.
+async function readStoredPrefix(path: string, requestId: string): Promise<Uint8Array> {
+  const { url, secretKey } = getConfig();
+  const headers: Record<string, string> = { "apikey": secretKey, "Range": "bytes=0-" + (SIGNATURE_BYTES - 1) };
+  if (secretKey.startsWith("eyJ")) headers.Authorization = "Bearer " + secretKey;
+  let response: Response;
+  try {
+    response = await fetch(url + "/storage/v1/object/authenticated/" + FILE_BUCKET + "/" + encodeObjectPath(path), {
+      method: "GET", headers, signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    console.error("company-api storage read network failure", { requestId });
+    throw new ApiError(503, "STORAGE_UNAVAILABLE");
+  }
+  if (response.status !== 200 && response.status !== 206) {
+    console.error("company-api storage read failed", { status: response.status, requestId });
+    throw new ApiError(502, "STORAGE_UNAVAILABLE");
+  }
+  return new Uint8Array(await response.arrayBuffer()).slice(0, SIGNATURE_BYTES);
+}
+
 async function completeUpload(auth: JsonObject, body: JsonObject, requestId: string) {
   assertAllowedKeys(body, ["parent_record_id", "path", "file_name", "mime_type", "file_size"]);
   validateFileDescriptor(body);
@@ -588,6 +618,18 @@ async function completeUpload(auth: JsonObject, body: JsonObject, requestId: str
   if (stored.size !== Number(body.file_size) || (stored.mimeType && stored.mimeType !== body.mime_type)) {
     await removeStoredObject(path, requestId);
     throw new ApiError(400, "FILE_VERIFICATION_FAILED");
+  }
+  // V10.58: the content must match the declared type (e.g. an .exe renamed to .pdf is rejected).
+  let prefix: Uint8Array;
+  try {
+    prefix = await readStoredPrefix(path, requestId);
+  } catch (error) {
+    await removeStoredObject(path, requestId);
+    throw error;
+  }
+  if (!matchesFileSignature(String(body.mime_type), prefix)) {
+    await removeStoredObject(path, requestId);
+    throw new ApiError(400, "FILE_CONTENT_MISMATCH");
   }
   const fileName = String(body.file_name).trim();
   try {
@@ -616,6 +658,33 @@ async function completeUpload(auth: JsonObject, body: JsonObject, requestId: str
     await removeStoredObject(path, requestId);
     throw error;
   }
+}
+
+// V10.58: called by the browser when the upload to the signed URL succeeded but
+// POST /files failed, so the object would otherwise stay in Storage without metadata.
+// Only an object under a record the caller can access, and not referenced by any
+// file metadata (POST /files may have succeeded with the response lost), is removed.
+async function abortUpload(auth: JsonObject, body: JsonObject, requestId: string) {
+  assertAllowedKeys(body, ["parent_record_id", "path"]);
+  if (typeof body.parent_record_id !== "string" || !UUID_RE.test(body.parent_record_id)) {
+    throw new ApiError(400, "VALIDATION_ERROR");
+  }
+  const parentId = body.parent_record_id.toLowerCase();
+  const match = typeof body.path === "string" ? body.path.match(FILE_PATH_RE) : null;
+  if (!match || match[1].toLowerCase() !== parentId || !UUID_RE.test(match[2])) {
+    throw new ApiError(400, "INVALID_FILE_PATH");
+  }
+  const path = String(body.path);
+  await assertAttachableParent(auth, parentId, requestId);
+  const { items } = await listRecordFiles(auth, parentId, requestId);
+  const referenced = items.some((item) => {
+    const data = item.data && typeof item.data === "object" ? item.data as JsonObject : {};
+    const file = data.file && typeof data.file === "object" ? data.file as JsonObject : {};
+    return file.path === path;
+  });
+  if (referenced) return { removed: false, reason: "IN_USE" };
+  if (!await removeStoredObject(path, requestId)) throw new ApiError(502, "STORAGE_DELETE_FAILED");
+  return { removed: true };
 }
 
 function storedFileInfo(record: Record<string, unknown>) {
@@ -656,20 +725,10 @@ async function deleteStoredFile(auth: JsonObject, id: string, requestId: string)
 }
 
 async function listRecordFiles(auth: JsonObject, parentId: string, requestId: string) {
-  const pageSize = 100;
-  let offset = 0, total = 0;
-  const items: Record<string, unknown>[] = [];
-  do {
-    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
-      ...auth, p_record_type: "file", p_business_type: null, p_status: null,
-      p_keyword: null, p_limit: pageSize, p_offset: offset,
-    }, requestId);
-    total = Number(page.total || 0);
-    const pageItems = Array.isArray(page.items) ? page.items : [];
-    items.push(...pageItems.filter((item) => String(item.parent_record_id).toLowerCase() === parentId.toLowerCase()));
-    if (!pageItems.length) break;
-    offset += pageItems.length;
-  } while (offset < total);
+  const all = await listAllRecords(auth, {
+    p_record_type: "file", p_business_type: null, p_status: null, p_keyword: null,
+  }, requestId);
+  const items = all.filter((item) => String(item.parent_record_id).toLowerCase() === parentId.toLowerCase());
   return { items, total: items.length };
 }
 
@@ -733,6 +792,10 @@ Deno.serve(async (req: Request) => {
     if (route === "/files" && req.method === "POST") {
       const result = await completeUpload(auth, await readJson(req), requestId);
       return jsonResponse({ data: result }, 201, origin, { "X-Request-Id": requestId });
+    }
+    if (route === "/files/abort" && req.method === "POST") {
+      const result = await abortUpload(auth, await readJson(req), requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
     }
     if (route === "/files" && req.method === "GET") {
       const parentId = url.searchParams.get("parent_record_id") ?? "";

@@ -33,6 +33,8 @@ jobs:
           node --check diary.js
           node --check company-records-rules.js
           node --check company-records-workspace.js
+          node --check company-record-loader.js
+          node --check scripts/validate-v10.58.mjs
           node --check scripts/validate-v10.56.mjs
           node --check scripts/validate-v10.54.mjs
           node --check scripts/validate-v10.53.mjs
@@ -63,4 +65,5 @@ jobs:
           node scripts/validate-v10.53.mjs
           node scripts/validate-v10.54.mjs
           node scripts/validate-v10.56.mjs
+          node scripts/validate-v10.58.mjs
           node scripts/test-one-star-memo-migration.mjs

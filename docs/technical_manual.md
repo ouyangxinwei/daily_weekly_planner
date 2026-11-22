@@ -50,7 +50,7 @@
 
 ## 5. 个人公司网站
 
-- 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`，以及 V10.56.0 的 `company-records-rules.js`（纯规则）和 `company-records-workspace.js`（交易/文档/附件界面）。
+- 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`，以及 V10.56.0 的 `company-records-rules.js`（纯规则）和 `company-records-workspace.js`（交易/文档/附件界面）。V10.58.0 新增 `company-record-loader.js`：公司业务记录的完整分页读取（total 一致、无空页/短页、最终数量等于 total，否则报错）和短时缓存（进入页面 15 秒、页面内筛选/翻页 60 秒、刷新重读、写入后清空），所有需要全量数据的地方都经由它读取。
 - 后端：Supabase Edge Function `company-api`。
 - 业务表：`company_records`，通过 `record_type` 区分 customer、project、task、follow_up 等对象；任务通过 `parent_record_id` 关联项目，`due_date` 保存截止日期。V10.45.0 使用 `data.progress_mode`（manual/auto）、`data.manual_progress_percent`、`data.progress_percent` 及自动统计字段；数据库触发器在任务变化时更新自动进度。
 - 前端复用当前登录会话，通过 HTTPS Basic Authorization 请求 API；不得把密码持久化到 LocalStorage，也不得暴露 service-role/secret key。

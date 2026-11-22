@@ -5,6 +5,13 @@ function timestamp(record) {
   return Number.isFinite(value) ? value : 0;
 }
 
+// Overdue project (2-C): target date before the local today and status not completed/cancelled.
+export function isOverdueProject(project, today) {
+  if (!today || !project || project.status === 'completed' || project.status === 'cancelled') return false;
+  const due = String(project.due_date || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(due) && due < today;
+}
+
 function progressOf(project) {
   const value = Number(project?.data?.progress_percent ?? 0);
   return Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
@@ -73,11 +80,7 @@ export function getProjectCustomerOverview(data = {}, today = '') {
   const averageProgress = progressRows.length
     ? Math.round(progressRows.reduce((sum, row) => sum + row.progress, 0) / progressRows.length)
     : 0;
-  const overdueProjects = today
-    ? projects.filter(project => project.status !== 'completed' && project.status !== 'cancelled'
-      && /^\d{4}-\d{2}-\d{2}$/.test(String(project.due_date || '').slice(0, 10))
-      && String(project.due_date).slice(0, 10) < today)
-    : [];
+  const overdueProjects = projects.filter(project => isOverdueProject(project, today));
 
   const recentActivity = [
     ...projects.map(record => ({ type: 'project', record, at: timestamp(record) })),

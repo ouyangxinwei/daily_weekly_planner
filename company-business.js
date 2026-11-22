@@ -1,22 +1,31 @@
 import { getLocalDateKey, matchesTaskDueDate } from './company-task-date-filter.js';
 import { getBusinessOverviewMetrics, getRecentBusinessRecords } from './company-overview-metrics.js';
 import { getTodoCenterSections, getTodoFollowupDateState } from './company-todo-center.js';
-import { getProjectCustomerOverview } from './company-project-customer-overview.js';
+import { getProjectCustomerOverview, isOverdueProject } from './company-project-customer-overview.js';
 import { getBusinessTrendReport } from './company-business-trends.js';
+import { createRecordCache } from './company-record-loader.js';
 
 (() => {
   'use strict';
   const API = 'company-api';
   const PROJECT_URL = 'https://kopvznygsqsheibsjjvv.supabase.co';
   const PAGE_SIZE = 20;
-  const state = { tab: 'customers', verified: '', customers: [], projects: [], followups: [], tasks: [], projectOffset: 0, followupOffset: 0, taskOffset: 0, projectQuery: '', followupQuery: '', taskQuery: '', taskDueFilter: '', projectStatus: '', followupStatus: '', taskStatus: '', taskProjectFilter: '', projectCustomerFilter: '', followupCustomerFilter: '', editing: null, busy: false, reloadPending: false, followupProjectFilter: '', followupDueFilter: '', overviewBusy: false, overviewData: null, todoBusy: false, projectCustomerBusy: false, trendBusy: false, trendPeriod: 'month', trendData: null, relationshipRecords: null, relationshipPromise: null };
+  // V10.58: complete reads are shared through a short-lived cache to stay within
+  // the company-api limit of 30 requests per IP per minute.
+  // ENTRY: opening a tab may reuse data read in the last 15 s.
+  // LOOKUP: filters, pagination, selectors and relation previews reuse data up to 60 s old.
+  // Refresh buttons read again (max age 0); every write invalidates the cache.
+  const ENTRY_MAX_AGE_MS = 15000;
+  const LOOKUP_MAX_AGE_MS = 60000;
+  const RECORD_LABELS = { customer:'customers', project:'projects', task:'tasks', follow_up:'followups' };
+  const state = { tab: 'customers', verified: '', customers: [], projects: [], followups: [], tasks: [], projectOffset: 0, followupOffset: 0, taskOffset: 0, projectQuery: '', followupQuery: '', taskQuery: '', taskDueFilter: '', projectStatus: '', projectDueFilter: '', followupStatus: '', taskStatus: '', taskProjectFilter: '', projectCustomerFilter: '', followupCustomerFilter: '', editing: null, busy: false, reloadPending: false, followupProjectFilter: '', followupDueFilter: '', overviewBusy: false, overviewData: null, todoBusy: false, projectCustomerBusy: false, trendBusy: false, trendPeriod: 'month', trendData: null, relationshipRecords: null };
   const $ = id => document.getElementById(id);
   const root = () => $('company-workspace-root');
   const locale = () => (document.documentElement.lang || 'zh-CN').toLowerCase().startsWith('ja') ? 'ja' : ((document.documentElement.lang || '').toLowerCase().startsWith('en') ? 'en' : 'zh');
   const words = {
-    zh: {businessTrends:'业务趋势',trendsTitle:'业务趋势与周期复盘',trendsSubtitle:'按周或月查看项目、任务和客户跟进活动',trendsLoading:'正在汇总业务趋势…',trendsLoadError:'业务趋势暂时无法读取',trendsWeek:'最近 8 周',trendsMonth:'最近 6 个月',trendsProjects:'项目趋势',trendsTasks:'任务趋势',trendsFollowups:'客户跟进趋势',trendsCreated:'新增',trendsCompleted:'完成',trendsRecorded:'跟进记录',trendsVsPrevious:'较上一周期',trendsIncrease:'增加',trendsDecrease:'减少',trendsNoChange:'持平',trendsNote:'完成项目/任务按当前已完成状态记录的最近更新时间估算，不代表精确完成日期；系统尚未保存状态变更历史。',trendsReview:'周期复盘',trendsCurrent:'本期截至今天',trendsPrevious:'上期',projectCustomerOverview:'项目与客户概况',pcOverviewTitle:'项目与客户业务概况',pcOverviewSubtitle:'查看项目状态、进度、客户项目组合与近期业务活动',pcLoading:'正在汇总项目与客户数据…',pcLoadError:'项目与客户概况暂时无法读取',pcProjects:'项目概况',pcCustomers:'客户项目组合',pcStatusDistribution:'项目状态分布',pcProgressOverview:'项目进度概览',pcAverageProgress:'平均项目进度',pcCompletedProjects:'已完成项目',pcOverdueProjects:'逾期项目',pcCustomerCoverage:'客户项目覆盖',pcCustomersWithProjects:'已有项目的客户',pcTaskCompletion:'任务完成情况',pcRecentActivity:'近期业务活动',pcNoProjects:'暂无项目',pcNoCustomers:'暂无客户',pcNoActivity:'暂无近期活动',pcProjectTaskSummary:'任务完成',pcOpen:'未完成',pcCompleted:'已完成',pcViewCustomer:'查看客户',pcViewProject:'查看项目',pcViewTask:'查看任务',pcViewFollowup:'查看跟进',  overview:'业务总览', todoCenter:'待办中心', todoCenterTitle:'待办事项中心', todoCenterSubtitle:'集中查看需要处理的任务与客户跟进', todoLoading:'正在整理待办事项…', todoLoadError:'待办事项暂时无法读取', todoEmpty:'目前没有需要处理的事项', todoOverdueTasks:'逾期任务', todoTodayTasks:'今日任务', todoUpcomingTasks:'未来 7 天任务', todoUndatedTasks:'未设置截止日期的任务', todoPendingFollowups:'待处理跟进', todoDueDate:'截止日期', todoProject:'所属项目', todoNextFollowup:'下次跟进', todoFollowupOverdue:'已逾期', todoFollowupToday:'今天', todoFollowupScheduled:'已安排', todoNoNextDate:'未设置下次跟进日期', todoOpenRecord:'打开记录', overviewTitle:'业务总览', overviewSubtitle:'快速了解当前业务状况与需要处理的事项', customersTotal:'客户总数', activeProjects:'进行中项目', unfinishedTasks:'未完成任务', pendingFollowups:'待处理跟进', needsAttention:'需要关注', overdueTasksCount:'逾期任务', dueTodayCount:'今日到期', dueNext7Count:'未来 7 天到期', overdueFollowups:'逾期待跟进', recentProjects:'最近更新项目', recentTasks:'最近任务', recentFollowups:'最近客户跟进', noRecent:'暂无记录', overviewLoading:'正在汇总业务数据…', overviewError:'业务总览暂时无法读取', incompleteData:'数据未能完整读取，请刷新重试', openTasks:'未完成', allFollowupDates:'全部跟进日期', overdueOnly:'仅逾期', customers:'客户', projects:'项目管理', tasks:'项目任务', followups:'业务跟进', project:'项目', task:'任务', followup:'跟进记录', newProject:'新增项目', newTask:'新增任务', newFollowup:'新增跟进', searchProject:'搜索项目名称', searchTask:'搜索任务名称', allTaskDueDates:'全部截止日期', overdueTasks:'逾期任务', dueToday:'今日到期', dueNext7Days:'未来 7 天', noDueDate:'无截止日期', noMatchingTasks:'没有符合当前筛选条件的任务', searchFollowup:'搜索跟进内容', allStatus:'全部状态', customer:'所属客户', chooseCustomer:'选择客户', status:'项目状态', planned:'计划中', active:'进行中', on_hold:'暂缓', completed:'已完成', cancelled:'已取消', prospect:'潜在客户', trade:'贸易', software:'软件开发', ecommerce:'电子商务', startDate:'开始日期', dueDate:'预计完成日期', description:'项目说明', save:'保存', cancel:'取消', edit:'编辑', delete:'删除', noProjects:'还没有项目', noTasks:'这个项目还没有任务', noFollowups:'还没有跟进记录', createProjectHint:'为客户建立第一个项目。', createTaskHint:'把项目拆分为可执行的任务。', createFollowupHint:'记录一次电话、邮件或会议跟进。', confirmDeleteProject:'确定删除这个项目吗？此操作无法撤销。', confirmDeleteTask:'确定删除这个任务吗？此操作无法撤销。', confirmDeleteFollowup:'确定删除这条跟进记录吗？此操作无法撤销。', method:'跟进方式', phone:'电话', email:'邮件', meeting:'会议', message:'即时消息', other:'其他', followupDate:'跟进时间', outcome:'跟进结果', nextDate:'下次跟进日期', notes:'备注', linkedProject:'关联项目（可选）', noProject:'不关联项目', pending:'待跟进', done:'已完成', next:'下一页', previous:'上一页', loading:'正在加载…', loaded:'已加载', failed:'操作失败，请稍后重试。', relationError:'该项目仍有关联的任务或跟进记录，请先调整或删除相关记录。', required:'请填写必填项目并选择客户。', customerMissing:'请先创建客户，再创建项目或跟进记录。', refresh:'刷新', allProjects:'全部项目', filterProject:'按项目筛选', projectTitle:'项目名称', followupTitle:'跟进主题', progress:'项目进度', progressPercent:'手动项目进度（0–100%）', progressMode:'进度计算方式', manualProgress:'手动设置', autoProgress:'按任务自动计算', progressAutoHint:'自动模式下，已完成任务数 ÷ 全部任务数 × 100%。', progressManualHint:'手动模式下，任务状态变化不会覆盖此进度。', viewDetails:'查看详情', projectDetails:'项目详情', manageTasks:'管理任务', taskTitle:'任务名称', taskProject:'所属项目', taskStatus:'任务状态', taskDue:'截止日期', todo:'待处理', in_progress:'进行中', blocked:'受阻', requiredTaskProject:'请选择所属项目。', invalidTaskStatus:'请选择有效的任务状态。', invalidProgress:'项目进度必须是 0 到 100 之间的整数。', close:'关闭', viewCustomer:'查看客户', viewProject:'查看项目', viewProjects:'查看项目', viewFollowups:'查看跟进', backToCustomer:'返回客户', backToProject:'返回项目', relatedCustomer:'关联客户', relatedProject:'关联项目', clearRelationFilter:'清除关联筛选', relatedTasks:'关联任务', relatedFollowups:'跟进记录', noRelatedRecords:'暂无关联记录', loadingRelations:'正在读取关联信息…', relationLoadFailed:'关联信息暂时无法读取。' },
-    en: {businessTrends:'Business trends',trendsTitle:'Business trends and review',trendsSubtitle:'Review projects, tasks and customer follow-ups by week or month',trendsLoading:'Summarizing business trends…',trendsLoadError:'Business trends are temporarily unavailable',trendsWeek:'Last 8 weeks',trendsMonth:'Last 6 months',trendsProjects:'Project trends',trendsTasks:'Task trends',trendsFollowups:'Customer follow-up trends',trendsCreated:'Created',trendsCompleted:'Completed',trendsRecorded:'Follow-ups',trendsVsPrevious:'vs previous period',trendsIncrease:'Up',trendsDecrease:'Down',trendsNoChange:'No change',trendsNote:'Project/task completion is estimated from the latest updated_at of records currently marked completed. It is not an exact completion date; status-change history is not stored.',trendsReview:'Period review',trendsCurrent:'Current period to date',trendsPrevious:'Previous',projectCustomerOverview:'Project & customer overview',pcOverviewTitle:'Project and customer overview',pcOverviewSubtitle:'Explore project status, progress, customer portfolios and recent activity',pcLoading:'Summarizing project and customer data…',pcLoadError:'Project and customer overview is temporarily unavailable',pcProjects:'Project overview',pcCustomers:'Customer portfolios',pcStatusDistribution:'Project status distribution',pcProgressOverview:'Project progress',pcAverageProgress:'Average project progress',pcCompletedProjects:'Completed projects',pcOverdueProjects:'Overdue projects',pcCustomerCoverage:'Customer coverage',pcCustomersWithProjects:'Customers with projects',pcTaskCompletion:'Task completion',pcRecentActivity:'Recent business activity',pcNoProjects:'No projects yet',pcNoCustomers:'No customers yet',pcNoActivity:'No recent activity',pcProjectTaskSummary:'Tasks completed',pcOpen:'Open',pcCompleted:'Completed',pcViewCustomer:'View customer',pcViewProject:'View project',pcViewTask:'View task',pcViewFollowup:'View follow-up',  overview:'Business overview', todoCenter:'To-do center', todoCenterTitle:'To-do center', todoCenterSubtitle:'One place for tasks and customer follow-ups that need attention', todoLoading:'Loading to-do items…', todoLoadError:'To-do items are temporarily unavailable', todoEmpty:'Nothing needs your attention right now', todoOverdueTasks:'Overdue tasks', todoTodayTasks:'Tasks due today', todoUpcomingTasks:'Tasks due in the next 7 days', todoUndatedTasks:'Tasks without a due date', todoPendingFollowups:'Pending follow-ups', todoDueDate:'Due', todoProject:'Project', todoNextFollowup:'Next follow-up', todoFollowupOverdue:'Overdue', todoFollowupToday:'Today', todoFollowupScheduled:'Scheduled', todoNoNextDate:'No next date set', todoOpenRecord:'Open record', overviewTitle:'Business overview', overviewSubtitle:'A quick view of current business and items needing attention', customersTotal:'Customers', activeProjects:'Active projects', unfinishedTasks:'Open tasks', pendingFollowups:'Pending follow-ups', needsAttention:'Needs attention', overdueTasksCount:'Overdue tasks', dueTodayCount:'Due today', dueNext7Count:'Due in next 7 days', overdueFollowups:'Overdue follow-ups', recentProjects:'Recently updated projects', recentTasks:'Recent tasks', recentFollowups:'Recent customer follow-ups', noRecent:'No records yet', overviewLoading:'Loading business overview…', overviewError:'Business overview is temporarily unavailable', incompleteData:'Could not read all records. Please refresh.', openTasks:'Open', allFollowupDates:'All follow-up dates', overdueOnly:'Overdue only', customers:'Customers', projects:'Projects', tasks:'Project tasks', followups:'Business follow-ups', project:'Project', task:'Task', followup:'Follow-up', newProject:'New project', newTask:'New task', newFollowup:'New follow-up', searchProject:'Search project name', searchTask:'Search task name', allTaskDueDates:'All due dates', overdueTasks:'Overdue', dueToday:'Due today', dueNext7Days:'Next 7 days', noDueDate:'No due date', noMatchingTasks:'No tasks match the current filters', searchFollowup:'Search follow-up', allStatus:'All statuses', customer:'Customer', chooseCustomer:'Select customer', status:'Project status', planned:'Planned', active:'In progress', on_hold:'On hold', completed:'Completed', cancelled:'Cancelled', prospect:'Prospect', trade:'Trade', software:'Software', ecommerce:'E-commerce', startDate:'Start date', dueDate:'Target date', description:'Description', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete', noProjects:'No projects yet', noTasks:'No tasks for this project yet', noFollowups:'No follow-ups yet', createProjectHint:'Create the first project for a customer.', createTaskHint:'Break this project into actionable tasks.', createFollowupHint:'Record a call, email or meeting.', confirmDeleteProject:'Delete this project? This cannot be undone.', confirmDeleteTask:'Delete this task? This cannot be undone.', confirmDeleteFollowup:'Delete this follow-up? This cannot be undone.', method:'Method', phone:'Phone', email:'Email', meeting:'Meeting', message:'Message', other:'Other', followupDate:'Follow-up time', outcome:'Outcome', nextDate:'Next follow-up date', notes:'Notes', linkedProject:'Related project (optional)', noProject:'No project', pending:'Pending', done:'Completed', next:'Next', previous:'Previous', loading:'Loading…', loaded:'Loaded', failed:'Operation failed. Please try again.', relationError:'This project still has linked tasks or follow-ups. Reassign or delete them first.', required:'Complete required fields and select a customer.', customerMissing:'Create a customer before adding projects or follow-ups.', refresh:'Refresh', allProjects:'All projects', filterProject:'Filter by project', projectTitle:'Project name', followupTitle:'Follow-up subject', progress:'Project progress', progressPercent:'Manual project progress (0–100%)', progressMode:'Progress calculation', manualProgress:'Manual', autoProgress:'Automatic from tasks', progressAutoHint:'Completed tasks ÷ all project tasks × 100%.', progressManualHint:'Task status changes will not overwrite this value in manual mode.', viewDetails:'View details', projectDetails:'Project details', manageTasks:'Manage tasks', taskTitle:'Task name', taskProject:'Project', taskStatus:'Task status', taskDue:'Due date', todo:'To do', in_progress:'In progress', blocked:'Blocked', requiredTaskProject:'Select a project for this task.', invalidTaskStatus:'Select a valid task status.', invalidProgress:'Progress must be a whole number from 0 to 100.', close:'Close', viewCustomer:'View customer', viewProject:'View project', viewProjects:'View projects', viewFollowups:'View follow-ups', backToCustomer:'Back to customer', backToProject:'Back to project', relatedCustomer:'Related customer', relatedProject:'Related project', clearRelationFilter:'Clear relation filter', relatedTasks:'Related tasks', relatedFollowups:'Follow-ups', noRelatedRecords:'No related records', loadingRelations:'Loading related information…', relationLoadFailed:'Related information is temporarily unavailable.' },
-    ja: {businessTrends:'業務トレンド',trendsTitle:'業務トレンドと期間レビュー',trendsSubtitle:'週次・月次でプロジェクト、タスク、顧客フォローを確認',trendsLoading:'業務トレンドを集計中…',trendsLoadError:'業務トレンドを一時的に読み込めません',trendsWeek:'直近8週間',trendsMonth:'直近6か月',trendsProjects:'プロジェクトの推移',trendsTasks:'タスクの推移',trendsFollowups:'顧客フォローの推移',trendsCreated:'新規',trendsCompleted:'完了',trendsRecorded:'フォロー記録',trendsVsPrevious:'前期間比',trendsIncrease:'増加',trendsDecrease:'減少',trendsNoChange:'変化なし',trendsNote:'完了数は現在完了状態のレコードの最終更新日時から推定しています。正確な完了日ではなく、状態変更履歴は保存されていません。',trendsReview:'期間レビュー',trendsCurrent:'今期（本日まで）',trendsPrevious:'前期',projectCustomerOverview:'プロジェクト・顧客概要',pcOverviewTitle:'プロジェクトと顧客の業務概要',pcOverviewSubtitle:'プロジェクトの状態・進捗、顧客別の案件構成、最近の活動を確認',pcLoading:'プロジェクトと顧客のデータを集計中…',pcLoadError:'プロジェクト・顧客概要を一時的に読み込めません',pcProjects:'プロジェクト概要',pcCustomers:'顧客別プロジェクト',pcStatusDistribution:'プロジェクト状態の分布',pcProgressOverview:'プロジェクト進捗',pcAverageProgress:'平均プロジェクト進捗',pcCompletedProjects:'完了プロジェクト',pcOverdueProjects:'期限超過プロジェクト',pcCustomerCoverage:'顧客カバレッジ',pcCustomersWithProjects:'プロジェクトを持つ顧客',pcTaskCompletion:'タスク完了状況',pcRecentActivity:'最近の業務活動',pcNoProjects:'プロジェクトはありません',pcNoCustomers:'顧客はありません',pcNoActivity:'最近の活動はありません',pcProjectTaskSummary:'タスク完了',pcOpen:'未完了',pcCompleted:'完了',pcViewCustomer:'顧客を見る',pcViewProject:'プロジェクトを見る',pcViewTask:'タスクを見る',pcViewFollowup:'フォローを見る',  overview:'業務概要', todoCenter:'To-doセンター', todoCenterTitle:'To-doセンター', todoCenterSubtitle:'対応が必要なタスクと顧客フォローを一か所で確認', todoLoading:'To-do項目を読み込み中…', todoLoadError:'To-do項目を一時的に読み込めません', todoEmpty:'現在、対応が必要な項目はありません', todoOverdueTasks:'期限超過タスク', todoTodayTasks:'今日が期限のタスク', todoUpcomingTasks:'今後7日間のタスク', todoUndatedTasks:'期限未設定のタスク', todoPendingFollowups:'未対応フォロー', todoDueDate:'期限', todoProject:'プロジェクト', todoNextFollowup:'次回フォロー', todoFollowupOverdue:'期限超過', todoFollowupToday:'今日', todoFollowupScheduled:'予定あり', todoNoNextDate:'次回日付未設定', todoOpenRecord:'記録を開く', overviewTitle:'業務概要', overviewSubtitle:'現在の業務状況と対応が必要な項目を確認', customersTotal:'顧客総数', activeProjects:'進行中プロジェクト', unfinishedTasks:'未完了タスク', pendingFollowups:'未対応フォロー', needsAttention:'要対応', overdueTasksCount:'期限超過タスク', dueTodayCount:'今日が期限', dueNext7Count:'今後7日間が期限', overdueFollowups:'期限超過フォロー', recentProjects:'最近更新したプロジェクト', recentTasks:'最近のタスク', recentFollowups:'最近の顧客フォロー', noRecent:'記録はありません', overviewLoading:'業務データを集計中…', overviewError:'業務概要を読み込めません', incompleteData:'全データを取得できませんでした。再読み込みしてください。', openTasks:'未完了', allFollowupDates:'すべてのフォロー日', overdueOnly:'期限超過のみ', customers:'顧客', projects:'プロジェクト管理', tasks:'プロジェクトタスク', followups:'業務フォロー', project:'プロジェクト', task:'タスク', followup:'フォロー記録', newProject:'プロジェクト追加', newTask:'タスク追加', newFollowup:'フォロー追加', searchProject:'プロジェクト名を検索', searchTask:'タスク名を検索', allTaskDueDates:'すべての期限', overdueTasks:'期限超過', dueToday:'今日が期限', dueNext7Days:'今後7日間', noDueDate:'期限なし', noMatchingTasks:'条件に一致するタスクはありません', searchFollowup:'フォロー内容を検索', allStatus:'すべての状態', customer:'顧客', chooseCustomer:'顧客を選択', status:'プロジェクト状態', planned:'予定', active:'進行中', on_hold:'保留', completed:'完了', cancelled:'中止', prospect:'見込み顧客', trade:'貿易', software:'ソフトウェア開発', ecommerce:'EC', startDate:'開始日', dueDate:'完了予定日', description:'説明', save:'保存', cancel:'キャンセル', edit:'編集', delete:'削除', noProjects:'プロジェクトはまだありません', noTasks:'このプロジェクトにはタスクがありません', noFollowups:'フォロー記録はまだありません', createProjectHint:'顧客の最初のプロジェクトを作成します。', createTaskHint:'プロジェクトを実行可能なタスクに分割します。', createFollowupHint:'電話、メール、会議の内容を記録します。', confirmDeleteProject:'このプロジェクトを削除しますか？元に戻せません。', confirmDeleteTask:'このタスクを削除しますか？元に戻せません。', confirmDeleteFollowup:'この記録を削除しますか？元に戻せません。', method:'方法', phone:'電話', email:'メール', meeting:'会議', message:'メッセージ', other:'その他', followupDate:'フォロー日時', outcome:'結果', nextDate:'次回フォロー日', notes:'メモ', linkedProject:'関連プロジェクト（任意）', noProject:'プロジェクトなし', pending:'未対応', done:'完了', next:'次へ', previous:'前へ', loading:'読み込み中…', loaded:'読み込み完了', failed:'処理に失敗しました。もう一度お試しください。', relationError:'タスクまたはフォロー記録が関連付けられています。先に関連を変更または削除してください。', required:'必須項目を入力し、顧客を選択してください。', customerMissing:'先に顧客を登録してください。', refresh:'更新', allProjects:'すべてのプロジェクト', filterProject:'プロジェクトで絞り込み', projectTitle:'プロジェクト名', followupTitle:'フォロー件名', progress:'進捗', progressPercent:'手動プロジェクト進捗（0～100%）', progressMode:'進捗の計算方法', manualProgress:'手動設定', autoProgress:'タスクから自動計算', progressAutoHint:'完了タスク数 ÷ 全タスク数 × 100%。', progressManualHint:'手動モードではタスク状態の変更で進捗は上書きされません。', viewDetails:'詳細を見る', projectDetails:'プロジェクト詳細', manageTasks:'タスク管理', taskTitle:'タスク名', taskProject:'所属プロジェクト', taskStatus:'タスク状態', taskDue:'期限', todo:'未着手', in_progress:'進行中', blocked:'ブロック中', requiredTaskProject:'所属プロジェクトを選択してください。', invalidTaskStatus:'有効なタスク状態を選択してください。', invalidProgress:'進捗は0～100の整数で入力してください。', close:'閉じる', viewCustomer:'顧客を見る', viewProject:'プロジェクトを見る', viewProjects:'プロジェクト一覧', viewFollowups:'フォローを見る', backToCustomer:'顧客に戻る', backToProject:'プロジェクトに戻る', relatedCustomer:'関連顧客', relatedProject:'関連プロジェクト', clearRelationFilter:'関連フィルターを解除', relatedTasks:'関連タスク', relatedFollowups:'フォロー記録', noRelatedRecords:'関連記録はありません', loadingRelations:'関連情報を読み込み中…', relationLoadFailed:'関連情報を一時的に読み込めません。' }
+    zh: {businessTrends:'业务趋势',trendsTitle:'业务趋势与周期复盘',trendsSubtitle:'按周或月查看项目、任务和客户跟进活动',trendsLoading:'正在汇总业务趋势…',trendsLoadError:'业务趋势暂时无法读取',trendsWeek:'最近 8 周',trendsMonth:'最近 6 个月',trendsProjects:'项目趋势',trendsTasks:'任务趋势',trendsFollowups:'客户跟进趋势',trendsCreated:'新增',trendsCompleted:'完成',trendsRecorded:'跟进记录',trendsVsPrevious:'较上一周期',trendsIncrease:'增加',trendsDecrease:'减少',trendsNoChange:'持平',trendsNote:'完成项目/任务按当前已完成状态记录的最近更新时间估算，不代表精确完成日期；系统尚未保存状态变更历史。',trendsReview:'周期复盘',trendsCurrent:'本期截至今天',trendsPrevious:'上期',projectCustomerOverview:'项目与客户概况',pcOverviewTitle:'项目与客户业务概况',pcOverviewSubtitle:'查看项目状态、进度、客户项目组合与近期业务活动',pcLoading:'正在汇总项目与客户数据…',pcLoadError:'项目与客户概况暂时无法读取',pcProjects:'项目概况',pcCustomers:'客户项目组合',pcStatusDistribution:'项目状态分布',pcProgressOverview:'项目进度概览',pcAverageProgress:'平均项目进度',pcCompletedProjects:'已完成项目',pcOverdueProjects:'逾期项目',pcCustomerCoverage:'客户项目覆盖',pcCustomersWithProjects:'已有项目的客户',pcTaskCompletion:'任务完成情况',pcRecentActivity:'近期业务活动',pcNoProjects:'暂无项目',pcNoCustomers:'暂无客户',pcNoActivity:'暂无近期活动',pcProjectTaskSummary:'任务完成',pcOpen:'未完成',pcCompleted:'已完成',pcViewCustomer:'查看客户',pcViewProject:'查看项目',pcViewTask:'查看任务',pcViewFollowup:'查看跟进',  overview:'业务总览', todoCenter:'待办中心', todoCenterTitle:'待办事项中心', todoCenterSubtitle:'集中查看需要处理的任务与客户跟进', todoLoading:'正在整理待办事项…', todoLoadError:'待办事项暂时无法读取', todoEmpty:'目前没有需要处理的事项', todoOverdueTasks:'逾期任务', todoTodayTasks:'今日任务', todoUpcomingTasks:'未来 7 天任务', todoUndatedTasks:'未设置截止日期的任务', todoPendingFollowups:'待处理跟进', todoDueDate:'截止日期', todoProject:'所属项目', todoNextFollowup:'下次跟进', todoFollowupOverdue:'已逾期', todoFollowupToday:'今天', todoFollowupScheduled:'已安排', todoNoNextDate:'未设置下次跟进日期', todoOpenRecord:'打开记录', overviewTitle:'业务总览', overviewSubtitle:'快速了解当前业务状况与需要处理的事项', customersTotal:'客户总数', activeProjects:'进行中项目', unfinishedTasks:'未完成任务', pendingFollowups:'待处理跟进', needsAttention:'需要关注', overdueTasksCount:'逾期任务', dueTodayCount:'今日到期', dueNext7Count:'未来 7 天到期', overdueFollowups:'逾期待跟进', recentProjects:'最近更新项目', recentTasks:'最近任务', recentFollowups:'最近客户跟进', noRecent:'暂无记录', overviewLoading:'正在汇总业务数据…', overviewError:'业务总览暂时无法读取', incompleteData:'数据未能完整读取，请刷新重试', openTasks:'未完成', allFollowupDates:'全部跟进日期', overdueOnly:'仅逾期', allProjectDueDates:'全部预计完成日期', relatedFollowupCount:'关联跟进', customers:'客户', projects:'项目管理', tasks:'项目任务', followups:'业务跟进', project:'项目', task:'任务', followup:'跟进记录', newProject:'新增项目', newTask:'新增任务', newFollowup:'新增跟进', searchProject:'搜索项目名称', searchTask:'搜索任务名称', allTaskDueDates:'全部截止日期', overdueTasks:'逾期任务', dueToday:'今日到期', dueNext7Days:'未来 7 天', noDueDate:'无截止日期', noMatchingTasks:'没有符合当前筛选条件的任务', searchFollowup:'搜索跟进内容', allStatus:'全部状态', customer:'所属客户', chooseCustomer:'选择客户', status:'项目状态', planned:'计划中', active:'进行中', on_hold:'暂缓', completed:'已完成', cancelled:'已取消', prospect:'潜在客户', trade:'贸易', software:'软件开发', ecommerce:'电子商务', startDate:'开始日期', dueDate:'预计完成日期', description:'项目说明', save:'保存', cancel:'取消', edit:'编辑', delete:'删除', noProjects:'还没有项目', noTasks:'这个项目还没有任务', noFollowups:'还没有跟进记录', createProjectHint:'为客户建立第一个项目。', createTaskHint:'把项目拆分为可执行的任务。', createFollowupHint:'记录一次电话、邮件或会议跟进。', confirmDeleteProject:'确定删除这个项目吗？此操作无法撤销。', confirmDeleteTask:'确定删除这个任务吗？此操作无法撤销。', confirmDeleteFollowup:'确定删除这条跟进记录吗？此操作无法撤销。', method:'跟进方式', phone:'电话', email:'邮件', meeting:'会议', message:'即时消息', other:'其他', followupDate:'跟进时间', outcome:'跟进结果', nextDate:'下次跟进日期', notes:'备注', linkedProject:'关联项目（可选）', noProject:'不关联项目', pending:'待跟进', done:'已完成', next:'下一页', previous:'上一页', loading:'正在加载…', loaded:'已加载', failed:'操作失败，请稍后重试。', relationError:'该项目仍有关联的任务或跟进记录，请先调整或删除相关记录。', required:'请填写必填项目并选择客户。', customerMissing:'请先创建客户，再创建项目或跟进记录。', refresh:'刷新', allProjects:'全部项目', filterProject:'按项目筛选', projectTitle:'项目名称', followupTitle:'跟进主题', progress:'项目进度', progressPercent:'手动项目进度（0–100%）', progressMode:'进度计算方式', manualProgress:'手动设置', autoProgress:'按任务自动计算', progressAutoHint:'自动模式下，已完成任务数 ÷ 全部任务数 × 100%。', progressManualHint:'手动模式下，任务状态变化不会覆盖此进度。', viewDetails:'查看详情', projectDetails:'项目详情', manageTasks:'管理任务', taskTitle:'任务名称', taskProject:'所属项目', taskStatus:'任务状态', taskDue:'截止日期', todo:'待处理', in_progress:'进行中', blocked:'受阻', requiredTaskProject:'请选择所属项目。', invalidTaskStatus:'请选择有效的任务状态。', invalidProgress:'项目进度必须是 0 到 100 之间的整数。', close:'关闭', viewCustomer:'查看客户', viewProject:'查看项目', viewProjects:'查看项目', viewFollowups:'查看跟进', backToCustomer:'返回客户', backToProject:'返回项目', relatedCustomer:'关联客户', relatedProject:'关联项目', clearRelationFilter:'清除关联筛选', relatedTasks:'关联任务', relatedFollowups:'跟进记录', noRelatedRecords:'暂无关联记录', loadingRelations:'正在读取关联信息…', relationLoadFailed:'关联信息暂时无法读取。', rateLimited:'请求过于频繁，请等待约 1 分钟后再刷新。' },
+    en: {businessTrends:'Business trends',trendsTitle:'Business trends and review',trendsSubtitle:'Review projects, tasks and customer follow-ups by week or month',trendsLoading:'Summarizing business trends…',trendsLoadError:'Business trends are temporarily unavailable',trendsWeek:'Last 8 weeks',trendsMonth:'Last 6 months',trendsProjects:'Project trends',trendsTasks:'Task trends',trendsFollowups:'Customer follow-up trends',trendsCreated:'Created',trendsCompleted:'Completed',trendsRecorded:'Follow-ups',trendsVsPrevious:'vs previous period',trendsIncrease:'Up',trendsDecrease:'Down',trendsNoChange:'No change',trendsNote:'Project/task completion is estimated from the latest updated_at of records currently marked completed. It is not an exact completion date; status-change history is not stored.',trendsReview:'Period review',trendsCurrent:'Current period to date',trendsPrevious:'Previous',projectCustomerOverview:'Project & customer overview',pcOverviewTitle:'Project and customer overview',pcOverviewSubtitle:'Explore project status, progress, customer portfolios and recent activity',pcLoading:'Summarizing project and customer data…',pcLoadError:'Project and customer overview is temporarily unavailable',pcProjects:'Project overview',pcCustomers:'Customer portfolios',pcStatusDistribution:'Project status distribution',pcProgressOverview:'Project progress',pcAverageProgress:'Average project progress',pcCompletedProjects:'Completed projects',pcOverdueProjects:'Overdue projects',pcCustomerCoverage:'Customer coverage',pcCustomersWithProjects:'Customers with projects',pcTaskCompletion:'Task completion',pcRecentActivity:'Recent business activity',pcNoProjects:'No projects yet',pcNoCustomers:'No customers yet',pcNoActivity:'No recent activity',pcProjectTaskSummary:'Tasks completed',pcOpen:'Open',pcCompleted:'Completed',pcViewCustomer:'View customer',pcViewProject:'View project',pcViewTask:'View task',pcViewFollowup:'View follow-up',  overview:'Business overview', todoCenter:'To-do center', todoCenterTitle:'To-do center', todoCenterSubtitle:'One place for tasks and customer follow-ups that need attention', todoLoading:'Loading to-do items…', todoLoadError:'To-do items are temporarily unavailable', todoEmpty:'Nothing needs your attention right now', todoOverdueTasks:'Overdue tasks', todoTodayTasks:'Tasks due today', todoUpcomingTasks:'Tasks due in the next 7 days', todoUndatedTasks:'Tasks without a due date', todoPendingFollowups:'Pending follow-ups', todoDueDate:'Due', todoProject:'Project', todoNextFollowup:'Next follow-up', todoFollowupOverdue:'Overdue', todoFollowupToday:'Today', todoFollowupScheduled:'Scheduled', todoNoNextDate:'No next date set', todoOpenRecord:'Open record', overviewTitle:'Business overview', overviewSubtitle:'A quick view of current business and items needing attention', customersTotal:'Customers', activeProjects:'Active projects', unfinishedTasks:'Open tasks', pendingFollowups:'Pending follow-ups', needsAttention:'Needs attention', overdueTasksCount:'Overdue tasks', dueTodayCount:'Due today', dueNext7Count:'Due in next 7 days', overdueFollowups:'Overdue follow-ups', recentProjects:'Recently updated projects', recentTasks:'Recent tasks', recentFollowups:'Recent customer follow-ups', noRecent:'No records yet', overviewLoading:'Loading business overview…', overviewError:'Business overview is temporarily unavailable', incompleteData:'Could not read all records. Please refresh.', openTasks:'Open', allFollowupDates:'All follow-up dates', overdueOnly:'Overdue only', allProjectDueDates:'All target dates', relatedFollowupCount:'Follow-ups', customers:'Customers', projects:'Projects', tasks:'Project tasks', followups:'Business follow-ups', project:'Project', task:'Task', followup:'Follow-up', newProject:'New project', newTask:'New task', newFollowup:'New follow-up', searchProject:'Search project name', searchTask:'Search task name', allTaskDueDates:'All due dates', overdueTasks:'Overdue', dueToday:'Due today', dueNext7Days:'Next 7 days', noDueDate:'No due date', noMatchingTasks:'No tasks match the current filters', searchFollowup:'Search follow-up', allStatus:'All statuses', customer:'Customer', chooseCustomer:'Select customer', status:'Project status', planned:'Planned', active:'In progress', on_hold:'On hold', completed:'Completed', cancelled:'Cancelled', prospect:'Prospect', trade:'Trade', software:'Software', ecommerce:'E-commerce', startDate:'Start date', dueDate:'Target date', description:'Description', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete', noProjects:'No projects yet', noTasks:'No tasks for this project yet', noFollowups:'No follow-ups yet', createProjectHint:'Create the first project for a customer.', createTaskHint:'Break this project into actionable tasks.', createFollowupHint:'Record a call, email or meeting.', confirmDeleteProject:'Delete this project? This cannot be undone.', confirmDeleteTask:'Delete this task? This cannot be undone.', confirmDeleteFollowup:'Delete this follow-up? This cannot be undone.', method:'Method', phone:'Phone', email:'Email', meeting:'Meeting', message:'Message', other:'Other', followupDate:'Follow-up time', outcome:'Outcome', nextDate:'Next follow-up date', notes:'Notes', linkedProject:'Related project (optional)', noProject:'No project', pending:'Pending', done:'Completed', next:'Next', previous:'Previous', loading:'Loading…', loaded:'Loaded', failed:'Operation failed. Please try again.', relationError:'This project still has linked tasks or follow-ups. Reassign or delete them first.', required:'Complete required fields and select a customer.', customerMissing:'Create a customer before adding projects or follow-ups.', refresh:'Refresh', allProjects:'All projects', filterProject:'Filter by project', projectTitle:'Project name', followupTitle:'Follow-up subject', progress:'Project progress', progressPercent:'Manual project progress (0–100%)', progressMode:'Progress calculation', manualProgress:'Manual', autoProgress:'Automatic from tasks', progressAutoHint:'Completed tasks ÷ all project tasks × 100%.', progressManualHint:'Task status changes will not overwrite this value in manual mode.', viewDetails:'View details', projectDetails:'Project details', manageTasks:'Manage tasks', taskTitle:'Task name', taskProject:'Project', taskStatus:'Task status', taskDue:'Due date', todo:'To do', in_progress:'In progress', blocked:'Blocked', requiredTaskProject:'Select a project for this task.', invalidTaskStatus:'Select a valid task status.', invalidProgress:'Progress must be a whole number from 0 to 100.', close:'Close', viewCustomer:'View customer', viewProject:'View project', viewProjects:'View projects', viewFollowups:'View follow-ups', backToCustomer:'Back to customer', backToProject:'Back to project', relatedCustomer:'Related customer', relatedProject:'Related project', clearRelationFilter:'Clear relation filter', relatedTasks:'Related tasks', relatedFollowups:'Follow-ups', noRelatedRecords:'No related records', loadingRelations:'Loading related information…', relationLoadFailed:'Related information is temporarily unavailable.', rateLimited:'Too many requests. Please wait about a minute and refresh.' },
+    ja: {businessTrends:'業務トレンド',trendsTitle:'業務トレンドと期間レビュー',trendsSubtitle:'週次・月次でプロジェクト、タスク、顧客フォローを確認',trendsLoading:'業務トレンドを集計中…',trendsLoadError:'業務トレンドを一時的に読み込めません',trendsWeek:'直近8週間',trendsMonth:'直近6か月',trendsProjects:'プロジェクトの推移',trendsTasks:'タスクの推移',trendsFollowups:'顧客フォローの推移',trendsCreated:'新規',trendsCompleted:'完了',trendsRecorded:'フォロー記録',trendsVsPrevious:'前期間比',trendsIncrease:'増加',trendsDecrease:'減少',trendsNoChange:'変化なし',trendsNote:'完了数は現在完了状態のレコードの最終更新日時から推定しています。正確な完了日ではなく、状態変更履歴は保存されていません。',trendsReview:'期間レビュー',trendsCurrent:'今期（本日まで）',trendsPrevious:'前期',projectCustomerOverview:'プロジェクト・顧客概要',pcOverviewTitle:'プロジェクトと顧客の業務概要',pcOverviewSubtitle:'プロジェクトの状態・進捗、顧客別の案件構成、最近の活動を確認',pcLoading:'プロジェクトと顧客のデータを集計中…',pcLoadError:'プロジェクト・顧客概要を一時的に読み込めません',pcProjects:'プロジェクト概要',pcCustomers:'顧客別プロジェクト',pcStatusDistribution:'プロジェクト状態の分布',pcProgressOverview:'プロジェクト進捗',pcAverageProgress:'平均プロジェクト進捗',pcCompletedProjects:'完了プロジェクト',pcOverdueProjects:'期限超過プロジェクト',pcCustomerCoverage:'顧客カバレッジ',pcCustomersWithProjects:'プロジェクトを持つ顧客',pcTaskCompletion:'タスク完了状況',pcRecentActivity:'最近の業務活動',pcNoProjects:'プロジェクトはありません',pcNoCustomers:'顧客はありません',pcNoActivity:'最近の活動はありません',pcProjectTaskSummary:'タスク完了',pcOpen:'未完了',pcCompleted:'完了',pcViewCustomer:'顧客を見る',pcViewProject:'プロジェクトを見る',pcViewTask:'タスクを見る',pcViewFollowup:'フォローを見る',  overview:'業務概要', todoCenter:'To-doセンター', todoCenterTitle:'To-doセンター', todoCenterSubtitle:'対応が必要なタスクと顧客フォローを一か所で確認', todoLoading:'To-do項目を読み込み中…', todoLoadError:'To-do項目を一時的に読み込めません', todoEmpty:'現在、対応が必要な項目はありません', todoOverdueTasks:'期限超過タスク', todoTodayTasks:'今日が期限のタスク', todoUpcomingTasks:'今後7日間のタスク', todoUndatedTasks:'期限未設定のタスク', todoPendingFollowups:'未対応フォロー', todoDueDate:'期限', todoProject:'プロジェクト', todoNextFollowup:'次回フォロー', todoFollowupOverdue:'期限超過', todoFollowupToday:'今日', todoFollowupScheduled:'予定あり', todoNoNextDate:'次回日付未設定', todoOpenRecord:'記録を開く', overviewTitle:'業務概要', overviewSubtitle:'現在の業務状況と対応が必要な項目を確認', customersTotal:'顧客総数', activeProjects:'進行中プロジェクト', unfinishedTasks:'未完了タスク', pendingFollowups:'未対応フォロー', needsAttention:'要対応', overdueTasksCount:'期限超過タスク', dueTodayCount:'今日が期限', dueNext7Count:'今後7日間が期限', overdueFollowups:'期限超過フォロー', recentProjects:'最近更新したプロジェクト', recentTasks:'最近のタスク', recentFollowups:'最近の顧客フォロー', noRecent:'記録はありません', overviewLoading:'業務データを集計中…', overviewError:'業務概要を読み込めません', incompleteData:'全データを取得できませんでした。再読み込みしてください。', openTasks:'未完了', allFollowupDates:'すべてのフォロー日', overdueOnly:'期限超過のみ', allProjectDueDates:'すべての完了予定日', relatedFollowupCount:'関連フォロー', customers:'顧客', projects:'プロジェクト管理', tasks:'プロジェクトタスク', followups:'業務フォロー', project:'プロジェクト', task:'タスク', followup:'フォロー記録', newProject:'プロジェクト追加', newTask:'タスク追加', newFollowup:'フォロー追加', searchProject:'プロジェクト名を検索', searchTask:'タスク名を検索', allTaskDueDates:'すべての期限', overdueTasks:'期限超過', dueToday:'今日が期限', dueNext7Days:'今後7日間', noDueDate:'期限なし', noMatchingTasks:'条件に一致するタスクはありません', searchFollowup:'フォロー内容を検索', allStatus:'すべての状態', customer:'顧客', chooseCustomer:'顧客を選択', status:'プロジェクト状態', planned:'予定', active:'進行中', on_hold:'保留', completed:'完了', cancelled:'中止', prospect:'見込み顧客', trade:'貿易', software:'ソフトウェア開発', ecommerce:'EC', startDate:'開始日', dueDate:'完了予定日', description:'説明', save:'保存', cancel:'キャンセル', edit:'編集', delete:'削除', noProjects:'プロジェクトはまだありません', noTasks:'このプロジェクトにはタスクがありません', noFollowups:'フォロー記録はまだありません', createProjectHint:'顧客の最初のプロジェクトを作成します。', createTaskHint:'プロジェクトを実行可能なタスクに分割します。', createFollowupHint:'電話、メール、会議の内容を記録します。', confirmDeleteProject:'このプロジェクトを削除しますか？元に戻せません。', confirmDeleteTask:'このタスクを削除しますか？元に戻せません。', confirmDeleteFollowup:'この記録を削除しますか？元に戻せません。', method:'方法', phone:'電話', email:'メール', meeting:'会議', message:'メッセージ', other:'その他', followupDate:'フォロー日時', outcome:'結果', nextDate:'次回フォロー日', notes:'メモ', linkedProject:'関連プロジェクト（任意）', noProject:'プロジェクトなし', pending:'未対応', done:'完了', next:'次へ', previous:'前へ', loading:'読み込み中…', loaded:'読み込み完了', failed:'処理に失敗しました。もう一度お試しください。', relationError:'タスクまたはフォロー記録が関連付けられています。先に関連を変更または削除してください。', required:'必須項目を入力し、顧客を選択してください。', customerMissing:'先に顧客を登録してください。', refresh:'更新', allProjects:'すべてのプロジェクト', filterProject:'プロジェクトで絞り込み', projectTitle:'プロジェクト名', followupTitle:'フォロー件名', progress:'進捗', progressPercent:'手動プロジェクト進捗（0～100%）', progressMode:'進捗の計算方法', manualProgress:'手動設定', autoProgress:'タスクから自動計算', progressAutoHint:'完了タスク数 ÷ 全タスク数 × 100%。', progressManualHint:'手動モードではタスク状態の変更で進捗は上書きされません。', viewDetails:'詳細を見る', projectDetails:'プロジェクト詳細', manageTasks:'タスク管理', taskTitle:'タスク名', taskProject:'所属プロジェクト', taskStatus:'タスク状態', taskDue:'期限', todo:'未着手', in_progress:'進行中', blocked:'ブロック中', requiredTaskProject:'所属プロジェクトを選択してください。', invalidTaskStatus:'有効なタスク状態を選択してください。', invalidProgress:'進捗は0～100の整数で入力してください。', close:'閉じる', viewCustomer:'顧客を見る', viewProject:'プロジェクトを見る', viewProjects:'プロジェクト一覧', viewFollowups:'フォローを見る', backToCustomer:'顧客に戻る', backToProject:'プロジェクトに戻る', relatedCustomer:'関連顧客', relatedProject:'関連プロジェクト', clearRelationFilter:'関連フィルターを解除', relatedTasks:'関連タスク', relatedFollowups:'フォロー記録', noRelatedRecords:'関連記録はありません', loadingRelations:'関連情報を読み込み中…', relationLoadFailed:'関連情報を一時的に読み込めません。', rateLimited:'リクエストが多すぎます。1分ほど待ってから更新してください。' }
   };
   const t = key => words[locale()][key] || words.zh[key] || key;
   function auth(){ return window.PlannerCompanyContext?.getAuth?.() || null; }
@@ -31,7 +40,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const response = await fetch(a.url.replace(/\/+$/, '') + '/functions/v1/' + API + path, options);
     let payload = {}; try { payload = await response.json(); } catch {}
     if (!response.ok) {
-      const error = new Error(payload.error === 'RECORD_IN_USE_OR_INVALID_RELATION' ? t('relationError') : (payload.error === 'AUTHENTICATION_FAILED' ? '账号验证失败，请重新登录。' : t('failed')));
+      const error = new Error(payload.error === 'RECORD_IN_USE_OR_INVALID_RELATION' ? t('relationError') : (payload.error === 'AUTHENTICATION_FAILED' ? '账号验证失败，请重新登录。' : (response.status === 429 || payload.error === 'RATE_LIMITED' ? t('rateLimited') : (payload.error === 'LIST_INCOMPLETE' ? t('incompleteData') : t('failed')))));
       error.code = payload.error; throw error;
     }
     return payload.data;
@@ -61,10 +70,10 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     business.innerHTML = '<div class="cw-business-toolbar"><form id="cw-business-search" class="cw-search"><label class="sr-only" for="cw-business-query"></label><input id="cw-business-query" type="search" maxlength="100"><button class="secondary" type="submit">搜索</button></form><select id="cw-business-status" aria-label="' + escape(t('allStatus')) + '"></select><select id="cw-business-project-filter" aria-label="' + escape(t('taskProject')) + '" hidden></select><select id="cw-business-due-filter" aria-label="' + escape(t('taskDue')) + '" hidden></select><select id="cw-business-followup-due-filter" aria-label="' + escape(t('nextDate')) + '" hidden></select><button class="primary" id="cw-business-new" type="button"></button><button class="secondary" id="cw-business-refresh" type="button">' + escape(t('refresh')) + '</button></div><div id="cw-business-relation-context" class="cw-relation-context" hidden></div><div class="cw-feedback" id="cw-business-feedback" role="status" aria-live="polite"></div><div class="cw-business-list" id="cw-business-list"></div><nav class="cw-pagination" id="cw-business-pagination"></nav>';
     shell.insertBefore(nav, customerPanel); shell.insertBefore(overview, customerPanel); shell.insertBefore(todos, customerPanel); shell.insertBefore(projectCustomer, customerPanel); shell.insertBefore(trends, customerPanel); customerPanel.insertAdjacentElement('afterend', business);
     $('cw-overview-title').textContent = t('overviewTitle'); $('cw-overview-subtitle').textContent = t('overviewSubtitle'); $('cw-overview-refresh').textContent = t('refresh'); $('cw-overview-attention-title').textContent = t('needsAttention'); $('cw-overview-recent-title').textContent = t('recentProjects') + ' · ' + t('recentTasks') + ' · ' + t('recentFollowups');
-    $('cw-overview-refresh').addEventListener('click', loadOverview);
-    $('cw-todo-title').textContent=t('todoCenterTitle'); $('cw-todo-subtitle').textContent=t('todoCenterSubtitle'); $('cw-todo-refresh').textContent=t('refresh'); $('cw-todo-refresh').addEventListener('click',loadTodoCenter);
-    updateProjectCustomerLabels(); $('cw-pc-refresh').addEventListener('click', loadProjectCustomerOverview);
-    updateBusinessTrendLabels(); $('cw-trends-refresh').addEventListener('click', loadBusinessTrends);
+    $('cw-overview-refresh').addEventListener('click', () => loadOverview(0));
+    $('cw-todo-title').textContent=t('todoCenterTitle'); $('cw-todo-subtitle').textContent=t('todoCenterSubtitle'); $('cw-todo-refresh').textContent=t('refresh'); $('cw-todo-refresh').addEventListener('click',()=>loadTodoCenter(0));
+    updateProjectCustomerLabels(); $('cw-pc-refresh').addEventListener('click', () => loadProjectCustomerOverview(0));
+    updateBusinessTrendLabels(); $('cw-trends-refresh').addEventListener('click', () => loadBusinessTrends(0));
     $('cw-trends-week').addEventListener('click', () => setBusinessTrendPeriod('week'));
     $('cw-trends-month').addEventListener('click', () => setBusinessTrendPeriod('month'));
     const dialog = document.createElement('dialog'); dialog.className = 'cw-dialog'; dialog.id = 'cw-business-editor';
@@ -86,13 +95,14 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     $('cw-business-status').addEventListener('change', () => { if (state.tab === 'projects') state.projectStatus = $('cw-business-status').value; else if (state.tab === 'tasks') state.taskStatus = $('cw-business-status').value; else state.followupStatus = $('cw-business-status').value; setOffset(0); loadActive(); });
     $('cw-business-project-filter').addEventListener('change', () => { if (state.tab === 'tasks') { state.taskProjectFilter = $('cw-business-project-filter').value; state.taskOffset = 0; } else { state.followupProjectFilter = $('cw-business-project-filter').value; state.followupCustomerFilter = ''; state.followupOffset = 0; } renderRelationContext(); loadActive(); });
     $('cw-business-due-filter').addEventListener('change', () => { state.taskDueFilter = $('cw-business-due-filter').value; state.taskOffset = 0; loadActive(); });
-    $('cw-business-followup-due-filter').addEventListener('change', () => { state.followupDueFilter = $('cw-business-followup-due-filter').value; state.followupOffset = 0; loadActive(); });
+    // V10.58: the same date select serves follow-ups (overdue next follow-up) and projects (overdue target date).
+    $('cw-business-followup-due-filter').addEventListener('change', () => { const value = $('cw-business-followup-due-filter').value; if (state.tab === 'projects') { state.projectDueFilter = value; state.projectOffset = 0; } else { state.followupDueFilter = value; state.followupOffset = 0; } loadActive(); });
     $('cw-business-new').addEventListener('click', () => openEditor());
-    $('cw-business-refresh').addEventListener('click', loadActive);
+    $('cw-business-refresh').addEventListener('click', () => loadActive({ force:true }));
     $('cw-business-form').addEventListener('submit', saveEditor);
     $('cw-business-close').addEventListener('click', closeEditor); $('cw-business-cancel').addEventListener('click', closeEditor);
     dialog.addEventListener('click', e => { if (e.target === dialog) closeEditor(); });
-    window.addEventListener('planner-language-change', () => { $('cw-business-nav').querySelectorAll('button:not([data-company-extension])').forEach(b => { const labels={overview:'overview',todos:'todoCenter',projectCustomerOverview:'projectCustomerOverview',businessTrends:'businessTrends',customers:'customers',projects:'projects',tasks:'tasks',followups:'followups'}; b.textContent=t(labels[b.dataset.tab]||b.dataset.tab); }); if (state.tab === 'projectCustomerOverview') { updateProjectCustomerLabels(); loadProjectCustomerOverview(); } else if (state.tab === 'businessTrends') { updateBusinessTrendLabels(); if(state.trendData) renderBusinessTrends(state.trendData); } else if (state.tab === 'overview') { $('cw-overview-title').textContent=t('overviewTitle'); $('cw-overview-subtitle').textContent=t('overviewSubtitle'); $('cw-overview-refresh').textContent=t('refresh'); $('cw-overview-attention-title').textContent=t('needsAttention'); $('cw-overview-recent-title').textContent=t('recentProjects')+' · '+t('recentTasks')+' · '+t('recentFollowups'); loadOverview(); } else if (state.tab !== 'customers') { updateToolbar(); loadActive(); } });
+    window.addEventListener('planner-language-change', () => { $('cw-business-nav').querySelectorAll('button:not([data-company-extension])').forEach(b => { const labels={overview:'overview',todos:'todoCenter',projectCustomerOverview:'projectCustomerOverview',businessTrends:'businessTrends',customers:'customers',projects:'projects',tasks:'tasks',followups:'followups'}; b.textContent=t(labels[b.dataset.tab]||b.dataset.tab); }); if (state.tab === 'projectCustomerOverview') { updateProjectCustomerLabels(); loadProjectCustomerOverview(LOOKUP_MAX_AGE_MS); } else if (state.tab === 'businessTrends') { updateBusinessTrendLabels(); if(state.trendData) renderBusinessTrends(state.trendData); } else if (state.tab === 'overview') { $('cw-overview-title').textContent=t('overviewTitle'); $('cw-overview-subtitle').textContent=t('overviewSubtitle'); $('cw-overview-refresh').textContent=t('refresh'); $('cw-overview-attention-title').textContent=t('needsAttention'); $('cw-overview-recent-title').textContent=t('recentProjects')+' · '+t('recentTasks')+' · '+t('recentFollowups'); loadOverview(LOOKUP_MAX_AGE_MS); } else if (state.tab !== 'customers') { updateToolbar(); loadActive(); } });
   }
   function switchTab(tab) {
     state.tab = tab;
@@ -110,7 +120,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     else if (tab === 'todos') loadTodoCenter();
     else if (tab === 'projectCustomerOverview') loadProjectCustomerOverview();
     else if (tab === 'businessTrends') loadBusinessTrends();
-    else if (tab !== 'customers') { updateToolbar(); loadActive(); }
+    else if (tab !== 'customers') { updateToolbar(); loadActive({ entry:true }); }
   }
   function setOffset(value) { if (state.tab === 'projects') state.projectOffset = value; else if (state.tab === 'tasks') state.taskOffset = value; else state.followupOffset = value; }
   function updateToolbar() {
@@ -126,8 +136,9 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     if (task || followup) projectFilter.innerHTML = selectOptions([['',t('allProjects')],...state.projects.map(p=>[p.id,p.title])],task ? state.taskProjectFilter : state.followupProjectFilter);
     const dueFilter = $('cw-business-due-filter'); dueFilter.hidden = !task;
     if (task) dueFilter.innerHTML = selectOptions([['',t('allTaskDueDates')],['overdue',t('overdueTasks')],['today',t('dueToday')],['next7',t('dueNext7Days')],['none',t('noDueDate')]],state.taskDueFilter);
-    const followupDueFilter = $('cw-business-followup-due-filter'); followupDueFilter.hidden = !followup;
-    if (followup) followupDueFilter.innerHTML = selectOptions([['',t('allFollowupDates')],['overdue',t('overdueOnly')]],state.followupDueFilter);
+    const followupDueFilter = $('cw-business-followup-due-filter'); followupDueFilter.hidden = !(followup || project);
+    if (followup) { followupDueFilter.innerHTML = selectOptions([['',t('allFollowupDates')],['overdue',t('overdueOnly')]],state.followupDueFilter); followupDueFilter.setAttribute('aria-label', t('nextDate')); }
+    else if (project) { followupDueFilter.innerHTML = selectOptions([['',t('allProjectDueDates')],['overdue',t('overdueOnly')]],state.projectDueFilter); followupDueFilter.setAttribute('aria-label', t('dueDate')); }
     renderRelationContext();
   }
   function renderRelationContext() {
@@ -158,25 +169,31 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     }));
   }
 
-  async function fetchCompleteRecords(path, label) {
-    const all = []; let offset = 0, expectedTotal = null;
-    while (true) {
-      if (offset > 1000000) throw new Error(t('incompleteData') + ' (' + label + ')');
-      const params = new URLSearchParams({ limit:'100', offset:String(offset) });
-      const result = await api(path + (path.includes('?') ? '&' : '?') + params.toString());
-      const page = Array.isArray(result?.items) ? result.items : [];
-      const reportedTotal = Number(result?.total);
-      if (!Number.isInteger(reportedTotal) || reportedTotal < 0) throw new Error(t('incompleteData') + ' (' + label + ')');
-      if (expectedTotal === null) expectedTotal = reportedTotal;
-      else if (reportedTotal !== expectedTotal) throw new Error(t('incompleteData') + ' (' + label + ')');
-      if (!page.length && offset < expectedTotal) throw new Error(t('incompleteData') + ' (' + label + ')');
-      all.push(...page); offset += page.length;
-      if (offset >= expectedTotal) break;
-      if (page.length < 100) throw new Error(t('incompleteData') + ' (' + label + ')');
+  const recordCache = createRecordCache({ request: path => api(path) });
+  // Complete, verified list of one record type (optionally narrowed by the API's q/status).
+  // Never returns partial data: incomplete pagination raises an error instead.
+  async function loadRecords(type, maxAgeMs = LOOKUP_MAX_AGE_MS, filters = {}) {
+    const params = new URLSearchParams({ record_type:type });
+    if (filters.q) params.set('q', filters.q);
+    if (filters.status) params.set('status', filters.status);
+    const label = RECORD_LABELS[type] || type;
+    try {
+      return await recordCache.load('/records?' + params.toString(), { label, maxAgeMs: typeof maxAgeMs === 'number' ? maxAgeMs : ENTRY_MAX_AGE_MS });
+    } catch (error) {
+      if (error?.code !== 'INCOMPLETE_DATA') throw error;
+      const wrapped = new Error(t('incompleteData') + ' (' + label + ')'); wrapped.code = error.code; throw wrapped;
     }
-    if (all.length !== expectedTotal) throw new Error(t('incompleteData') + ' (' + label + ')');
-    return all;
   }
+  async function loadCustomerList(maxAgeMs = LOOKUP_MAX_AGE_MS) {
+    try {
+      return await recordCache.load('/customers', { label:'customers', maxAgeMs: typeof maxAgeMs === 'number' ? maxAgeMs : ENTRY_MAX_AGE_MS });
+    } catch (error) {
+      if (error?.code !== 'INCOMPLETE_DATA') throw error;
+      const wrapped = new Error(t('incompleteData') + ' (customers)'); wrapped.code = error.code; throw wrapped;
+    }
+  }
+  function loadBusinessRecords(types, maxAgeMs) { return Promise.all(types.map(type => loadRecords(type, maxAgeMs))); }
+  function rememberRelationshipRecords(projects, tasks, followups) { state.relationshipRecords = { projects, tasks, followups }; }
   function recordTimestamp(record) {
     const timestamp = Date.parse(record?.updated_at || record?.created_at || record?.record_date || '');
     return Number.isFinite(timestamp) ? timestamp : 0;
@@ -204,7 +221,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const today=getLocalDateKey(),metrics=getBusinessOverviewMetrics(data,today);
     const cards=[
       ['customersTotal',metrics.customers,()=>{switchTab('customers');window.CompanyWebsite?.showAllCustomers?.();}],
-      ['activeProjects',metrics.activeProjects,()=>{state.projectQuery='';state.projectCustomerFilter='';state.projectStatus='active';state.projectOffset=0;switchTab('projects');}],
+      ['activeProjects',metrics.activeProjects,()=>{state.projectQuery='';state.projectDueFilter='';state.projectCustomerFilter='';state.projectStatus='active';state.projectOffset=0;switchTab('projects');}],
       ['unfinishedTasks',metrics.unfinishedTasks,()=>{state.taskQuery='';state.taskProjectFilter='';state.taskStatus='__open__';state.taskDueFilter='';state.taskOffset=0;switchTab('tasks');}],
       ['pendingFollowups',metrics.pendingFollowups,()=>{state.followupQuery='';state.followupCustomerFilter='';state.followupProjectFilter='';state.followupStatus='pending';state.followupDueFilter='';state.followupOffset=0;switchTab('followups');}]
     ];
@@ -252,18 +269,13 @@ import { getBusinessTrendReport } from './company-business-trends.js';
       group.append(list);host.append(group);
     });
   }
-  async function loadTodoCenter(){
+  async function loadTodoCenter(maxAgeMs=ENTRY_MAX_AGE_MS){
     if(state.todoBusy)return;
     state.todoBusy=true;const feedback=$('cw-todo-feedback');feedback.classList.remove('error');feedback.textContent=t('todoLoading');
     try{
-      const [tasks,followups,projects,customers]=await Promise.all([
-        fetchCompleteRecords('/records?record_type=task','tasks'),
-        fetchCompleteRecords('/records?record_type=follow_up','followups'),
-        fetchCompleteRecords('/records?record_type=project','projects'),
-        fetchCompleteRecords('/records?record_type=customer','customers')
-      ]);
+      const [tasks,followups,projects,customers]=await loadBusinessRecords(['task','follow_up','project','customer'],maxAgeMs);
       state.tasks=tasks;state.followups=followups;state.projects=projects;state.customers=customers;
-      state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);
+      rememberRelationshipRecords(projects,tasks,followups);
       renderTodoCenter(tasks,followups);feedback.textContent='';
     }catch(error){
       $('cw-todo-sections').replaceChildren();feedback.classList.add('error');feedback.textContent=error.message||t('todoLoadError');
@@ -355,19 +367,15 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     ]);
     updateBusinessTrendLabels();
   }
-  async function loadBusinessTrends() {
+  async function loadBusinessTrends(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if(state.trendBusy)return;
     state.trendBusy=true;
     const feedback=$('cw-trends-feedback');feedback.classList.remove('error');feedback.textContent=t('trendsLoading');
     try {
-      const [projects,tasks,followups]=await Promise.all([
-        fetchCompleteRecords('/records?record_type=project','projects'),
-        fetchCompleteRecords('/records?record_type=task','tasks'),
-        fetchCompleteRecords('/records?record_type=follow_up','followups')
-      ]);
+      const [projects,tasks,followups]=await loadBusinessRecords(['project','task','follow_up'],maxAgeMs);
       state.trendData={projects,tasks,followups};
       state.projects=projects;state.tasks=tasks;state.followups=followups;
-      state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);
+      rememberRelationshipRecords(projects,tasks,followups);
       renderBusinessTrends(state.trendData);feedback.textContent='';
     } catch(error) {
       state.trendData=null;
@@ -390,16 +398,16 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const metrics=getProjectCustomerOverview(data,getLocalDateKey());
     const kpis=$('cw-pc-kpis'); kpis.replaceChildren();
     [
-      ['projects',metrics.totalProjects,()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
-      ['pcAverageProgress',metrics.averageProgress+'%',()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
-      ['pcCompletedProjects',metrics.completedProjects,()=>{state.projectStatus='completed';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
-      ['pcOverdueProjects',metrics.overdueProjects,()=>{state.projectStatus='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['projects',metrics.totalProjects,()=>{state.projectStatus='';state.projectDueFilter='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['pcAverageProgress',metrics.averageProgress+'%',()=>{state.projectStatus='';state.projectDueFilter='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['pcCompletedProjects',metrics.completedProjects,()=>{state.projectStatus='completed';state.projectDueFilter='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
+      ['pcOverdueProjects',metrics.overdueProjects,()=>{state.projectStatus='';state.projectDueFilter='overdue';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');}],
       ['pcCustomersWithProjects',metrics.customersWithProjects+'/'+metrics.totalCustomers,()=>{switchTab('customers');window.CompanyWebsite?.refresh?.();}],
       ['pcTaskCompletion',metrics.completedTasks+'/'+metrics.totalTasks,()=>{state.taskQuery='';state.taskStatus='completed';state.taskProjectFilter='';state.taskDueFilter='';state.taskOffset=0;switchTab('tasks');}]
     ].forEach(([label,value,action])=>{const card=button('', 'cw-pc-kpi',action);card.append(node('span','',t(label)),node('strong','',String(value)));kpis.append(card);});
     const status=$('cw-pc-status');status.replaceChildren();
     [['planned','planned'],['active','active'],['on_hold','on_hold'],['completed','completed'],['cancelled','cancelled']].forEach(([key,label])=>{
-      const item=button('', 'cw-pc-status-card',()=>{state.projectStatus=key;state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');});
+      const item=button('', 'cw-pc-status-card',()=>{state.projectStatus=key;state.projectDueFilter='';state.projectCustomerFilter='';state.projectQuery='';state.projectOffset=0;switchTab('projects');});
       item.append(node('span','',t(label)),node('strong','',String(metrics.statusCounts[key]||0)));status.append(item);
     });
     const projectHost=$('cw-pc-projects');projectHost.replaceChildren();
@@ -416,7 +424,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     if(!metrics.customerRows.length)customerHost.append(node('p','cw-pc-empty',t('pcNoCustomers')));
     metrics.customerRows.forEach(row=>{
       const item=button('', 'cw-pc-customer',()=>openCustomer(row.customer.id));
-      item.append(node('strong','',row.customer.title||'—'),node('span','',t('pcCustomersWithProjects')+': '+row.projectCount+' · '+t('activeProjects')+': '+row.activeProjectCount+' · '+t('pendingFollowups')+': '+row.followupCount));
+      item.append(node('strong','',row.customer.title||'—'),node('span','',t('pcCustomersWithProjects')+': '+row.projectCount+' · '+t('activeProjects')+': '+row.activeProjectCount+' · '+t('relatedFollowupCount')+': '+row.followupCount));
       customerHost.append(item);
     });
     const activityHost=$('cw-pc-activity');activityHost.replaceChildren();
@@ -430,20 +438,15 @@ import { getBusinessTrendReport } from './company-business-trends.js';
       activityHost.append(row);
     });
   }
-  async function loadProjectCustomerOverview() {
+  async function loadProjectCustomerOverview(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if(state.projectCustomerBusy)return;
     state.projectCustomerBusy=true;
     const feedback=$('cw-pc-feedback');feedback.classList.remove('error');feedback.textContent=t('pcLoading');
     try {
-      const [customers,projects,tasks,followups]=await Promise.all([
-        fetchCompleteRecords('/records?record_type=customer','customers'),
-        fetchCompleteRecords('/records?record_type=project','projects'),
-        fetchCompleteRecords('/records?record_type=task','tasks'),
-        fetchCompleteRecords('/records?record_type=follow_up','followups')
-      ]);
+      const [customers,projects,tasks,followups]=await loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs);
       const data={customers,projects,tasks,followups};
       state.customers=customers;state.projects=projects;state.tasks=tasks;state.followups=followups;
-      state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);
+      rememberRelationshipRecords(projects,tasks,followups);
       renderProjectCustomerOverview(data);feedback.textContent='';
     } catch(error) {
       feedback.classList.add('error');feedback.textContent=error.message||t('pcLoadError');
@@ -451,47 +454,28 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     } finally {state.projectCustomerBusy=false;}
   }
 
-  async function loadOverview() {
+  async function loadOverview(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if(state.overviewBusy)return;
     state.overviewBusy=true;const feedback=$('cw-overview-feedback');feedback.classList.remove('error');feedback.textContent=t('overviewLoading');
     try {
-      const [customers,projects,tasks,followups]=await Promise.all([
-        fetchCompleteRecords('/records?record_type=customer','customers'),
-        fetchCompleteRecords('/records?record_type=project','projects'),
-        fetchCompleteRecords('/records?record_type=task','tasks'),
-        fetchCompleteRecords('/records?record_type=follow_up','followups')
-      ]);
-      const data={customers,projects,tasks,followups};state.overviewData=data;state.customers=customers;state.projects=projects;state.relationshipRecords={projects,tasks,followups};state.relationshipPromise=Promise.resolve(state.relationshipRecords);renderOverview(data);feedback.textContent='';
+      const [customers,projects,tasks,followups]=await loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs);
+      const data={customers,projects,tasks,followups};state.overviewData=data;state.customers=customers;state.projects=projects;rememberRelationshipRecords(projects,tasks,followups);renderOverview(data);feedback.textContent='';
     } catch(error) {
       feedback.classList.add('error');feedback.textContent=error.message||t('overviewError');
       $('cw-overview-kpis').replaceChildren();$('cw-overview-attention').replaceChildren();$('cw-overview-recent').replaceChildren();
     } finally {state.overviewBusy=false;}
   }
 
-  async function fetchAllRecords(type, maxRecords = 10000) {
-    const items=[]; let offset=0,total=0;
-    do {
-      const params=new URLSearchParams({record_type:type,limit:'100',offset:String(offset)});
-      const result=await api('/records?'+params.toString());
-      const page=Array.isArray(result?.items)?result.items:[];
-      items.push(...page); total=Number(result?.total||0); offset+=page.length;
-      if(!page.length)break;
-    } while(offset<total && offset<maxRecords);
-    return items;
-  }
-  async function getRelationshipRecords() {
-    if(state.relationshipRecords)return state.relationshipRecords;
-    if(!state.relationshipPromise){
-      state.relationshipPromise=Promise.all(['project','task','follow_up'].map(fetchAllRecords)).then(([projects,tasks,followups])=>{
-        state.relationshipRecords={projects,tasks,followups};
-        state.projects=[...new Map([...state.projects,...projects].map(item=>[item.id,item])).values()];
-        return state.relationshipRecords;
-      }).catch(error=>{state.relationshipPromise=null;throw error;});
-    }
-    return state.relationshipPromise;
+  // V10.58: complete project/task/follow-up sets. The old reader was called through Array.map,
+  // which passed the array index as its record limit, so only the first 100 of each type were read.
+  async function getRelationshipRecords(maxAgeMs = LOOKUP_MAX_AGE_MS) {
+    const [projects,tasks,followups]=await loadBusinessRecords(['project','task','follow_up'],maxAgeMs);
+    rememberRelationshipRecords(projects,tasks,followups);
+    state.projects=projects;
+    return state.relationshipRecords;
   }
   async function loadCustomerRelations(customers) {
-    const summaries={}; (customers||[]).forEach(customer=>summaries[customer.id]={projects:[],tasks:[],followups:[]});
+    const summaries={}; (customers||[]).forEach(customer=>summaries[customer.id]={projects:[],tasks:[],followups:[],failed:false});
     try {
       const records=await getRelationshipRecords();
       const customerIds=new Set((customers||[]).map(item=>item.id));
@@ -504,7 +488,11 @@ import { getBusinessTrendReport } from './company-business-trends.js';
         const customerId=data.customer_id||(record.related_record_ids||[]).find(id=>customerIds.has(id))||(customerIds.has(record.parent_record_id)?record.parent_record_id:'')||(projectId?projectById.get(projectId)?.parent_record_id:'');
         if(summaries[customerId])summaries[customerId].followups.push(record);
       });
-    } catch(error) { console.warn('Unable to load company relationship summaries',error); }
+    } catch(error) {
+      // Show "unavailable" instead of counting the failure as 0 related records.
+      console.warn('Unable to load company relationship summaries',error);
+      Object.values(summaries).forEach(summary=>{summary.projects=[];summary.tasks=[];summary.followups=[];summary.failed=true;summary.error=error?.message||t('relationLoadFailed');});
+    }
     Object.values(summaries).forEach(summary=>{
       summary.projects.sort((a,b)=>new Date(b.record_date||0)-new Date(a.record_date||0));
       summary.tasks.sort((a,b)=>new Date(a.due_date||'9999-12-31')-new Date(b.due_date||'9999-12-31'));
@@ -518,7 +506,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     const followups=records.followups.filter(item=>{const data=item.data&&typeof item.data==='object'?item.data:{};return data.project_id===projectId||item.parent_record_id===projectId;}).sort((a,b)=>new Date(b.record_date||0)-new Date(a.record_date||0));
     return {tasks,followups};
   }
-  function invalidateRelations(){state.relationshipRecords=null;state.relationshipPromise=null;}
+  function invalidateRelations(){state.relationshipRecords=null;recordCache.invalidate();}
   function renderProjectRelations(projectId) {
     const tasksHost=$('cw-project-related-tasks'),followupsHost=$('cw-project-related-followups');
     tasksHost.replaceChildren(node('p','cw-related-empty',t('loadingRelations')));
@@ -533,19 +521,24 @@ import { getBusinessTrendReport } from './company-business-trends.js';
       if(followups.length>6)followupsHost.append(node('p','cw-related-more','+'+(followups.length-6)));
     }).catch(()=>{tasksHost.replaceChildren(node('p','cw-related-empty',t('relationLoadFailed')));followupsHost.replaceChildren(node('p','cw-related-empty',t('relationLoadFailed')));});
   }
-  async function loadCustomers() {
-    const result = await api('/customers?limit=100&offset=0');
-    state.customers = Array.isArray(result?.items) ? result.items : [];
-    const projects = await api('/records?record_type=project&limit=100&offset=0');
-    const pageProjects = Array.isArray(projects?.items) ? projects.items : [];
-    state.projects = state.relationshipRecords?.projects ? [...new Map([...pageProjects,...state.relationshipRecords.projects].map(item=>[item.id,item])).values()] : pageProjects;
+  // V10.58: complete customer and project lists for selectors, names and filters
+  // (previously only the first 100 of each were read).
+  async function loadCustomers(maxAgeMs = LOOKUP_MAX_AGE_MS) {
+    // Customers keep coming from GET /customers (as before V10.58), now read page by page in full.
+    const [customers, projects] = await Promise.all([loadCustomerList(maxAgeMs), loadRecords('project', maxAgeMs)]);
+    state.customers = customers;
+    state.projects = projects;
   }
-  async function loadActive() {
+  // options.entry: tab was just opened; options.force: user pressed refresh.
+  // Filter, search and pagination changes reuse the cached complete sets.
+  async function loadActive(options = {}) {
     if (!['projects','tasks','followups'].includes(state.tab)) return;
-    if (state.busy) { state.reloadPending = true; return; }
-    state.busy = true; $('cw-business-feedback').textContent = t('loading');
+    const opts = options && typeof options === 'object' && !('type' in options) ? options : {};
+    if (state.busy) { state.reloadPending = { ...(state.reloadPending || {}), ...opts }; return; }
+    const maxAgeMs = opts.force ? 0 : opts.entry ? ENTRY_MAX_AGE_MS : LOOKUP_MAX_AGE_MS;
+    state.busy = true; $('cw-business-feedback').textContent = t('loading'); $('cw-business-feedback').classList.remove('error');
     try {
-      await loadCustomers();
+      await loadCustomers(maxAgeMs);
       updateToolbar();
       renderRelationContext();
       const project = state.tab === 'projects', task = state.tab === 'tasks', type = project ? 'project' : task ? 'task' : 'follow_up';
@@ -553,11 +546,11 @@ import { getBusinessTrendReport } from './company-business-trends.js';
       const offset = project ? state.projectOffset : task ? state.taskOffset : state.followupOffset;
       const query = project ? state.projectQuery : task ? state.taskQuery : state.followupQuery;
       const status = project ? state.projectStatus : task ? state.taskStatus : state.followupStatus;
-      const relationFiltered = (project && state.projectCustomerFilter) || (state.tab === 'followups' && (state.followupCustomerFilter || state.followupProjectFilter || state.followupDueFilter));
+      const relationFiltered = (project && (state.projectCustomerFilter || state.projectDueFilter)) || (state.tab === 'followups' && (state.followupCustomerFilter || state.followupProjectFilter || state.followupDueFilter));
       let records = [], total = 0;
       if (task) {
         // Date filtering must run against the complete task set before pagination.
-        const allTasks = await fetchAllRecords('task', Number.MAX_SAFE_INTEGER);
+        const allTasks = await loadRecords('task', maxAgeMs);
         const normalizedQuery = query.toLowerCase();
         const filteredTasks = allTasks.filter(record => {
           if (normalizedQuery && !String(record.title || '').toLowerCase().includes(normalizedQuery)) return false;
@@ -577,29 +570,29 @@ import { getBusinessTrendReport } from './company-business-trends.js';
         return;
       }
       if (relationFiltered) {
-        const all = []; let pageOffset = 0, reportedTotal = 0;
-        do {
-          const params = new URLSearchParams({ record_type:type, limit:'100', offset:String(pageOffset) });
-          if (query) params.set('q', query); if (status) params.set('status', status);
-          const result = await api('/records?' + params.toString());
-          const items = Array.isArray(result?.items) ? result.items : [];
-          all.push(...items); reportedTotal = Number(result?.total || 0); pageOffset += items.length;
-          if (!items.length) break;
-        } while (pageOffset < reportedTotal);
+        // Relation filters are applied in the browser, so read the complete (API q/status filtered) set.
+        const all = await loadRecords(type, maxAgeMs, { q:query, status });
         records = all.filter(record => {
           const data = record.data && typeof record.data === 'object' ? record.data : {};
-          if (project && state.projectCustomerFilter) return record.parent_record_id === state.projectCustomerFilter;
+          if (project) {
+            if (state.projectCustomerFilter && record.parent_record_id !== state.projectCustomerFilter) return false;
+            if (state.projectDueFilter === 'overdue') return isOverdueProject(record, getLocalDateKey());
+            return true;
+          }
           if (state.followupCustomerFilter && (data.customer_id || (record.related_record_ids || [])[0] || (state.customers.some(c=>c.id===record.parent_record_id) ? record.parent_record_id : '')) !== state.followupCustomerFilter) return false;
           if (state.followupProjectFilter && (data.project_id || (state.projects.some(p=>p.id===record.parent_record_id) ? record.parent_record_id : '')) !== state.followupProjectFilter) return false;
           if (state.followupDueFilter === 'overdue') return record.status === 'pending' && Boolean(data.next_follow_up_date) && String(data.next_follow_up_date).slice(0,10) < getLocalDateKey();
           return true;
         });
         total = records.length;
-        const pageRecords = records.slice(offset, offset + PAGE_SIZE);
+        const lastPageOffset = total ? Math.floor((total - 1) / PAGE_SIZE) * PAGE_SIZE : 0;
+        const pageOffset = Math.min(offset, lastPageOffset);
+        if (pageOffset !== offset) setOffset(pageOffset);
+        const pageRecords = records.slice(pageOffset, pageOffset + PAGE_SIZE);
         if (project) state.projects = [...new Map([...state.projects, ...all.filter(item => item.record_type === 'project')].map(item => [item.id, item])).values()];
         else state.followups = records;
         $('cw-business-feedback').textContent = total ? t('loaded') + ' · ' + total : '';
-        renderList(project, task, pageRecords, total, offset);
+        renderList(project, task, pageRecords, total, pageOffset);
       } else {
         const params = new URLSearchParams({ record_type:type, limit:String(PAGE_SIZE), offset:String(offset) });
         if (query) params.set('q', query); if (status) params.set('status', status);
@@ -614,12 +607,12 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     } catch (error) { $('cw-business-feedback').textContent = error.message || t('failed'); $('cw-business-feedback').classList.add('error'); }
     finally {
       state.busy = false;
-      if (state.reloadPending) { state.reloadPending = false; loadActive(); }
+      if (state.reloadPending) { const pending = state.reloadPending; state.reloadPending = false; loadActive(pending); }
     }
   }
   function customerName(id) { return state.customers.find(c => c.id === id)?.title || '—'; }
   function openCustomer(id) { const customer = state.customers.find(c => c.id === id); switchTab('customers'); if (customer && window.CompanyWebsite?.focusCustomer) window.CompanyWebsite.focusCustomer(id); else if (window.CompanyWebsite?.focusCustomer) window.CompanyWebsite.focusCustomer(id); }
-  function showCustomerProjects(id) { state.projectCustomerFilter = id || ''; state.projectOffset = 0; switchTab('projects'); }
+  function showCustomerProjects(id) { state.projectCustomerFilter = id || ''; state.projectDueFilter = ''; state.projectOffset = 0; switchTab('projects'); }
   function showCustomerFollowups(id) { state.followupCustomerFilter = id || ''; state.followupProjectFilter = ''; state.followupOffset = 0; switchTab('followups'); }
   function showProjectFollowups(id) { state.followupProjectFilter = id || ''; state.followupCustomerFilter = ''; state.followupOffset = 0; switchTab('followups'); }
   function showProjectTasks(id) { state.taskProjectFilter = id || ''; state.taskOffset = 0; switchTab('tasks'); }
@@ -825,5 +818,5 @@ import { getBusinessTrendReport } from './company-business-trends.js';
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
-  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations });
+  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations, loadRecords:(type, maxAgeMs) => loadRecords(type, maxAgeMs) });
 })();

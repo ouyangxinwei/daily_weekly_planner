@@ -38,11 +38,11 @@ const recent = getRecentBusinessRecords([
 assert.deepEqual(recent.map(record => record.id), ['new','middle']);
 const source = readFileSync(new URL('../company-business.js', import.meta.url), 'utf8');
 for (const marker of [
-  "fetchCompleteRecords('/records?record_type=customer'",
-  "fetchCompleteRecords('/records?record_type=project'",
-  "fetchCompleteRecords('/records?record_type=task'",
-  "fetchCompleteRecords('/records?record_type=follow_up'",
-  "if (reportedTotal !== expectedTotal)",
+  "loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs)",
+  "loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs)",
+  "loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs)",
+  "loadBusinessRecords(['customer','project','task','follow_up'],maxAgeMs)",
+  "import { createRecordCache } from './company-record-loader.js';",
   "id = 'cw-business-overview'",
   "data.next_follow_up_date",
   "getBusinessOverviewMetrics(data,today)",

@@ -29,6 +29,6 @@ assert.equal(getTodoFollowupDateState(followups[2],today),'todoFollowupToday');
 assert.equal(getTodoFollowupDateState(followups[3],today),'todoNoNextDate');
 assert.deepEqual(getTodoCenterSections([],[],today).map(section=>section.records.length),[0,0,0,0,0]);
 const source=readFileSync(new URL('../company-business.js',import.meta.url),'utf8');
-for(const marker of ["id = 'cw-business-todos'","loadTodoCenter()","fetchCompleteRecords('/records?record_type=task'","fetchCompleteRecords('/records?record_type=follow_up'","getTodoCenterSections(tasks,followups,today)","openRelatedRecord(section.type,record)"])assert.ok(source.includes(marker),'Missing to-do center integration: '+marker);
+for(const marker of ["id = 'cw-business-todos'","loadTodoCenter()","loadBusinessRecords(['task','follow_up','project','customer'],maxAgeMs)","loadBusinessRecords(['task','follow_up','project','customer'],maxAgeMs)","getTodoCenterSections(tasks,followups,today)","openRelatedRecord(section.type,record)"])assert.ok(source.includes(marker),'Missing to-do center integration: '+marker);
 for(const label of ["todoCenter:'待办中心'","todoCenter:'To-do center'","todoCenter:'To-doセンター'"])assert.ok(source.includes(label),'Missing translation: '+label);
 console.log('V10.52 to-do center validation passed.');
