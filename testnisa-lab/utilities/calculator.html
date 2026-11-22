@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EXP-003 金额精度实验 · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <script type="module" src="./calculator-page.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow"><a href="../index.html">实验室</a> / EXP-003</p>
+      <h1>金额精度与换算实验</h1>
+      <p class="lead">使用十进制字符串解析和 BigInt 定点运算。计算过程不把金额转成 JavaScript Number。</p>
+      <div class="notice">本页面的汇率输入为手动测试值，不会请求 API。需要真实汇率时请使用 EXP-001 页面。</div>
+    </header>
+    <section class="panel">
+      <h2>定点换算</h2>
+      <form id="calc-form">
+        <div class="form-grid">
+          <div class="field"><label for="amount">原币金额</label><input id="amount" value="10000" maxlength="40" inputmode="decimal" required></div>
+          <div class="field"><label for="rate">汇率（目标币 / 原币）</label><input id="rate" value="0.00672" maxlength="40" inputmode="decimal" required></div>
+          <div class="field"><label for="target">目标币种</label><select id="target"><option value="USD">USD（2 位小数）</option><option value="JPY">JPY（0 位小数）</option></select></div>
+        </div>
+        <div class="actions"><button class="button primary" type="submit">执行精度计算</button><button class="button" id="example" type="button">载入边界案例</button></div>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite">输入金额和汇率后执行。</div>
+      <div id="result" class="result-grid"></div>
+      <h3>精度规则</h3>
+      <ul class="check-list">
+        <li>金额和汇率均以十进制字符串解析。</li>
+        <li>中间乘法使用 BigInt，避免浮点累计误差。</li>
+        <li>目标币种 JPY 保留 0 位，USD 保留 2 位。</li>
+        <li>舍入规则为 half-up：恰好一半时远离零。</li>
+        <li>最多 30 位有效数字；当前实验最多支持 8 位目标小数精度。</li>
+      </ul>
+      <h3>自动化测试</h3>
+      <p class="muted small">仓库使用 Node.js 内置 node:test 执行纯函数测试，无第三方依赖。CI 在每次推送时运行。</p>
+    </section>
+    <footer class="footer">EXP-003 · <a href="../api/currency.html">转到 EXP-001 汇率 API 实验</a></footer>
+  </main>
+</body>
+</html>
