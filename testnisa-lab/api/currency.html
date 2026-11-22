@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://api.frankfurter.dev; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EXP-001 汇率 API 实验 · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <script type="module" src="./currency-page.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow"><a href="../index.html">实验室</a> / EXP-001</p>
+      <h1>汇率 API 浏览器直连实验</h1>
+      <p class="lead">直接从当前浏览器请求 Frankfurter API v2。请求不经过本项目服务器，也不会保存输入。</p>
+      <div class="notice">此数据是最近可用工作日的参考汇率，不是实时外汇报价，也不保证可按该价格成交。</div>
+    </header>
+    <section class="panel">
+      <h2>请求参数</h2>
+      <form id="rate-form">
+        <div class="form-grid">
+          <div class="field"><label for="base">基准币种</label><select id="base" name="base"><option>JPY</option><option>USD</option><option>EUR</option><option>GBP</option><option>AUD</option><option>CAD</option><option>CHF</option></select></div>
+          <div class="field"><label for="quote">目标币种</label><select id="quote" name="quote"><option>USD</option><option>JPY</option><option>EUR</option><option>GBP</option><option>AUD</option><option>CAD</option><option>CHF</option></select></div>
+          <div class="field"><label for="amount">换算金额（十进制文本）</label><input id="amount" name="amount" inputmode="decimal" value="10000" maxlength="40" required></div>
+          <div class="field"><label for="date">历史日期（可选）</label><input id="date" name="date" type="date"></div>
+        </div>
+        <div class="actions"><button class="button primary" id="submit" type="submit">请求汇率并计算</button><button class="button" id="cancel" type="button" disabled>取消请求</button></div>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite">尚未发起请求。</div>
+      <div id="result" class="result-grid" aria-live="polite"></div>
+      <p class="inline-note">接口：<a href="https://frankfurter.dev/" target="_blank" rel="noopener noreferrer">Frankfurter 官方文档</a> · <a href="https://api.frankfurter.dev/v2/rate/jpy/usd" target="_blank" rel="noopener noreferrer">示例 API</a></p>
+      <h3>原始响应（脱敏展示）</h3>
+      <pre id="raw">暂无响应</pre>
+    </section>
+    <footer class="footer">EXP-001 · 请求超时 10 秒 · 不缓存响应 · <a href="../utilities/calculator.html">转到 EXP-003 金额实验</a></footer>
+  </main>
+</body>
+</html>

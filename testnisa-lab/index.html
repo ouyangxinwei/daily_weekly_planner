@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="testNisa 技术预研实验室目录">
+  <meta name="theme-color" content="#101827">
+  <title>技术预研实验室 · testNisa</title>
+  <link rel="stylesheet" href="./assets/lab.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">STAGE 0.5 / TECHNICAL RESEARCH</p>
+      <h1>技术预研实验室</h1>
+      <p class="lead">独立验证 API 可访问性、浏览器能力和可复用计算函数。实验结果与正式业务实现分开管理。</p>
+      <div class="notice"><strong>安全边界：</strong>不连接真实券商、不执行真实交易、不输入账户凭据或私人投资数据。汇率为参考汇率，不代表可成交报价。</div>
+    </header>
+    <section class="section">
+      <h2>当前实验</h2>
+      <div class="card-grid">
+        <article class="panel">
+          <div class="tag">EXP-001 · P0</div>
+          <h3>汇率 API 浏览器直连</h3>
+          <p>从浏览器直接请求 Frankfurter v2，检查 HTTP 状态、CORS、响应数据、日期与换算结果。</p>
+          <a class="button primary" href="./api/currency.html">打开汇率实验</a>
+          <p class="small muted">状态：实现已提交，需在部署 Origin 完成实测。</p>
+        </article>
+        <article class="panel">
+          <div class="tag">EXP-003 · P0</div>
+          <h3>金额精度与换算函数</h3>
+          <p>使用十进制字符串与 BigInt 进行定点运算，避免账务金额直接使用二进制浮点累计。</p>
+          <a class="button" href="./utilities/calculator.html">打开金额实验</a>
+          <p class="small muted">状态：含自动化单元测试；仍需人工浏览器验收。</p>
+        </article>
+      </div>
+    </section>
+    <section class="section">
+      <h2>实验规则</h2>
+      <ul class="check-list">
+        <li>每次 API 请求显示来源、日期、状态和耗时。</li>
+        <li>错误响应不伪装成有效数据；失败时保留清晰错误信息。</li>
+        <li>计算核心使用纯函数，不读写 DOM 或 IndexedDB。</li>
+        <li>日元默认 0 位小数；美元默认 2 位小数；舍入规则明确为 half-up（恰好一半时远离零）。</li>
+        <li>实验页面不保存用户输入，不使用第三方分析脚本或外部 JavaScript 库。</li>
+      </ul>
+    </section>
+    <footer class="footer"><a href="../index.html">返回项目入口</a> · <a href="https://github.com/ouyangxinwei/testNisa/blob/main/docs/08-TECHNICAL-RESEARCH/README.md">研究文档</a></footer>
+  </main>
+</body>
+</html>
