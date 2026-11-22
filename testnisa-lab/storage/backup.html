@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EXP-006/011 JSON 备份兼容性、版本适配与原子恢复实验">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta name="theme-color" content="#101827">
+  <title>JSON 备份恢复 · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <script type="module" src="./backup-page.js"></script>
+</head>
+<body>
+  <main class="container narrow">
+    <header class="hero">
+      <p class="eyebrow">EXP-006 / EXP-011 · BACKUP COMPATIBILITY</p>
+      <h1>JSON 数据备份与恢复</h1>
+      <p class="lead">验证备份格式版本适配、数据库 schema 独立演进、恢复预览和原子事务保护。</p>
+      <div class="notice"><strong>重要：</strong>恢复模式为整体替换当前实验数据库的 records/settings 数据。必须先预览并确认。备份格式版本与 IndexedDB schema 版本独立；文件限制 2 MiB。请勿使用真实账户或私人投资数据。</div>
+    </header>
+    <section class="panel">
+      <h2>导出本地实验数据</h2>
+      <p class="small muted">导出当前实验数据库中的 records 与 settings，不包含其他站点数据。文件下载由 EXP-009 公共模块处理。</p>
+      <div class="actions"><button class="button primary" id="export-backup" type="button">导出 JSON 备份</button></div>
+      <div id="export-status" class="status" role="status" aria-live="polite">等待导出。</div>
+    </section>
+    <section class="panel">
+      <h2>导入与预览</h2>
+      <p class="small muted">先识别备份格式版本并转换为当前内部数据结构，再执行完整校验；此阶段不会修改数据库。</p>
+      <div class="field">
+        <label for="backup-file">选择备份文件（仅 .json，最大 2 MiB）</label>
+        <input id="backup-file" type="file" accept=".json,application/json">
+      </div>
+      <div class="actions"><button class="button" id="preview-backup" type="button" disabled>校验并预览</button><button class="button primary" id="restore-backup" type="button" disabled>确认恢复（整体替换）</button></div>
+      <div id="import-status" class="status" role="status" aria-live="polite">尚未选择文件。</div>
+      <pre id="preview-output">预览信息将在这里显示。</pre>
+    </section>
+    <section class="panel">
+      <h2>当前数据库概况</h2>
+      <p class="small muted">同时显示 IndexedDB schema 版本、迁移元数据和数据数量。</p>
+      <div class="actions"><button class="button" id="refresh-counts" type="button">刷新数据数量</button></div>
+      <pre id="database-counts">正在读取…</pre>
+    </section>
+    <footer class="footer"><a href="../index.html">返回实验室</a> · <a href="./indexeddb.html">IndexedDB 实验</a> · <a href="./migrations.html">迁移实验</a></footer>
+  </main>
+</body>
+</html>

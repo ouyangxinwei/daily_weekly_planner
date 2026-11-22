@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EXP-004 日期与日本交易日实验</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<script type="module" src="./calendar-page.js"></script>
+</head>
+<body>
+<main class="container narrow">
+<header class="hero">
+<p class="eyebrow"><a href="../index.html">实验室</a> / EXP-004</p>
+<h1>日期与日本交易日函数</h1>
+<p class="lead">验证日期格式、周末、法定节假日、年末年始休场，以及 T+1 / T+2 交易日偏移。</p>
+<div class="notice">2026–2027 使用日本内阁府已公布日历。其他年份按现行规则推算，春分/秋分等日期为估算，不作为官方日历。日本股票市场休场日按周末、国民祝日和年末年始简化处理。</div>
+</header>
+<section class="panel">
+<h2>日期查询</h2>
+<form id="calendar-form">
+<div class="field"><label for="target-date">查询日期</label><input id="target-date" type="date" value="2026-11-24" required></div>
+<div class="actions"><button class="button primary" type="submit">查询日期状态</button><button class="button" id="today" type="button">使用今天</button></div>
+</form>
+<div id="status" class="status" role="status" aria-live="polite">选择日期后查询。</div>
+<div id="details" class="result-grid"></div>
+</section>
+<section class="panel">
+<h2>交易日偏移</h2>
+<p class="muted small">以输入日期为起点，不计入起始日。正数向未来，负数向过去。</p>
+<div class="form-grid">
+<div class="field"><label for="offset">交易日偏移（-20 至 +20）</label><input id="offset" type="number" min="-20" max="20" step="1" value="1"></div>
+<div class="field"><label for="count-end">结束日期（计算交易日数量）</label><input id="count-end" type="date" value="2026-12-01"></div>
+</div>
+<div class="actions"><button class="button primary" id="calculate" type="button">计算 T+n</button></div>
+<div id="offset-result" class="status">等待计算。</div>
+</section>
+<section class="panel">
+<h2>接下来 5 个交易日</h2>
+<ol id="next-days" class="check-list"><li>查询后显示。</li></ol>
+</section>
+<footer class="footer">EXP-004 · 离线日期计算 · 不调用第三方 API</footer>
+</main>
+</body>
+</html>

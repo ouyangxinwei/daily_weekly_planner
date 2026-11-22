@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EXP-007 输入校验与 XSS 安全实验">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="theme-color" content="#101827">
+  <title>EXP-007 输入与 XSS 安全 · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <script type="module" src="./input-validation-page.js"></script>
+</head>
+<body>
+<main class="container narrow">
+  <header class="hero">
+    <p class="eyebrow">EXP-007 / INPUT VALIDATION & XSS</p>
+    <h1>输入验证与 XSS 防护</h1>
+    <p class="lead">验证不可信输入的类型、长度、范围、协议和安全显示方式。</p>
+    <div class="notice"><strong>安全边界：</strong>攻击样例只作为普通文本显示，不执行脚本。前端校验不能代替服务端授权。</div>
+  </header>
+  <section class="panel">
+    <h2>文本输入与安全显示</h2>
+    <div class="field"><label for="text-input">最多 80 个字符</label><input id="text-input" type="text" value="普通文本示例"></div>
+    <div class="actions"><button class="button primary" id="validate-text" type="button">校验并安全显示</button><button class="button" id="show-attack-sample" type="button">显示恶意字符串样例</button></div>
+    <div id="text-status" class="status" role="status" aria-live="polite">等待输入。</div>
+    <pre id="text-output">安全显示结果将在这里出现。</pre>
+  </section>
+  <section class="panel">
+    <h2>数值输入</h2>
+    <div class="field"><label for="number-input">0 至 100，最多 2 位小数</label><input id="number-input" type="text" inputmode="decimal" value="12.50"></div>
+    <div class="actions"><button class="button primary" id="validate-number" type="button">校验数值</button></div>
+    <div id="number-status" class="status" role="status" aria-live="polite">等待输入。</div>
+  </section>
+  <section class="panel">
+    <h2>安全 URL</h2>
+    <div class="field"><label for="url-input">仅允许绝对 HTTPS URL</label><input id="url-input" type="text" value="https://example.com/"></div>
+    <div class="actions"><button class="button primary" id="validate-url" type="button">校验 URL</button></div>
+    <div id="url-status" class="status" role="status" aria-live="polite">等待输入。</div>
+    <div id="url-output" class="small"></div>
+  </section>
+  <section class="panel">
+    <h2>实验规则</h2>
+    <ul class="check-list">
+      <li>普通文本使用 textContent；复杂节点使用 createElement。</li>
+      <li>不把用户输入传给 innerHTML、insertAdjacentHTML、eval 或 Function。</li>
+      <li>URL 使用协议白名单，拒绝 javascript:、data: 和凭据。</li>
+      <li>HTML maxlength 只是交互提示，JavaScript 仍需独立校验。</li>
+      <li>Meta CSP 不能完整替代 HTTP 响应头；frame-ancestors 等策略应在托管层设置。</li>
+    </ul>
+  </section>
+  <footer class="footer"><a href="../index.html">返回实验室</a> · <a href="../../docs/03-ARCHITECTURE/SECURITY_BASELINE.md">安全基线</a></footer>
+</main>
+</body>
+</html>

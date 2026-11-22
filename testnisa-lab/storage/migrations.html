@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="EXP-010 IndexedDB 数据版本与迁移实验">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'none'; img-src 'none'; base-uri 'none'; form-action 'self'">
+<meta name="theme-color" content="#101827"><title>EXP-010 IndexedDB 迁移 · testNisa</title>
+<link rel="stylesheet" href="../assets/lab.css"><script type="module" src="./migrations-page.js"></script>
+</head>
+<body><main class="container narrow">
+<header class="hero"><p class="eyebrow">EXP-010 / SCHEMA MIGRATIONS</p><h1>IndexedDB 数据版本与迁移</h1>
+<p class="lead">检查数据库 schema 版本、迁移历史和升级后的对象仓库结构。</p>
+<div class="notice"><strong>数据边界：</strong>只操作 EXP-005 的独立实验数据库 <code>testnisa-technical-lab</code>。打开本页会自动将旧版本数据库升级到 schema v2；不连接网络、不触碰正式业务数据。</div></header>
+<section class="panel"><h2>数据库状态</h2><div id="migration-status" class="status pending" role="status" aria-live="polite">正在打开数据库并检查迁移状态…</div>
+<div class="actions"><button class="button" id="refresh-migrations" type="button">重新读取迁移信息</button></div><pre id="migration-output">等待数据库信息。</pre></section>
+<section class="panel"><h2>当前 schema v2 变化</h2>
+<ul><li>保留 v1 的 <code>records</code>、<code>settings</code> 对象仓库和既有索引。</li><li>为 <code>records</code> 新增非唯一 <code>by_name</code> 索引。</li><li>新增 <code>schema_meta</code>，记录当前 schema 版本与已执行迁移。</li><li>升级在 IndexedDB versionchange 事务内执行；失败时中止事务，由浏览器回滚本次 schema 变更。</li></ul></section>
+<section class="panel"><h2>升级保护说明</h2><p>迁移按版本逐步执行（v0 → v1 → v2），不跳过中间步骤。遇到未知迁移路径、缺少旧对象仓库或升级请求被其他标签页阻塞时，打开数据库会失败并显示错误，不会主动删除或重建旧数据。</p><p class="small muted">自动化测试验证迁移步骤与元数据契约；真实浏览器的升级事务回滚行为仍需浏览器验收。</p></section>
+<footer class="footer"><a href="./indexeddb.html">返回 EXP-005 IndexedDB</a> · <a href="../index.html">返回实验室</a></footer>
+</main></body></html>

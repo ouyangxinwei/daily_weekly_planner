@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NISA Wiki 预开发实验 · testNisa</title>
+  <link rel="stylesheet" href="../assets/lab.css">
+  <style>
+    .wiki-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.85fr);gap:18px;align-items:start}
+    .wiki-list{display:grid;gap:10px}.wiki-entry{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+    .wiki-entry h3{margin:0 0 5px}.wiki-entry p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+    .wiki-meta{font-size:.8rem;color:var(--muted)}.wiki-body{overflow-wrap:anywhere;min-height:60px}
+    .wiki-body p{white-space:pre-wrap}.wiki-body pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border-radius:8px;background:var(--surface-2)}
+    .wiki-inline-link{border:0;background:none;color:var(--link,var(--accent));text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+    .wiki-inline-link.unresolved,.wiki-unresolved{color:var(--muted);text-decoration:line-through;cursor:not-allowed}
+    #detail-links{display:grid;gap:12px;margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+    #detail-links h3{font-size:1rem;margin:8px 0}
+    textarea{width:100%;min-height:150px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#0e1828;color:var(--text);font:inherit}
+    .wiki-import-preview{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+    .wiki-import-warning{padding:8px;border-left:3px solid #c58b32;background:var(--surface-2);overflow-wrap:anywhere}
+    .wiki-import-ack{display:flex;gap:8px;align-items:flex-start;font-size:.9rem;margin:12px 0}
+    .wiki-import-ack input{width:auto;margin-top:4px}
+    .empty{padding:22px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+    @media(max-width:760px){.wiki-layout{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main class="container">
+  <header class="hero">
+    <p class="eyebrow">WIKI PRE-DEVELOPMENT / WIKI-004</p>
+    <h1>NISA Wiki 知识库原型</h1>
+    <p class="lead">提前验证知识条目的管理、Markdown 内链，以及外部文本粘贴导入、JSON 备份和非破坏式恢复。数据保存在独立的浏览器 IndexedDB 中，不连接正式业务数据。</p>
+    <div class="notice">实验原型：不要录入真实账户信息、密码、API Key 或其他敏感资料。清理浏览器站点数据可能删除实验内容，请勿把它当作正式资料库。</div>
+  </header>
+  <div id="wiki-status" class="status" role="status" aria-live="polite">正在打开本地 Wiki 数据库…</div>
+  <section class="section">
+    <div class="result-grid">
+      <div class="metric"><div class="label">本地条目数</div><div class="value" id="wiki-count">0</div></div>
+      <div class="metric"><div class="label">当前数据库</div><div class="value">Wiki Lab v1</div></div>
+      <div class="metric"><div class="label">保存位置</div><div class="value">浏览器 IndexedDB</div></div>
+    </div>
+  </section>
+  <div class="wiki-layout">
+    <section class="panel">
+      <h2>知识条目</h2>
+      <div class="form-grid">
+        <div class="field full"><label for="wiki-search">关键词搜索</label><input id="wiki-search" type="search" placeholder="搜索标题、正文、摘要、分类、标签或别名"></div>
+        <div class="field"><label for="wiki-category-filter">分类筛选</label><select id="wiki-category-filter"><option value="">全部分类</option></select></div>
+        <div class="field"><label for="wiki-status-filter">状态筛选</label><select id="wiki-status-filter"><option value="">全部状态</option><option value="draft">待确认</option><option value="verified">已核实</option><option value="needs_update">需要更新</option><option value="disputed">存在争议</option></select></div>
+      </div>
+      <div id="wiki-list" class="wiki-list" style="margin-top:16px"><div class="empty">正在加载…</div></div>
+      <div id="wiki-detail" class="panel" hidden>
+        <h2 id="detail-title"></h2>
+        <p id="detail-meta" class="wiki-meta"></p>
+        <p id="detail-summary"></p>
+        <div id="detail-body" class="wiki-body"></div>
+        <div id="detail-links" aria-label="Wiki 内部链接"></div>
+        <p id="detail-tags" class="wiki-meta"></p>
+        <div class="actions"><button id="detail-edit" class="button primary" type="button">编辑此条目</button></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>粘贴导入（Markdown / AI 文本）</h2>
+      <p class="wiki-meta">不调用 AI API。粘贴已有文本后解析预览；确认后仅新建「待确认」条目。</p>
+      <div class="field"><label for="wiki-import-source">粘贴文本</label><textarea id="wiki-import-source" maxlength="50000" placeholder="# 条目标题&#10;&#10;摘要或正文……"></textarea></div>
+      <div class="actions"><button id="wiki-import-parse" class="button" type="button">解析并预览</button></div>
+      <section id="wiki-import-preview" class="wiki-import-preview" hidden>
+        <h3>导入预览（可编辑）</h3><div id="wiki-import-parser-warnings"></div>
+        <div class="field"><label for="wiki-import-title">标题</label><input id="wiki-import-title" maxlength="200"></div>
+        <div class="field"><label for="wiki-import-summary">摘要</label><input id="wiki-import-summary" maxlength="500"></div>
+        <div class="field"><label for="wiki-import-category">分类</label><input id="wiki-import-category" maxlength="80"></div>
+        <div class="field"><label for="wiki-import-tags">标签（逗号分隔）</label><input id="wiki-import-tags"></div>
+        <div class="field"><label for="wiki-import-aliases">别名（逗号分隔）</label><input id="wiki-import-aliases"></div>
+        <div class="field"><label for="wiki-import-body">正文</label><textarea id="wiki-import-body" maxlength="50000"></textarea></div>
+        <div id="wiki-import-warnings" aria-live="polite"></div>
+        <label class="wiki-import-ack"><input id="wiki-import-duplicate-ack" type="checkbox"> 我已检查重复提示，仍要作为新条目导入（不会覆盖已有条目）</label>
+        <div class="actions"><button id="wiki-import-confirm" class="button primary" type="button">确认导入</button><button id="wiki-import-cancel" class="button" type="button">取消</button></div>
+      </section>
+      <hr>
+      <h2>JSON 备份与恢复</h2>
+      <p class="wiki-meta">备份仅包含 Wiki 条目，不包含其他实验或投资数据。导入采用合并模式，只新增无冲突条目，不覆盖或删除现有内容。</p>
+      <div class="actions">
+        <button id="wiki-backup-export" class="button" type="button">导出 JSON 备份</button>
+        <button id="wiki-backup-select" class="button" type="button">选择备份文件</button>
+        <input id="wiki-backup-file" type="file" accept=".json,application/json" hidden>
+      </div>
+      <section id="wiki-backup-preview" class="wiki-import-preview" hidden>
+        <h3>恢复预览</h3>
+        <p id="wiki-backup-meta" class="wiki-meta"></p>
+        <div class="result-grid">
+          <div class="metric"><div class="label">可新增</div><div class="value" id="backup-new-count">0</div></div>
+          <div class="metric"><div class="label">重复跳过</div><div class="value" id="backup-duplicate-count">0</div></div>
+          <div class="metric"><div class="label">冲突跳过</div><div class="value" id="backup-conflict-count">0</div></div>
+          <div class="metric"><div class="label">无效跳过</div><div class="value" id="backup-invalid-count">0</div></div>
+        </div>
+        <div id="wiki-backup-issues" aria-live="polite"></div>
+        <div class="actions"><button id="wiki-backup-confirm" class="button primary" type="button">确认导入可新增条目</button><button id="wiki-backup-cancel" class="button" type="button">取消</button></div>
+      </section>
+      <hr>
+      <h2 id="form-heading">新建知识条目</h2>
+      <form id="wiki-form">
+        <input id="wiki-id" type="hidden">
+        <div class="field"><label for="wiki-title">标题（必填）</label><input id="wiki-title" maxlength="200" required placeholder="例如：新 NISA 的つみたて投資枠"></div>
+        <div class="field"><label for="wiki-summary">简短摘要</label><input id="wiki-summary" maxlength="500" placeholder="用一两句话概括"></div>
+        <div class="field"><label for="wiki-category">分类</label><input id="wiki-category" maxlength="80" list="wiki-category-options" placeholder="例如：NISA 制度"><datalist id="wiki-category-options"><option value="NISA 制度"><option value="投资商品"><option value="交易术语"><option value="税务"><option value="市场与行情"><option value="风险"><option value="系统开发"></datalist></div>
+        <div class="field"><label for="wiki-tags">标签（用逗号分隔）</label><input id="wiki-tags" placeholder="例如：新NISA, 额度, 日本"></div>
+        <div class="field"><label for="wiki-aliases">别名（用逗号分隔）</label><input id="wiki-aliases" placeholder="例如：新NISA, 新しいNISA"></div>
+        <div class="field"><label for="wiki-status">知识状态</label><select id="wiki-status"><option value="draft">待确认</option><option value="verified">已核实</option><option value="needs_update">需要更新</option><option value="disputed">存在争议</option></select></div>
+        <div class="field"><label for="wiki-body">正文（支持基础 Markdown 和 Wiki 内链 [[条目ID|显示文字]]）</label><textarea id="wiki-body" maxlength="50000" placeholder="记录解释、例子、疑问和资料线索…"></textarea></div>
+        <div class="actions"><button class="button primary" type="submit">保存条目</button><button id="wiki-reset" class="button" type="button">清空 / 新建</button></div>
+      </form>
+    </section>
+  </div>
+  <footer class="footer"><a href="../index.html">返回技术预研实验室</a> · <a href="../../index.html">返回项目入口</a></footer>
+</main>
+<script type="module" src="./wiki-page.js"></script>
+</body>
+</html>
