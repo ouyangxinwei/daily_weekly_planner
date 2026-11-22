@@ -1,4 +1,6 @@
-# 阶段 3-A：交易收支、业务文档与私有附件（V10.57.0，已验收）
+# 阶段 3-A：交易收支、业务文档与私有附件（V10.56.0，已验收）
+
+> 版本说明：3-A 的代码版本是 V10.56.0（提交 `3cc5120`）；V10.57.0 是之后独立的「开发日记」模块。
 
 > 本阶段补齐阶段 1-A 设计中一直未实施的三种记录类型：`transaction`（交易）、`document`（业务文档）和 `file`（附件元数据），并首次启用私有 Storage。
 
@@ -74,7 +76,7 @@
 | 项目 | 状态 |
 |---|---|
 | 代码 | 已提交到 `main`（本地提交，见 Git 历史） |
-| 数据库迁移（Storage Bucket） | **已执行并核验**：migration `20261121020047`；Bucket 私有、10 MiB、12 种 MIME 类型 |
+| 数据库迁移（Storage Bucket） | **已执行并核验**：生产 migration history 版本为 `20261121020047`（与仓库文件名 `20261121090000_…` 不同；SQL 带 `on conflict`，重复执行无害）；Bucket 私有、10 MiB、12 种 MIME 类型 |
 | Edge Function `company-api` v6 | **已部署并核验 ACTIVE，版本 6，verify_jwt=false，函数内部执行 Basic 认证** |
 | GitHub Pages 前端 | V10.57.0 已由用户在生产入口完成真实浏览器验收 |
 | 用户真实浏览器验收 | **2026-11-21 用户确认验收 OK；Phase 3-A 正式完成** |
@@ -87,7 +89,7 @@ supabase db push
 supabase functions deploy company-api --no-verify-jwt
 ```
 
-（也可在 Supabase SQL Editor 执行上述迁移文件，并在控制台部署 `supabase/functions/company-api/index.ts`。）
+（也可在 Supabase SQL Editor 执行上述迁移文件，并在控制台部署 `supabase/functions/company-api/` 下的 `index.ts` 和 `list-all.ts`（V10.58 起函数由两个文件组成）。）
 
 **验收结果：** 用户于 2026-11-21 确认生产环境验收 OK，Phase 3-A 正式完成。日常使用中仍建议关注附件上传失败、签名 URL 过期和大文件网络中断等边界情况。Supabase Security Advisors 仍提示现有自定义登录模式下 `planner_diary_*`、`planner_login`、`planner_get_data`、`planner_put_data` 等 SECURITY DEFINER RPC 可由 anon/authenticated 调用（函数内部自行验证密码），此为现有认证架构的安全提示，不是本次 Storage 迁移新增的权限策略。
 

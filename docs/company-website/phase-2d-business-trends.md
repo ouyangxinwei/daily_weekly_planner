@@ -81,5 +81,5 @@
 - main 验证 run `44750195057`：completed / success。
 - Pages run `44750193594`：completed / success；build、deploy、report-build-status 均成功。
 - Playwright 未取得通过结论，不记录为通过，也不作为本阶段合并前提。
-- 用户真实浏览器验收：等待确认。
+- 用户真实浏览器验收：2026-11-21 用户确认 OK（见第 8 节），Phase 2 正式完成。
 - 未修改数据库、RLS、Edge Function、认证或生产业务数据。

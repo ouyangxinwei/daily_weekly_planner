@@ -45,8 +45,15 @@
 - 既有 `validate-v10.50`、`v10.51`、`v10.52` 的静态检查标记改为新的函数名，`v10.56` 的版本号断言改为 10.58.0。
 - 版本：V10.58.0（`VERSION`、`package.json`、`APP_VERSION='V10.58_company_complete_reads'`、Service Worker 缓存名）。
 
-## 5. 未包含（后续）
+## 5. 同一 PR 中的其他修正
 
-- 服务端 `listRecordFiles`、`listProjectTasks` 的分页扫描（Edge Function 内部，需要部署 company-api）。
-- 2-B「未来 7 天」文档前后矛盾、2-C 客户行「待处理跟进」标签与口径不符、2-C「逾期项目」点进去没有筛选。
-- 各文档阶段状态和版本号的统一。
+- **company-api 内部扫描**：`listProjectTasks`（`GET /projects/:id/tasks`）和 `listRecordFiles`（`GET /files`）改用新文件 `supabase/functions/company-api/list-all.ts` 的 `collectAllPages()`，规则与前端相同；读取不完整时返回 `503 LIST_INCOMPLETE`，前端显示「数据未能完整读取」。**需要重新部署 company-api 才会在生产生效**（`supabase functions deploy company-api --no-verify-jwt`；函数现在由 `index.ts` 和 `list-all.ts` 两个文件组成）。
+- **total 缺失**：前端和服务端都把缺失的 `total`（null、空字符串）视为错误，而不是 0。
+- **2-B**：验收标准第 2 条「明天至第 6 天」改为与第 2 节、代码和测试一致的「明天至今天 + 7 天」。
+- **2-C**：客户行标签改为「关联跟进」；「逾期项目」点击后自动应用新的项目「仅逾期」筛选，KPI 与列表共用 `isOverdueProject()`。
+- **文档状态与版本号**：产品规范、功能说明中 2-D 和 3-A 改为已实现并验收；路线图 §13 的 2-D 状态、「下一步」编号；3-A 文档标题改为 V10.56.0（V10.57.0 是开发日记）；README 和路线图的 main 版本改为 V10.58.0；2-D 第 9 节的验收状态。
+
+## 6. 仍未包含
+
+- 3-A 附件：浏览器上传成功但随后 `POST /files` 失败时，Storage 中会留下孤儿对象（需要清理机制，例如定期扫描）。
+- 3-A 金额：服务端不拒绝超过 6 位小数的金额（数据库会四舍五入）；服务端不检查文件内容（只核对声明的类型和大小）。

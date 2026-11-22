@@ -4,7 +4,10 @@
 - Task due-date filters, follow-up/project relation filters and customer/project choices in editors now read complete data. Incomplete pagination (empty page, short page, changing total, count mismatch) shows an error instead of silently using partial data.
 - Added a short-lived cache: changing filters or pages no longer repeats requests; opening a page reuses data up to 15 seconds old; Refresh reads again; any create/edit/delete clears the cache. This reduces the chance of hitting the company-api limit of 30 requests per minute.
 - Too many requests (429) now shows a clear message; a failed related-information read shows "unavailable" instead of 0.
-- No database, RLS, company-api or record format changes.
+- Project & customer overview: the follow-up count on customer rows is now labelled "Follow-ups"; clicking "Overdue projects" opens the project list filtered to overdue projects (new "Overdue only" project filter).
+- company-api internal task and attachment scans also verify pagination completeness (takes effect after redeploying company-api).
+- Aligned phase statuses and version numbers across the company website docs.
+- No database, RLS or record format changes.
 
 # V10.57 Development Diary V1 — 2026-11-21
 

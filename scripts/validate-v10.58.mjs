@@ -2,6 +2,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { fetchCompleteList, createRecordCache, IncompleteDataError } from '../company-record-loader.js';
+import { isOverdueProject, getProjectCustomerOverview } from '../company-project-customer-overview.js';
+import { collectAllPages, IncompleteListError } from '../supabase/functions/company-api/list-all.ts';
 
 function makeRecords(count, type = 'task') {
   return Array.from({ length: count }, (_, index) => ({ id: type + '-' + index, record_type: type }));
@@ -47,6 +49,7 @@ await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offse
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offset) => offset === 100 ? { ...page, items: page.items.slice(0, 40) } : page).request, '/records?record_type=task'), 'short-page');
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250), (page, offset) => offset === 100 ? { ...page, total: 251 } : page).request, '/records?record_type=task'), 'total-changed');
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(10), page => ({ ...page, total: 'x' })).request, '/records?record_type=task'), 'invalid-total');
+await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(10), page => ({ ...page, total: null })).request, '/records?record_type=task'), 'invalid-total');
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(10), page => ({ ...page, items: null })).request, '/records?record_type=task'), 'invalid-page');
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(150), (page, offset) => offset === 100 ? { ...page, items: [...page.items, ...makeRecords(5, 'extra')] } : page).request, '/records?record_type=task'), 'count-mismatch');
 await rejectsIncomplete(fetchCompleteList(fakeApi(makeRecords(250)).request, '/records?record_type=task', { maxOffset: 150 }), 'offset-limit');
@@ -138,6 +141,45 @@ const workspace = fs.readFileSync('company-records-workspace.js', 'utf8');
 assert.match(workspace, /if \(all\.length !== expected\) throw new Error\(t\('failed'\)\);/);
 assert.match(workspace, /if \(page\.length < 100\) throw new Error\(t\('failed'\)\);/);
 assert.match(workspace, /const customers = await fetchShared\('customer'\);/);
+
+// --- company-api internal scans (list-all.ts) ---------------------------------------
+{
+  const rows = makeRecords(250);
+  const pageOf = (tamper = p => p) => async (offset, limit) => tamper({ items: rows.slice(offset, offset + limit), total: rows.length }, offset);
+  assert.equal((await collectAllPages(pageOf())).length, 250);
+  assert.equal((await collectAllPages(async () => ({ items: [], total: 0 }))).length, 0);
+  const rejectsList = (fn, reason) => assert.rejects(collectAllPages(fn), e => e instanceof IncompleteListError && e.reason === reason);
+  await rejectsList(pageOf((p, o) => o === 100 ? { ...p, items: [] } : p), 'empty-page');
+  await rejectsList(pageOf((p, o) => o === 100 ? { ...p, items: p.items.slice(0, 10) } : p), 'short-page');
+  await rejectsList(pageOf((p, o) => o === 100 ? { ...p, total: 300 } : p), 'total-changed');
+  await rejectsList(pageOf(p => ({ ...p, total: null })), 'invalid-total');
+}
+const edge = fs.readFileSync('supabase/functions/company-api/index.ts', 'utf8');
+assert.match(edge, /import \{ collectAllPages, IncompleteListError, type ListPage \} from "\.\/list-all\.ts";/);
+assert.doesNotMatch(edge, /scanOffset/, 'listProjectTasks no longer advances blindly by page size');
+assert.doesNotMatch(edge, /if \(!pageItems\.length\) break;/, 'listRecordFiles no longer stops silently on an empty page');
+assert.equal((edge.match(/await listAllRecords\(auth, \{/g) || []).length, 2, 'both internal scans use listAllRecords');
+assert.match(edge, /throw new ApiError\(503, "LIST_INCOMPLETE"\)/);
+assert.match(business, /payload\.error === 'LIST_INCOMPLETE' \? t\('incompleteData'\)/);
+
+// --- 2-C overdue projects and labels ---------------------------------------------------
+{
+  const today = '2026-11-22';
+  assert.equal(isOverdueProject({ status: 'active', due_date: '2026-11-21' }, today), true);
+  assert.equal(isOverdueProject({ status: 'planned', due_date: '2026-11-21T09:00:00Z' }, today), true);
+  assert.equal(isOverdueProject({ status: 'active', due_date: '2026-11-22' }, today), false, 'due today is not overdue');
+  assert.equal(isOverdueProject({ status: 'completed', due_date: '2026-11-01' }, today), false);
+  assert.equal(isOverdueProject({ status: 'cancelled', due_date: '2026-11-01' }, today), false);
+  assert.equal(isOverdueProject({ status: 'active', due_date: null }, today), false);
+  assert.equal(isOverdueProject({ status: 'active', due_date: 'bad' }, today), false);
+  const projects = [{ id: 'a', status: 'active', due_date: '2026-11-01' }, { id: 'b', status: 'on_hold', due_date: '2026-11-20' }, { id: 'c', status: 'completed', due_date: '2026-11-01' }, { id: 'd', status: 'active', due_date: '2026-12-01' }];
+  assert.equal(getProjectCustomerOverview({ projects }, today).overdueProjects, projects.filter(p => isOverdueProject(p, today)).length, 'KPI and list filter share one rule');
+}
+assert.match(business, /\['pcOverdueProjects',metrics\.overdueProjects,\(\)=>\{state\.projectStatus='';state\.projectDueFilter='overdue';/);
+assert.match(business, /if \(state\.projectDueFilter === 'overdue'\) return isOverdueProject\(record, getLocalDateKey\(\)\);/);
+assert.match(business, /const relationFiltered = \(project && \(state\.projectCustomerFilter \|\| state\.projectDueFilter\)\)/);
+assert.match(business, /t\('relatedFollowupCount'\)\+': '\+row\.followupCount/);
+for (const label of ["relatedFollowupCount:'关联跟进'", "relatedFollowupCount:'Follow-ups'", "relatedFollowupCount:'関連フォロー'"]) assert.ok(business.includes(label), label);
 
 // --- version and service worker ---------------------------------------------------
 const html = fs.readFileSync('index.html', 'utf8');

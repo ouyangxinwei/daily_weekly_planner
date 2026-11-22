@@ -35,7 +35,8 @@ export async function fetchCompleteList(request, path, { label = path, pageSize 
     const result = await request(path + (path.includes('?') ? '&' : '?') + params.toString());
     const page = Array.isArray(result?.items) ? result.items : null;
     if (!page) throw new IncompleteDataError(label, 'invalid-page');
-    const reportedTotal = Number(result?.total);
+    const rawTotal = result?.total;
+    const reportedTotal = typeof rawTotal === 'number' ? rawTotal : (typeof rawTotal === 'string' && rawTotal.trim() !== '' ? Number(rawTotal) : NaN);
     if (!Number.isInteger(reportedTotal) || reportedTotal < 0) throw new IncompleteDataError(label, 'invalid-total');
     if (expectedTotal === null) expectedTotal = reportedTotal;
     else if (reportedTotal !== expectedTotal) throw new IncompleteDataError(label, 'total-changed');

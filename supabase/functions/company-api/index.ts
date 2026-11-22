@@ -1,3 +1,5 @@
+import { collectAllPages, IncompleteListError, type ListPage } from "./list-all.ts";
+
 type JsonObject = Record<string, unknown>;
 
 const ALLOWED_ORIGINS = new Set([
@@ -388,19 +390,26 @@ async function assertTaskProject(auth: JsonObject, projectId: unknown, requestId
 async function listProjectTasks(auth: JsonObject, projectId: string, url: URL, requestId: string) {
   const args = listArguments(url, "task");
   if (args.p_status !== null && !TASK_STATUSES.has(String(args.p_status))) throw new ApiError(400, "INVALID_TASK_STATUS");
-  const limit = Number(args.p_limit), offset = Number(args.p_offset), pageSize = 100;
-  let scanOffset = 0, total = 0;
-  const matches: Record<string, unknown>[] = [];
-  do {
-    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
-      ...auth, p_record_type: "task", p_business_type: null, p_status: args.p_status,
-      p_keyword: args.p_keyword, p_limit: pageSize, p_offset: scanOffset,
-    }, requestId);
-    total = Number(page.total || 0);
-    matches.push(...(Array.isArray(page.items) ? page.items.filter(item => item.parent_record_id === projectId) : []));
-    scanOffset += pageSize;
-  } while (scanOffset < total);
+  const limit = Number(args.p_limit), offset = Number(args.p_offset);
+  const all = await listAllRecords(auth, {
+    p_record_type: "task", p_business_type: null, p_status: args.p_status, p_keyword: args.p_keyword,
+  }, requestId);
+  const matches = all.filter(item => item.parent_record_id === projectId);
   return { items: matches.slice(offset, offset + limit), total: matches.length, limit, offset };
+}
+
+// V10.58: every internal scan reads all pages and verifies them (see list-all.ts).
+async function listAllRecords(auth: JsonObject, filters: JsonObject, requestId: string): Promise<Record<string, unknown>[]> {
+  try {
+    return await collectAllPages<Record<string, unknown>>((offset, limit) =>
+      rpc<ListPage>("company_list_records", { ...auth, ...filters, p_limit: limit, p_offset: offset }, requestId));
+  } catch (error) {
+    if (error instanceof IncompleteListError) {
+      console.error("company-api list scan incomplete", { reason: error.reason, requestId });
+      throw new ApiError(503, "LIST_INCOMPLETE");
+    }
+    throw error;
+  }
 }
 
 function validateProjectProgressFields(body: JsonObject) {
@@ -656,20 +665,10 @@ async function deleteStoredFile(auth: JsonObject, id: string, requestId: string)
 }
 
 async function listRecordFiles(auth: JsonObject, parentId: string, requestId: string) {
-  const pageSize = 100;
-  let offset = 0, total = 0;
-  const items: Record<string, unknown>[] = [];
-  do {
-    const page = await rpc<{ items: Record<string, unknown>[]; total: number }>("company_list_records", {
-      ...auth, p_record_type: "file", p_business_type: null, p_status: null,
-      p_keyword: null, p_limit: pageSize, p_offset: offset,
-    }, requestId);
-    total = Number(page.total || 0);
-    const pageItems = Array.isArray(page.items) ? page.items : [];
-    items.push(...pageItems.filter((item) => String(item.parent_record_id).toLowerCase() === parentId.toLowerCase()));
-    if (!pageItems.length) break;
-    offset += pageItems.length;
-  } while (offset < total);
+  const all = await listAllRecords(auth, {
+    p_record_type: "file", p_business_type: null, p_status: null, p_keyword: null,
+  }, requestId);
+  const items = all.filter((item) => String(item.parent_record_id).toLowerCase() === parentId.toLowerCase());
   return { items, total: items.length };
 }
 
