@@ -17,7 +17,7 @@
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改。
 - 业务数据：使用主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB。
 - 认证：沿用慢慢计划现有自定义账号认证；Edge Function 在服务端再次验证请求身份。
-- API：生产 `company-api` v8（ACTIVE）；新增 `/status-history` 认证分页读取路由。
+- API：生产 `company-api` v8（ACTIVE）；包含 `/status-history`，Phase 3-B-D 合并后目标部署 v9（新增 `/activity-history`）。
 - 文件存储：私有 Bucket `company-documents` 已部署，`public=false`，10 MiB 上限、12 种 MIME 类型；不开放客户端 Storage RLS 策略，附件只通过 company-api 签发的短时签名 URL 上传/下载。
 - 阶段 1-A 至 1-H：设计、数据库/API、客户、项目、任务和项目进度联动能力均已完成。
 - 阶段 1-I-A：跨模块导航 V10.46.0 已合并、部署并通过用户真实浏览器验收。
@@ -32,7 +32,8 @@
 
 ## 阶段文档
 
-- [Phase 3-B-D：业务活动时间线](./phase-3b-d-business-activity.md)\n- [Phase 3-B-C：业务状态变更历史](./phase-3b-c-status-history.md)
+- [Phase 3-B-D：业务活动时间线](./phase-3b-d-business-activity.md)
+- [Phase 3-B-C：业务状态变更历史](./phase-3b-c-status-history.md)
 - [Phase 3-B-B：按币种的月度收支趋势](./phase-3b-b-monthly-cashflow.md)
 - [Phase 2 路线与阶段规划](./phase-2-overview-workbench.md)
 - [阶段 2-A：业务总览首页](./phase-2a-business-overview.md)
