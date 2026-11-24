@@ -247,7 +247,7 @@ import {
   }
 
   function render() {
-    if (!TABS.includes(state.tab)) return;
+    if (!TABS.includes(state.tab) || state.tab === 'cashflowTrends') return;
     updateLabels();
     const transactions = state.tab === 'transactions', filters = currentFilters();
     const filtered = transactions ? filterTransactions(state.transactions, filters) : filterDocuments(state.documents, filters);
@@ -576,7 +576,7 @@ import {
   function init() {
     if (!install()) return;
     window.addEventListener('company-business-tab-change', onTabChange);
-    window.addEventListener('planner-language-change', () => { updateLabels(); if (state.tab) render(); });
+    window.addEventListener('planner-language-change', () => { updateLabels(); if (state.tab === 'cashflowTrends') renderCashflowTrends(); else if (state.tab) render(); });
     window.addEventListener('planner-auth-change', () => { state.customers = []; state.projects = []; state.transactions = []; state.documents = []; state.cashflowTransactions = []; state.filesByParent = {}; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
