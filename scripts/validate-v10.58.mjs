@@ -215,6 +215,6 @@ const sw = fs.readFileSync('sw.js', 'utf8');
 assert.match(sw, /daily-weekly-planner-v10-(?:58-company-complete-reads|59-company-entity-attachments|60-monthly-cashflow)/);
 assert.ok(sw.includes("'./company-record-loader.js'"), 'service worker caches the loader module');
 assert.ok(['10.58.0', '10.59.0', '10.60.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
-assert.ok(['10.58.0', '10.59.0'].includes(JSON.parse(fs.readFileSync('package.json', 'utf8')).version));
+assert.ok(['10.58.0', '10.59.0', '10.60.0'].includes(JSON.parse(fs.readFileSync('package.json', 'utf8')).version));
 
 console.log('V10.58 complete company reads, cache and rate-limit validation passed.');
