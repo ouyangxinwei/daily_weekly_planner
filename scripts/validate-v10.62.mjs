@@ -19,7 +19,7 @@ assert.match(migration, /enable row level security/i);
 assert.match(migration, /revoke all on table public\.company_record_activity_history from public,anon,authenticated,service_role/i);
 assert.match(migration, /company_list_activity_history/);
 assert.match(cleanup, /company_record_status_history/);
-assert.match(cleanup, /keys\.key<>'progress_percent'/);
+assert.match(cleanup, /k<>'progress_percent'/);
 assert.match(cleanup, /drop table if exists public\.company_record_activity/i);
 assert.match(emptyLegacy, /return jsonb_build_object\('items',v_items,'total',v_total/);
 assert.match(edge, /route === "\/activity-history" && req\.method === "GET"/);
