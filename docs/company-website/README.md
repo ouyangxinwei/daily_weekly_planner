@@ -6,18 +6,18 @@
 
 - **整体阶段：Phase 3——财务与文档资料（Phase 2 已全部完成并通过用户验收）。**
 - **Phase 1：当前定义的 13 个核心工作项均已完成并通过阶段验收。**
-- **最新完成阶段：Phase 3-B-C——业务状态变更历史（V10.61.0，PR #76 已合并；数据库 migration 已应用；company-api v8 已部署 ACTIVE；Pages 部署状态待确认；真实浏览器验收暂缓）。**
+- **当前开发阶段：Phase 3-B-D——业务活动时间线（目标 V10.62.0；功能分支开发中，数据库 migration 已应用；应用/API 尚待合并部署）。**
 - Phase 3-B-A（V10.59.0，PR #72）已合并；用户暂缓实际浏览器验收，后续开发继续推进。
 - Phase 3-A（V10.56.0）已于 2026-11-21 通过生产真实浏览器验收；V10.58.0 数据完整读取修复已合并并部署。
 - **V10.58.0：业务记录完整读取与限流保护修复（PR #66，已合并、已部署；自动化验证通过，真实浏览器验收状态未单独记录）。**
 - 2-D 业务趋势与周期复盘（V10.54.0）：已合并、部署并通过用户真实浏览器验收（2026-11-21）；Phase 2 正式完成。
 - **Phase 2 路线：2-A 业务总览 → 2-B 待办事项中心 → 2-C 项目与客户业务概况 → 2-D 业务趋势与周期复盘。**
-- 当前 main 应用版本：V10.61.0（PR #76 已合并）。Pages 部署状态以对应 GitHub Actions build/deploy 结果为准。
+- 当前 main 应用版本：V10.61.0（PR #76 已合并）；Phase 3-B-D 目标版本 V10.62.0。Pages 部署状态以对应 GitHub Actions build/deploy 结果为准。
 - Phase 3-B-C：状态变更历史（V10.61.0），项目/任务/跟进初始状态及每次状态变化由数据库触发器记录；业务趋势按真实完成事件时间统计。
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改。
 - 业务数据：使用主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB。
 - 认证：沿用慢慢计划现有自定义账号认证；Edge Function 在服务端再次验证请求身份。
-- API：生产 `company-api` v8（ACTIVE）；新增 `/status-history` 认证分页读取路由。
+- API：生产 `company-api` v8（ACTIVE）；包含 `/status-history`，Phase 3-B-D 合并后目标部署 v9（新增 `/activity-history`）。
 - 文件存储：私有 Bucket `company-documents` 已部署，`public=false`，10 MiB 上限、12 种 MIME 类型；不开放客户端 Storage RLS 策略，附件只通过 company-api 签发的短时签名 URL 上传/下载。
 - 阶段 1-A 至 1-H：设计、数据库/API、客户、项目、任务和项目进度联动能力均已完成。
 - 阶段 1-I-A：跨模块导航 V10.46.0 已合并、部署并通过用户真实浏览器验收。
@@ -32,6 +32,7 @@
 
 ## 阶段文档
 
+- [Phase 3-B-D：业务活动时间线](./phase-3b-d-business-activity.md)
 - [Phase 3-B-C：业务状态变更历史](./phase-3b-c-status-history.md)
 - [Phase 3-B-B：按币种的月度收支趋势](./phase-3b-b-monthly-cashflow.md)
 - [Phase 2 路线与阶段规划](./phase-2-overview-workbench.md)

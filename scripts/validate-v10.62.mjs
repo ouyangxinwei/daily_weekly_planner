@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
+const migration = read('../supabase/migrations/20261124223414_company_business_activity_history_phase_3b_d.sql');
+const cleanup = read('../supabase/migrations/20261124223517_company_activity_history_deduplicate_phase_3b_d.sql');
+const emptyLegacy = read('../supabase/migrations/20261124223644_company_activity_history_empty_records_phase_3b_d.sql');
+const edge = read('../supabase/functions/company-api/index.ts');
+const ui = read('../company-business.js');
+const customerUi = read('../company-website.js');
+const initialMigration = read('../supabase/migrations/20261124223326_company_record_activity_phase_3b_d.sql');
+const pkg = JSON.parse(read('../package.json'));
+const html = read('../index.html');
+const sw = read('../sw.js');
+
+assert.match(initialMigration, /company_record_activity/);
+assert.match(migration, /company_record_activity_history/);
+assert.match(migration, /enable row level security/i);
+assert.match(migration, /revoke all on table public\.company_record_activity_history from public,anon,authenticated,service_role/i);
+assert.match(migration, /company_list_activity_history/);
+assert.match(cleanup, /company_record_status_history/);
+assert.match(read('../supabase/migrations/20261124224743_company_customer_status_activity_phase_3b_d.sql'), /NEW\.record_type='customer' and OLD\.status is distinct from NEW\.status/);
+assert.match(cleanup, /k<>'progress_percent'/);
+assert.match(cleanup, /drop table if exists public\.company_record_activity/i);
+assert.match(emptyLegacy, /return jsonb_build_object\('items',v_items,'total',v_total/);
+assert.match(edge, /route === "\/activity-history" && req\.method === "GET"/);
+assert.match(edge, /company_list_activity_history/);
+assert.match(ui, /loadAllActivityHistory/);
+assert.match(ui, /api\('\/activity-history\?/);
+assert.match(ui, /activityStatusChanged/);
+assert.match(ui, /activityDeleted/);
+assert.match(ui, /activityHistoryNote/);
+assert.match(ui, /events\.forEach\(event =>/);
+assert.match(pkg.version, /^10\.62\.0$/);
+assert.ok(pkg.scripts['test:validate:company-activity-history']);
+assert.match(html, /V10\.62_business_activity_history/);
+assert.match(sw, /v10-62-business-activity-history/);
+console.log('V10.62 business activity history validation passed.');

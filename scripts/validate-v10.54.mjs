@@ -18,6 +18,13 @@ const weekly = getBusinessTrendReport({
     { id: 'f2', record_date: '', created_at: '2026-01-05T12:00:00Z' },
     { id: 'f3', record_date: 'invalid', created_at: '2026-01-05T12:00:00Z' },
     { id: 'f4', record_date: '2026-01-10', created_at: '2026-01-04T11:00:00Z' }
+  ],
+  projectStatusHistory: [
+    { old_status: 'active', new_status: 'completed', changed_at: '2026-01-05T12:00:00Z' },
+    { old_status: 'active', new_status: 'completed', changed_at: '2025-12-20T09:00:00Z' }
+  ],
+  taskStatusHistory: [
+    { old_status: 'todo', new_status: 'completed', changed_at: '2026-01-05T12:00:00Z' }
   ]
 }, 'week', '2026-01-05');
 
@@ -42,7 +49,9 @@ const monthly = getBusinessTrendReport({
     { status: 'active', created_at: '2026-01-01', updated_at: '2026-01-02' }
   ],
   tasks: [{ status: 'completed', created_at: '2025-08-31', updated_at: '2025-12-31' }],
-  followups: [{ record_date: '2025-08-31', created_at: '2026-01-02' }]
+  followups: [{ record_date: '2025-08-31', created_at: '2026-01-02' }],
+  projectStatusHistory: [{ old_status: 'active', new_status: 'completed', changed_at: '2026-01-02T12:00:00Z' }],
+  taskStatusHistory: [{ old_status: 'in_progress', new_status: 'completed', changed_at: '2025-12-31T12:00:00Z' }]
 }, 'month', '2026-01-05');
 
 assert.equal(monthly.periods.length, 6);
