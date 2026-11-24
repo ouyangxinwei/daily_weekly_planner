@@ -226,7 +226,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 1. Phase 3-A 前端、私有 Storage 与 company-api v6 均已部署；用户于 2026-11-21 确认生产真实浏览器验收 OK，阶段正式完成。
 2. Phase 3-B-A 代码已通过 PR #72 合并：客户卡片、项目列表、任务列表和跟进列表增加附件入口，复用现有附件管理窗口与 API。验证 workflow run #423 成功；Pages 部署状态仍待确认。
 3. Phase 3-B-A 后续验证重点：四类记录均能打开正确附件列表；上传/下载/删除沿用私有 Storage；存在附件时业务记录删除仍受保护；三语与移动布局正常。
-4. Phase 3-B-B 已合并，提供最近 12 个月 JPY/CNY/USD 分币种收支趋势；验证 run #427 成功。Pages 部署待确认，用户实际浏览器验收暂缓，不阻断下一阶段。后续评估状态变更历史（`completed_at`）。
+4. Phase 3-B-C（V10.61.0 / PR #76）和 Phase 3-B-D（V10.62.0 / PR #78）均已合并；company-api v9 ACTIVE，五个 Phase 3-B-D migration 已应用。Pages 部署证据待确认，真实浏览器验收暂缓。
 
 ## 15. V10.58.0：业务记录完整读取与限流保护（修复，2026-11-22）
 
@@ -237,15 +237,17 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - 状态：PR #66 已于 2026-11-22 合并至 main；对应 JavaScript/业务规则验证和 GitHub Pages build/deploy 均成功。company-api v6 已部署，V10.58 服务端分页完整性、文件内容检查、孤儿文件清理及金额精度校验随该版本生效。
 
 
-## 16. 当前主分支核对（2026-11-24）
+## 16. 当前主分支核对（2026-11-25）
 
 - 当前 `main`：以 GitHub 仓库 `main` 分支 HEAD 为准；本路线文档不固定记录自身提交 SHA，避免文档提交后立即过期。
-- 应用版本：`10.59.0`（PR #72 已合并；`VERSION` 与 `package.json` 一致）。
+- 应用版本：`10.62.0`（PR #78 已合并；`VERSION` 与 `package.json` 一致）。
 - PR #66（V10.58 公司业务完整读取修复）：已合并；其 main 验证与 Pages build/deploy 均成功。
 - PR #68（testNisa 完整演练区迁移）：已合并；迁移 38 个文件、11 个页面。
 - PR #69（testNisa 部署状态文档）：已合并；Pages Run #333 成功。
 - PR #70（当前版本与项目路线文档校准）：已于 2026-11-24 合并；仅修改文档，不改变应用代码或版本。
-- PR #72（Phase 3-B-A 客户/项目/任务/跟进附件入口）：已合并，merge commit `08ceb873b1749a2318fab38c986ef7b590520411`；验证 run #423 success；用户暂缓实际浏览器验收。
+- PR #72（Phase 3-B-A 客户/项目/任务/跟进附件入口）：已合并；验证 run #423 success；用户暂缓实际浏览器验收。
 - PR #74（Phase 3-B-B 按币种的月度收支趋势）：已合并，merge commit `6b29839b0dbf7975597ac44ede571d068e89a941`；验证 run #427 success；Pages build/deploy 状态待确认，用户真实浏览器验收暂缓。
-- PR #72 已关闭并合并；当前开放 PR 状态以 GitHub 实时列表为准。浏览器逐页验收 testNisa 11 个页面仍待用户方便时完成；未执行 Nightly Playwright。
-- Phase 1、Phase 2、Phase 3-A 均已完成；Phase 3-B-A 代码已合并至 main，目标版本 V10.59.0；Pages 部署和用户验收仍待确认。
+- PR #76（Phase 3-B-C 业务状态变更历史）：已合并，merge commit `c14c1cbadd93bf8cb62ce092732f60e69116730d`；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署状态待确认。
+- PR #78（Phase 3-B-D 业务活动时间线）：已合并，merge commit `5441c765f02c1547a2bb247506b67690955c265e`；PR 验证 run #460 success；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署成功证据尚未取得。
+- 当前开放 PR 状态以 GitHub 实时列表为准。testNisa 11 个页面的真实浏览器验收仍待用户方便时完成；未执行 Nightly Playwright。
+- Phase 1、Phase 2、Phase 3-A 已完成；Phase 3-B-A 至 3-B-D 代码均已合并。Phase 3-B-D 的 Pages 部署和真实浏览器验收状态仍待确认。
