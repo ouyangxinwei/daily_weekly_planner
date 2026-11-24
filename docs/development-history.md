@@ -4,7 +4,7 @@
 - 将 `openAttachments(record)` 暴露为 `window.CompanyRecords.openAttachments`，不复制附件管理逻辑。
 - 复用 company-api v6 和私有 Bucket `company-documents`；无数据库迁移、RLS 变更、Storage policy 变更或后端部署要求。
 - 三语标签：简体中文、英文、日文。Service Worker 缓存和应用版本目标为 V10.59.0。
-- 开发分支：`feature/phase-3b-a-business-attachments`；合并、Actions、Pages 部署和用户真实浏览器验收状态待最终交付记录。
+- 开发分支：`feature/phase-3b-a-business-attachments`；PR #72 已于 2026-11-24 squash merge，合并提交 `08ceb873b1749a2318fab38c986ef7b590520411`；验证 workflow run #423 success。Pages 部署状态待确认，用户真实浏览器验收待完成。
 
 # V10.55 美股七巨头行情看板（2026-11-21）
 
