@@ -19,6 +19,7 @@ assert.match(migration, /enable row level security/i);
 assert.match(migration, /revoke all on table public\.company_record_activity_history from public,anon,authenticated,service_role/i);
 assert.match(migration, /company_list_activity_history/);
 assert.match(cleanup, /company_record_status_history/);
+assert.match(read('../supabase/migrations/20261124224743_company_customer_status_activity_phase_3b_d.sql'), /NEW\.record_type='customer' and OLD\.status is distinct from NEW\.status/);
 assert.match(cleanup, /k<>'progress_percent'/);
 assert.match(cleanup, /drop table if exists public\.company_record_activity/i);
 assert.match(emptyLegacy, /return jsonb_build_object\('items',v_items,'total',v_total/);
