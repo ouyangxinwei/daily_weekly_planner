@@ -518,5 +518,5 @@ import {
     window.addEventListener('planner-auth-change', () => { state.customers = []; state.projects = []; state.transactions = []; state.documents = []; state.filesByParent = {}; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
-  window.CompanyRecords = Object.freeze({ version: '1.0.0', reload: load, maxFileBytes: FILE_MAX_BYTES });
+  window.CompanyRecords = Object.freeze({ version: '1.1.0', reload: load, openAttachments, maxFileBytes: FILE_MAX_BYTES });
 })();
