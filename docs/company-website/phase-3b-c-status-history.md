@@ -46,5 +46,8 @@
 - 生产 Supabase 项目：`kopvznygsqsheibsjjvv`。
 - 数据库 migration 已应用；历史表已建立，RLS enabled，表行数为 0（没有插入测试业务记录）。
 - Security Advisor 中该表仅报告既有策略基线相同的 RLS Enabled No Policy 信息项；表直接权限已撤销，RPC 仅 service_role 可执行。
-- Edge Function 路由与前端尚需以合并后部署结果确认；Pages 部署需以对应 Actions build/deploy 成功为准。
+- 功能 PR #76 已 squash merge；合并提交：`c14c1cbadd93bf8cb62ce092732f60e69116730d`。
+- Supabase Edge Function `company-api` v8 已部署，状态 ACTIVE，`verify_jwt=false`（沿用函数内部 Basic 认证）。
+- GitHub Actions run/status 查询未返回该提交的可核验运行记录，因此不宣称 V10.61 验证 workflow 已通过。
+- GitHub Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署。
 - 用户真实浏览器验收暂缓，不作为继续开发的阻断条件。
