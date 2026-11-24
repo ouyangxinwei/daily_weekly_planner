@@ -256,3 +256,11 @@ html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 .cw-cashflow-note{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
 @media(max-width:760px){.cw-cashflow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-cashflow-chart{grid-template-columns:1fr}}
 @media(max-width:480px){.cw-cashflow-heading{display:grid}.cw-cashflow-controls{width:100%}.cw-cashflow-controls select{flex:1;min-width:0}.cw-cashflow-kpi{padding:10px}}
+
+.cw-status-history-dialog{width:min(620px,calc(100% - 24px));max-height:min(80vh,760px);overflow:auto}
+.cw-status-history-list{list-style:none;display:grid;gap:0;margin:14px 0;padding:0}
+.cw-status-history-item{position:relative;padding:0 0 18px 20px;border-left:2px solid var(--line)}
+.cw-status-history-item:last-child{border-left-color:transparent;padding-bottom:0}
+.cw-status-history-item:before{content:"";position:absolute;left:-5px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.cw-status-history-change{margin:0 0 4px;color:var(--ink);font-size:13px;font-weight:650}
+.cw-status-history-time{color:var(--muted);font-size:11px}

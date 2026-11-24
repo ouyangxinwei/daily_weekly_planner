@@ -72,7 +72,7 @@
 - 基于 main：9dcc2563299538eb2cde0dfd6bb78f1ff65ef2d7。
 - 当前状态：已合并、已部署并通过用户真实浏览器验收；用户于 2026-11-21 明确确认 OK，Phase 2 正式完成。
 
-## 9. 合并与部署记录（2026-11-20）
+## 10. V10.61.0 后续口径更新\n\nV10.61.0 起，项目/任务完成趋势改为使用数据库状态历史中进入 `completed` 的真实时间。V10.61.0 上线前的历史事件不存在，不从当前状态或 `updated_at` 推断补造；本阶段文档第 3 节保留当时 V10.54.0 的历史实现口径。\n\n## 9. 合并与部署记录（2026-11-20）
 
 - 功能 PR #57：https://github.com/ouyangxinwei/daily_weekly_planner/pull/57，已 squash merge。
 - 合并提交：`e5d53d61c9d14bc0e6ccc257f2013bdb35bd1f1b`。
