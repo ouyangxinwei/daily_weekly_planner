@@ -18,7 +18,7 @@ begin
  if OLD.amount is distinct from NEW.amount then v_fields:=array_append(v_fields,'amount'); end if;
  if OLD.currency is distinct from NEW.currency then v_fields:=array_append(v_fields,'currency'); end if;
  for v_key in select k from (select jsonb_object_keys(coalesce(OLD.data,'{}'::jsonb)) k union select jsonb_object_keys(coalesce(NEW.data,'{}'::jsonb)) k) x where k<>'progress_percent' and (coalesce(OLD.data,'{}'::jsonb)->k) is distinct from (coalesce(NEW.data,'{}'::jsonb)->k) order by k loop v_fields:=array_append(v_fields,'data.'||v_key); end loop;
- if cardinality(v_fields)>0 then insert into public.company_record_activity_history(owner_username,record_id,record_type,record_title,action,changed_fields,occurred_at) values(NEW.owner_username,NEW.id,NEW.record_type,NEW.title,'updated',v_fields,clock_timestamp()); end if;
+ -- Status transitions are recorded once in company_record_status_history.\n if cardinality(v_fields)>0 then insert into public.company_record_activity_history(owner_username,record_id,record_type,record_title,action,changed_fields,occurred_at) values(NEW.owner_username,NEW.id,NEW.record_type,NEW.title,'updated',v_fields,clock_timestamp()); end if;
  return NEW;
 end;$f$;
 drop table if exists public.company_record_activity;
