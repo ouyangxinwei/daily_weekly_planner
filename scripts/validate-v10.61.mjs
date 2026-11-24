@@ -45,7 +45,7 @@ assert.match(migration, /revoke all on table public\.company_record_status_histo
 assert.match(migration, /after update of status on public\.company_records/i);
 assert.match(migration, /old_status is distinct from new_status/i);
 assert.match(migration, /company_assert_access\(p_username, p_password\)/);
-assert.match(pkg.version, /^10\\.(?:61|62)\\.0$/);
+assert.match(pkg.version, /^10\.(?:61|62)\.0$/);
 assert.ok(pkg.scripts['test:validate:company-status-history']);
 assert.match(html, /V10\.(?:61_company_status_history|62_business_activity_history)/);
 assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history)/);
