@@ -47,6 +47,9 @@
 ## 交付状态
 
 - 目标版本：V10.59.0。
+- PR #72：https://github.com/ouyangxinwei/daily_weekly_planner/pull/72，已于 2026-11-24 squash merge。
+- 合并提交：`08ceb873b1749a2318fab38c986ef7b590520411`。
+- 验证 workflow run #423（`45385650616`）：completed / success；JavaScript 语法检查、V10.14 隔离验证、历史数据迁移回归、V10.50～V10.59 业务规则验证均通过。
 - 生产 API / Storage：复用已部署的 company-api v6 与私有 Bucket，无需后端部署或数据库迁移。
-- Pages：以本阶段 PR 合并后的 GitHub Pages build/deploy Actions 为准。
-- 用户验收：部署后待用户真实浏览器确认。
+- Pages：当前尚未取得该 merge commit 对应的 GitHub Pages build/deploy 成功证据，因此不标记为已部署。
+- 用户验收：待 Pages 部署确认后，由用户进行真实浏览器确认。
