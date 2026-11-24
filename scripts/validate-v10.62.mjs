@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const migration = read('../supabase/migrations/20261124223414_company_business_activity_history_phase_3b_d.sql');
 const cleanup = read('../supabase/migrations/20261124223517_company_activity_history_deduplicate_phase_3b_d.sql');
-const emptyLegacy = read('../supabase/migrations/20261124223630_company_activity_history_empty_records_phase_3b_d.sql');
+const emptyLegacy = read('../supabase/migrations/20261124223644_company_activity_history_empty_records_phase_3b_d.sql');
 const edge = read('../supabase/functions/company-api/index.ts');
 const ui = read('../company-business.js');
 const customerUi = read('../company-website.js');
