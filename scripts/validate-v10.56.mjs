@@ -131,6 +131,6 @@ assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_ent
 const sw = fs.readFileSync('sw.js', 'utf8');
 assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-)/);
 assert.ok(sw.includes("'./company-records-rules.js'") && sw.includes("'./company-records-workspace.js'"));
-assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.58.0');
+assert.ok(['10.58.0', '10.59.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
 
 console.log('V10.56 company transactions, documents and attachments validation passed.');
