@@ -77,9 +77,11 @@ export function getBusinessTrendReport(data = {}, mode = 'month', today = '') {
   const tasks = safeRecords(data.tasks);
   const followups = safeRecords(data.followups);
   const projectCreated = countByPeriod(projects, periods, record => record?.created_at, today);
-  const projectCompleted = countByPeriod(projects.filter(record => record?.status === 'completed'), periods, record => record?.updated_at, today);
+  const projectStatusHistory = safeRecords(data.projectStatusHistory);
+  const taskStatusHistory = safeRecords(data.taskStatusHistory);
+  const projectCompleted = countByPeriod(projectStatusHistory.filter(event => event?.new_status === 'completed' && event?.old_status !== 'completed'), periods, event => event?.changed_at, today);
   const taskCreated = countByPeriod(tasks, periods, record => record?.created_at, today);
-  const taskCompleted = countByPeriod(tasks.filter(record => record?.status === 'completed'), periods, record => record?.updated_at, today);
+  const taskCompleted = countByPeriod(taskStatusHistory.filter(event => event?.new_status === 'completed' && event?.old_status !== 'completed'), periods, event => event?.changed_at, today);
   const followupRecorded = countByPeriod(followups, periods, record => normalizeDate(record?.record_date) ? record.record_date : record?.created_at, today);
   const series = periods.map(period => ({
     ...period,
