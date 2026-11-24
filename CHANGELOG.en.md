@@ -1,3 +1,11 @@
+# V10.60 Monthly cashflow trends by currency — 2026-11-24
+
+- Added a Monthly cashflow workspace showing the last 12 calendar months with JPY / CNY / USD selection.
+- Monthly completed income, completed expense and net are grouped by transaction date. Planned income/expense are summarized separately; cancelled transactions are excluded.
+- Currencies remain separate: no FX conversion or cross-currency total. Amounts use exact BigInt micro-units.
+- Reads the complete transaction set through the existing paginated company-api. No database schema, RPC, Edge Function or Supabase configuration changes.
+- Supports Simplified Chinese, English, Japanese and responsive mobile layout.
+
 # V10.59 Attachments for customers, projects, tasks and follow-ups — 2026-11-24
 
 - Added attachment entry points to customer cards and project, task and follow-up lists, reusing the existing private attachment manager.
