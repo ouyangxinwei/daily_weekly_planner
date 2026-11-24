@@ -60,7 +60,7 @@ const html = read('index.html');
 const sw = read('sw.js');
 assert.equal(version, '10.60.0');
 assert.equal(pkg.version, version);
-assert.match(html, /APP_VERSION='V10\.60_company_monthly_cashflow'/);
+assert.match(html, /APP_VERSION='V10\\.(?:60_company_monthly_cashflow|61_company_status_history|62_business_activity_history)'/);
 assert.match(sw, /daily-weekly-planner-v10-(?:60-monthly-cashflow|61-company-status-history|62-business-activity-history)/);
 assert.match(ui, /const TABS = \['transactions', 'documents', 'cashflowTrends'\]/);
 assert.match(ui, /fetchAll\('transaction'\)/);
