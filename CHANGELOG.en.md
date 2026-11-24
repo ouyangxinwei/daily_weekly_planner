@@ -1,3 +1,10 @@
+# V10.61 Business Status History — 2026-11-24
+
+- Added database-level status audit for projects, tasks and customer follow-ups. Initial status and each actual status change are recorded with old/new values and database timestamps.
+- Added a private history table with RLS enabled and direct client-role access revoked; reads use the existing authenticated company-api boundary.
+- Added per-record status timelines and changed project/task completion trends to use actual completion transition timestamps.
+- Pre-release history is not backfilled because it cannot be reliably reconstructed from current status or updated_at.
+
 # V10.60 Monthly cashflow trends by currency — 2026-11-24
 
 - Added a Monthly cashflow workspace showing the last 12 calendar months with JPY / CNY / USD selection.
