@@ -17,7 +17,7 @@
 
 ## 3. 数据库与安全
 
-- Migration：`20261124000100_company_record_status_history_phase_3b_c.sql`。
+- Migration：`20261124120058_company_record_status_history_phase_3b_c.sql`。
 - 新表：`public.company_record_status_history`，外键关联 company_records，删除业务记录时级联清除对应历史。
 - 启用 RLS；撤销 public、anon、authenticated、service_role 对表的直接权限。
 - 触发器函数 SECURITY DEFINER，空 search_path，普通角色无 EXECUTE 权限。
