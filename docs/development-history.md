@@ -1,3 +1,11 @@
+# V10.59 Phase 3-B-A：客户、项目、任务与跟进附件入口（2026-11-24）
+
+- 在客户卡片、项目列表、任务列表和跟进列表增加统一附件管理入口，沿用 Phase 3-A 已有的附件上传、列表、下载和删除能力。
+- 将 `openAttachments(record)` 暴露为 `window.CompanyRecords.openAttachments`，不复制附件管理逻辑。
+- 复用 company-api v6 和私有 Bucket `company-documents`；无数据库迁移、RLS 变更、Storage policy 变更或后端部署要求。
+- 三语标签：简体中文、英文、日文。Service Worker 缓存和应用版本目标为 V10.59.0。
+- 开发分支：`feature/phase-3b-a-business-attachments`；合并、Actions、Pages 部署和用户真实浏览器验收状态待最终交付记录。
+
 # V10.55 美股七巨头行情看板（2026-11-21）
 
 - 新增股票看板，位于首页天气预报模块正下方。
