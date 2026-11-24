@@ -9,7 +9,7 @@
 - 覆盖 `customer`、`project`、`task`、`follow_up` 四类业务记录。
 - 创建和删除事件由数据库触发器记录。
 - 普通更新仅记录实际变化的字段名称；不保存旧值、新值或整份 JSONB 快照。
-- 状态变化仍由 `company_record_status_history` 记录，统一查询时合并展示，不重复写入第二条状态事件。
+- 项目、任务、跟进的状态变化由 `company_record_status_history` 记录，统一查询时合并展示，不重复写入第二条状态事件。客户状态不在 V10.61 状态表范围内，因此作为 customer 的 `status` 字段变更名称记录在活动表中。
 - 自动项目进度计算产生的 `data.progress_percent` 更新不生成噪声活动。
 - 事件时间由 PostgreSQL `clock_timestamp()` 生成。
 - 删除事件保留记录 ID、类型、标题快照和事件时间；活动表不设置业务记录外键，避免删除时丢失审计事件。
@@ -18,7 +18,7 @@
 
 ## 3. 数据库与安全
 
-- Migration versions：`20261124223326`、`20261124223414`、`20261124223517`、`20261124223630`。
+- Migration versions：`20261124223326`、`20261124223414`、`20261124223517`、`20261124223644`、`20261124224743`。
 - 最终活动表：`public.company_record_activity_history`。
 - 过渡表 `company_record_activity` 已确认为空并在清理 migration 中删除。
 - 启用 RLS，不创建客户端策略；撤销 public、anon、authenticated、service_role 的直接表权限。
@@ -46,6 +46,6 @@
 
 - 目标版本：V10.62.0。
 - Supabase 项目：`kopvznygsqsheibsjjvv`。
-- 数据库：四个 migration 均已应用；最终活动表存在，RLS 开启，过渡表已删除。
+- 数据库：五个 migration 均已应用；最终活动表存在，RLS 开启，过渡表已删除。
 - Edge Function 需在代码合并后部署为 company-api v9。
 - GitHub Pages build/deploy 需以合并后对应 Actions 成功结果为准；未确认前不报告前端已部署。
