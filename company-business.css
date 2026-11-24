@@ -264,3 +264,5 @@ html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 .cw-status-history-item:before{content:"";position:absolute;left:-5px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--brand)}
 .cw-status-history-change{margin:0 0 4px;color:var(--ink);font-size:13px;font-weight:650}
 .cw-status-history-time{color:var(--muted);font-size:11px}
+
+.cw-status-history-fields{margin:0 0 5px;color:var(--muted);font-size:11px;line-height:1.55}
