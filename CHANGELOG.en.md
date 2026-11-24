@@ -1,3 +1,11 @@
+# V10.62 Business Activity Timeline — 2026-11-25
+
+- Added a unified per-record activity timeline for customer, project, task and follow-up records, covering creation, field edits, status transitions and deletion.
+- Ordinary edits store changed field names only; no old/new values or JSONB snapshots are copied. Status events reuse the V10.61 status history.
+- Delete events retain minimal record identity and title context; no historical backfill is fabricated.
+- Added authenticated, paginated `GET /activity-history` using the existing Basic authentication and owner isolation.
+- Derived automatic project progress changes are excluded from activity noise; zh/en/ja UI is supported.
+
 # V10.61 Business Status History — 2026-11-24
 
 - Added database-level status audit for projects, tasks and customer follow-ups. Initial status and each actual status change are recorded with old/new values and database timestamps.
