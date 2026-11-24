@@ -129,6 +129,52 @@ export function summarizeTransactions(records) {
   });
 }
 
+// Monthly cashflow is calculated independently per currency. Only completed
+// transactions contribute to actual income/expense; planned amounts are shown
+// separately and cancelled/invalid records are ignored.
+export function getMonthlyCashflow(records, currency, now = new Date(), months = 12) {
+  if (!CURRENCIES.includes(currency)) throw new Error('Unsupported currency');
+  if (!(now instanceof Date) || Number.isNaN(now.getTime())) throw new Error('A valid local date is required');
+  if (!Number.isInteger(months) || months < 1 || months > 36) throw new Error('Months must be between 1 and 36');
+  const current = new Date(now.getFullYear(), now.getMonth(), 1);
+  const periods = [];
+  for (let index = months - 1; index >= 0; index -= 1) {
+    const date = new Date(current.getFullYear(), current.getMonth() - index, 1);
+    const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+    periods.push({ key, income: 0n, expense: 0n, net: 0n, plannedIncome: 0n, plannedExpense: 0n, completedCount: 0, plannedCount: 0 });
+  }
+  const byMonth = new Map(periods.map(period => [period.key, period]));
+  for (const record of Array.isArray(records) ? records : []) {
+    if (record?.currency !== currency) continue;
+    const direction = record?.data?.direction;
+    if (!TRANSACTION_DIRECTIONS.includes(direction)) continue;
+    const day = dateKey(record?.record_date);
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)) continue;
+    const period = byMonth.get(day.slice(0, 7));
+    if (!period) continue;
+    const amount = parseAmountMicros(record?.amount);
+    if (amount === null || amount <= 0n) continue;
+    if (record.status === 'completed') {
+      period[direction] += amount;
+      period.completedCount += 1;
+    } else if (record.status === 'planned') {
+      period[direction === 'income' ? 'plannedIncome' : 'plannedExpense'] += amount;
+      period.plannedCount += 1;
+    }
+  }
+  for (const period of periods) period.net = period.income - period.expense;
+  const totals = periods.reduce((sum, period) => ({
+    income: sum.income + period.income,
+    expense: sum.expense + period.expense,
+    net: sum.net + period.net,
+    plannedIncome: sum.plannedIncome + period.plannedIncome,
+    plannedExpense: sum.plannedExpense + period.plannedExpense,
+    completedCount: sum.completedCount + period.completedCount,
+    plannedCount: sum.plannedCount + period.plannedCount
+  }), { income: 0n, expense: 0n, net: 0n, plannedIncome: 0n, plannedExpense: 0n, completedCount: 0, plannedCount: 0 });
+  return { currency, periods, totals };
+}
+
 export function recordRelations(record) {
   const data = record?.data && typeof record.data === 'object' ? record.data : {};
   return { customerId: data.customer_id || '', projectId: data.project_id || '' };
