@@ -44,7 +44,10 @@
 ## 6. 交付状态
 
 - 目标版本：V10.60.0。
+- 功能 PR #74：https://github.com/ouyangxinwei/daily_weekly_planner/pull/74，已于 2026-11-24 squash merge。
+- 合并提交：`6b29839b0dbf7975597ac44ede571d068e89a941`。
+- 验证 workflow run #427（`45387896039`）：completed / success；JavaScript 语法检查、隔离/迁移回归、V10.50～V10.60 业务规则验证均通过；日志明确输出 `V10.60 monthly cashflow validation passed.`。
 - 数据库 / API / Storage：无变更，复用生产 company-api v6。
-- 用户已明确暂缓 V10.59.0 的实际浏览器验收；此项不作为 V10.60.0 开发、合并或部署的前置条件。
-- Pages 部署状态以 V10.60.0 合并后的 GitHub Pages build/deploy Actions 为准。
-- 真实浏览器验收状态独立记录，不因自动化验证成功而推定通过。
+- V10.59.0 的实际浏览器验收由用户暂缓；该项不阻断 V10.60.0 开发与合并。
+- V10.60.0 Pages build/deploy：当前尚未取得对应成功运行证据，不标记为已部署。
+- 真实浏览器验收状态独立记录，不因自动化验证成功而推定通过；用户已说明目前不方便验收，暂缓处理。
