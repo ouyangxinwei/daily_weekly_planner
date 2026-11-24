@@ -932,5 +932,5 @@ import { createRecordCache } from './company-record-loader.js';
     switchTab('customers');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
-  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations, loadRecords:(type, maxAgeMs) => loadRecords(type, maxAgeMs) });
+  window.CompanyBusiness = Object.freeze({ refresh:loadActive, switchTab, showCustomerProjects, showCustomerFollowups, showProjectFollowups, showProjectTasks, openCustomer, openProject:openProjectById, openRelatedRecord, loadCustomerRelations, invalidateRelations, loadRecords:(type, maxAgeMs) => loadRecords(type, maxAgeMs), openActivityHistory:openStatusHistory });
 })();
