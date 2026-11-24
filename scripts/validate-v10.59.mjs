@@ -13,8 +13,8 @@ const index = read('index.html');
 
 assert.ok(['10.59.0', '10.60.0'].includes(version));
 assert.equal(pkg.version, version);
-assert.match(index, /APP_VERSION='V10\.(?:59_company_entity_attachments|60_company_monthly_cashflow)'/);
-assert.match(sw, /v10-(?:59-company-entity-attachments|60-monthly-cashflow)/);
+assert.match(index, /APP_VERSION='V10\.(?:59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history)'/);
+assert.match(sw, /v10-(?:59-company-entity-attachments|60-monthly-cashflow|61-company-status-history|62-business-activity-history)/);
 
 assert.match(records, /function openAttachments\(record\)/);
 assert.match(records, /window\.CompanyRecords = Object\.freeze\(\{[^}]*openAttachments/);
