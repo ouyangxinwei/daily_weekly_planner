@@ -25,7 +25,7 @@ assert.doesNotMatch(records, /localStorage|sessionStorage|indexedDB/i);
 
 assert.match(website, /attachments:\{zh:'附件',en:'Attachments',ja:'添付ファイル'\}/);
 assert.match(website, /window\.CompanyRecords\?\.openAttachments\(customer\)/);
-assert.match(website, /actions\.append\(projectsButton,followupsButton,attachmentsButton,edit,remove\)/);
+assert.match(website, /actions\\.append\\(projectsButton,followupsButton,attachmentsButton,(?:historyButton,)?edit,remove\\)/);
 
 assert.match(business, /attachments:'附件'/);
 assert.match(business, /attachments:'Attachments'/);
