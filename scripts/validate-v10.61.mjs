@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import { getBusinessTrendReport } from '../company-business-trends.js';
+import { readFileSync } from 'node:fs';
+
+const projectHistory = [
+  { id: 1, record_id: 'p1', old_status: null, new_status: 'planned', changed_at: '2026-01-02T09:00:00Z' },
+  { id: 2, record_id: 'p1', old_status: 'planned', new_status: 'active', changed_at: '2026-01-03T09:00:00Z' },
+  { id: 3, record_id: 'p1', old_status: 'active', new_status: 'completed', changed_at: '2026-01-05T09:00:00Z' },
+  { id: 4, record_id: 'p1', old_status: 'completed', new_status: 'active', changed_at: '2026-01-06T09:00:00Z' },
+  { id: 5, record_id: 'p1', old_status: 'active', new_status: 'completed', changed_at: '2026-02-02T09:00:00Z' },
+  { id: 6, record_id: 'p2', old_status: null, new_status: 'completed', changed_at: '2026-01-07T09:00:00Z' }
+];
+const taskHistory = [
+  { id: 7, record_id: 't1', old_status: 'todo', new_status: 'completed', changed_at: '2026-01-04T09:00:00Z' },
+  { id: 8, record_id: 't1', old_status: 'completed', new_status: 'in_progress', changed_at: '2026-01-05T09:00:00Z' },
+  { id: 9, record_id: 't1', old_status: 'in_progress', new_status: 'completed', changed_at: '2026-01-08T09:00:00Z' }
+];
+const report = getBusinessTrendReport({
+  projects: [{ id: 'p1', status: 'active', created_at: '2025-12-20T09:00:00Z', updated_at: '2026-02-03T09:00:00Z' }, { id: 'p2', status: 'completed', created_at: '2026-01-07T08:00:00Z', updated_at: '2026-01-07T09:00:00Z' }],
+  tasks: [{ id: 't1', status: 'completed', created_at: '2026-01-01T08:00:00Z', updated_at: '2026-02-10T09:00:00Z' }],
+  followups: [],
+  projectStatusHistory: projectHistory,
+  taskStatusHistory: taskHistory
+}, 'month', '2026-02-15');
+assert.equal(report.periods.length, 6);
+assert.equal(report.periods.find(p => p.key === '2026-01-01').projectsCompleted, 2);
+assert.equal(report.periods.find(p => p.key === '2026-02-01').projectsCompleted, 1);
+assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCompleted, 1);
+assert.equal(report.periods.find(p => p.key === '2026-02-01').tasksCompleted, 1);
+assert.equal(report.periods.find(p => p.key === '2026-01-01').projectsCreated, 1);
+assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCreated, 1);
+
+const source = readFileSync(new URL('../company-business.js', import.meta.url), 'utf8');
+const edge = readFileSync(new URL('../supabase/functions/company-api/index.ts', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20261124000100_company_record_status_history_phase_3b_c.sql', import.meta.url), 'utf8');
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+assert.match(source, /loadAllStatusHistory/);
+assert.match(source, /status-history/);
+assert.match(source, /statusHistoryTitle/);
+assert.match(edge, /company_list_status_history/);
+assert.match(migration, /enable row level security/i);
+assert.match(migration, /revoke all on table public\.company_record_status_history from public, anon, authenticated, service_role/i);
+assert.match(migration, /after update of status on public\.company_records/i);
+assert.match(migration, /old_status is distinct from new_status/i);
+assert.match(migration, /company_assert_access\(p_username, p_password\)/);
+assert.match(pkg.version, /^10\.61\.0$/);
+assert.ok(pkg.scripts['test:validate:company-status-history']);
+assert.match(html, /V10\.61_company_status_history/);
+assert.match(sw, /v10-61-company-status-history/);
+console.log('V10.61 status history validation passed.');
