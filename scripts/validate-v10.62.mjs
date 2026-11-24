@@ -7,10 +7,13 @@ const cleanup = read('../supabase/migrations/20261124223517_company_activity_his
 const emptyLegacy = read('../supabase/migrations/20261124223630_company_activity_history_empty_records_phase_3b_d.sql');
 const edge = read('../supabase/functions/company-api/index.ts');
 const ui = read('../company-business.js');
+const customerUi = read('../company-website.js');
+const initialMigration = read('../supabase/migrations/20261124223326_company_record_activity_phase_3b_d.sql');
 const pkg = JSON.parse(read('../package.json'));
 const html = read('../index.html');
 const sw = read('../sw.js');
 
+assert.match(initialMigration, /company_record_activity/);
 assert.match(migration, /company_record_activity_history/);
 assert.match(migration, /enable row level security/i);
 assert.match(migration, /revoke all on table public\.company_record_activity_history from public,anon,authenticated,service_role/i);
