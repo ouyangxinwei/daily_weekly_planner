@@ -149,7 +149,7 @@ export function getMonthlyCashflow(records, currency, now = new Date(), months =
     const direction = record?.data?.direction;
     if (!TRANSACTION_DIRECTIONS.includes(direction)) continue;
     const day = dateKey(record?.record_date);
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(day)) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) continue;
     const period = byMonth.get(day.slice(0, 7));
     if (!period) continue;
     const amount = parseAmountMicros(record?.amount);
