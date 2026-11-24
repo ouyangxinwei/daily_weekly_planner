@@ -32,7 +32,7 @@ assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCreated, 1);
 
 const source = readFileSync(new URL('../company-business.js', import.meta.url), 'utf8');
 const edge = readFileSync(new URL('../supabase/functions/company-api/index.ts', import.meta.url), 'utf8');
-const migration = readFileSync(new URL('../supabase/migrations/20261124000100_company_record_status_history_phase_3b_c.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20261124120058_company_record_status_history_phase_3b_c.sql', import.meta.url), 'utf8');
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
