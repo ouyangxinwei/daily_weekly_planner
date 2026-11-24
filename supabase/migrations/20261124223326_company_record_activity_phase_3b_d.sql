@@ -6,8 +6,8 @@ create table public.company_record_activity (
  record_title text not null, action text not null check(action in ('created','updated','deleted')),
  changed_fields text[] not null default '{}', occurred_at timestamptz not null default clock_timestamp()
 );
-create index company_record_activity_owner_record_time_idx on public.company_record_activity(owner_username,record_id,occurred_at desc,id desc);
-create index company_record_activity_owner_type_time_idx on public.company_record_activity(owner_username,record_type,occurred_at desc,id desc);
+create index company_record_activity_legacy_owner_record_time_idx on public.company_record_activity(owner_username,record_id,occurred_at desc,id desc);
+create index company_record_activity_legacy_owner_type_time_idx on public.company_record_activity(owner_username,record_type,occurred_at desc,id desc);
 alter table public.company_record_activity enable row level security;
 revoke all on table public.company_record_activity from public,anon,authenticated,service_role;
 create or replace function public.company_log_record_activity() returns trigger language plpgsql security definer set search_path=''
