@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-weekly-planner-v10-60-monthly-cashflow';
+const CACHE_NAME = 'daily-weekly-planner-v10-61-company-status-history';
 const APP_FILES = ['./', './index.html', './i18n.js', './logger.js', './runtime-logs.js', './health-check.js', './language-workspace.js', './language-workspace.css', './company-website.js', './company-website.css', './company-business.js', './company-record-loader.js', './company-task-date-filter.js', './company-overview-metrics.js', './company-todo-center.js', './company-project-customer-overview.js', './company-business-trends.js', './company-records-rules.js', './company-records-workspace.js', './company-business.css', './weather-dashboard.js', './weather-dashboard.css', './stock-dashboard.js', './stock-dashboard.css', './diary.js', './diary.css', './CHANGELOG.md', './CHANGELOG.en.md', './CHANGELOG.ja.md', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
