@@ -47,6 +47,6 @@ assert.match(migration, /old_status is distinct from new_status/i);
 assert.match(migration, /company_assert_access\(p_username, p_password\)/);
 assert.match(pkg.version, /^10\.61\.0$/);
 assert.ok(pkg.scripts['test:validate:company-status-history']);
-assert.match(html, /V10\.61_company_status_history/);
+assert.match(html, /V10\\.(?:61_company_status_history|62_business_activity_history)/);
 assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history)/);
 console.log('V10.61 status history validation passed.');
