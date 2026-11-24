@@ -210,9 +210,9 @@ for (const label of ["fileContentMismatch: '文件内容与文件类型不符", 
 
 // --- version and service worker ---------------------------------------------------
 const html = fs.readFileSync('index.html', 'utf8');
-assert.match(html, /APP_VERSION='V10.58_company_complete_reads'/);
+assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_entity_attachments)'/);
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.match(sw, /daily-weekly-planner-v10-58-company-complete-reads/);
+assert.match(sw, /daily-weekly-planner-v10-(?:58-company-complete-reads|59-company-entity-attachments)/);
 assert.ok(sw.includes("'./company-record-loader.js'"), 'service worker caches the loader module');
 assert.equal(fs.readFileSync('VERSION', 'utf8').trim(), '10.58.0');
 assert.equal(JSON.parse(fs.readFileSync('package.json', 'utf8')).version, '10.58.0');
