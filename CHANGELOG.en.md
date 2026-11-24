@@ -1,3 +1,10 @@
+# V10.59 Attachments for customers, projects, tasks and follow-ups — 2026-11-24
+
+- Added attachment entry points to customer cards and project, task and follow-up lists, reusing the existing private attachment manager.
+- Reuses company-api v6 signed uploads/downloads, content-signature checks, the 10 MiB limit, orphan cleanup and deletion protection; no public Storage URLs are introduced.
+- Added Simplified Chinese, English and Japanese labels. Existing transaction and business-document attachments remain unchanged.
+- No database schema, RLS, authentication, backup format or business-record changes.
+
 # V10.58 Complete company record reads — 2026-11-21
 
 - Fixed related projects, tasks and follow-ups on customer cards and project details being limited to the first 100 records (an `Array.map` index was passed as the record limit).
