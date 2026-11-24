@@ -4,7 +4,7 @@ import {
   CURRENCIES, DOCUMENT_STATUSES, DOCUMENT_TYPES, FILE_ACCEPT_ATTRIBUTE, FILE_MAX_BYTES,
   TRANSACTION_DIRECTIONS, TRANSACTION_STATUSES, filterDocuments, filterTransactions,
   formatAmountMicros, formatFileSize, groupFilesByParent, isValidAmountInput, normalizeAmountInput,
-  parseAmountMicros, recordRelations, relationPayload, sortByBusinessDate, summarizeTransactions,
+  parseAmountMicros, recordRelations, relationPayload, sortByBusinessDate, summarizeTransactions, getMonthlyCashflow,
   validateUploadCandidate
 } from './company-records-rules.js';
 
@@ -13,9 +13,9 @@ import {
   const API = 'company-api';
   const PROJECT_URL = 'https://kopvznygsqsheibsjjvv.supabase.co';
   const PAGE_SIZE = 20;
-  const TABS = ['transactions', 'documents'];
+  const TABS = ['transactions', 'documents', 'cashflowTrends'];
   const state = {
-    tab: '', busy: false, customers: [], projects: [], transactions: [], documents: [], filesByParent: {},
+    tab: '', busy: false, customers: [], projects: [], transactions: [], documents: [], cashflowTransactions: [], cashflowCurrency: 'JPY', filesByParent: {},
     editing: null, attachmentsFor: null, uploading: false,
     filters: {
       transactions: { query: '', direction: '', status: '', currency: '', customerId: '', offset: 0 },
@@ -39,7 +39,8 @@ import {
       saved: '已保存。', deleted: '已删除。', failed: '操作失败，请稍后重试。', hasAttachments: '该记录仍有附件，请先删除附件再删除记录。', relationError: '该记录仍被其他业务记录关联，暂时不能删除。', authFailed: '账号验证失败，请重新登录。', loginRequired: '请先在计划工作区登录现有账号。',
       attachments: '附件', attachmentsTitle: '私有附件', upload: '上传附件', uploading: '正在上传…', download: '下载', noAttachments: '还没有附件', attachmentLimit: '单个文件最大 10 MB；支持 PDF、图片（PNG/JPEG/WebP）、TXT/CSV 和常见 Office 文档。文件保存在私有存储中，下载链接 5 分钟后失效。',
       chooseFile: '请先选择文件。', fileTooLarge: '文件超过 10 MB。', fileEmpty: '文件为空。', fileTypeNotAllowed: '不支持该文件类型。', fileNameInvalid: '文件名无效。', uploaded: '附件已上传。', confirmDeleteFile: '确定删除这个附件吗？文件将从私有存储中删除，无法恢复。',
-      storageUnavailable: '文件存储暂时不可用，请稍后重试。', fileMissing: '文件已不存在，可删除此附件记录后重新上传。', uploadFailed: '上传失败，请检查网络后重试。', fileContentMismatch: '文件内容与文件类型不符，已拒绝上传。', rateLimited: '请求过于频繁，请稍后再试。', viewCustomer: '查看客户', viewProject: '查看项目', footnote: '交易、文档和附件元数据保存在公司业务数据库；附件内容保存在私有 Storage，不进入计划模块备份。'
+      storageUnavailable: '文件存储暂时不可用，请稍后重试。', fileMissing: '文件已不存在，可删除此附件记录后重新上传。', uploadFailed: '上传失败，请检查网络后重试。', fileContentMismatch: '文件内容与文件类型不符，已拒绝上传。', rateLimited: '请求过于频繁，请稍后再试。', viewCustomer: '查看客户', viewProject: '查看项目', footnote: '交易、文档和附件元数据保存在公司业务数据库；附件内容保存在私有 Storage，不进入计划模块备份。',
+      cashflowTrends: '月度收支趋势', cashflowTitle: '按币种查看月度收支', cashflowSubtitle: '最近 12 个自然月；已完成交易按交易日期统计。', cashflowIncome: '已完成收入', cashflowExpense: '已完成支出', cashflowNet: '收支净额', cashflowPlanned: '预计收入 / 支出', cashflowMonth: '月份', cashflowNoData: '最近 12 个月没有该币种的已完成交易。', cashflowNote: '仅统计状态为「已完成」的交易；预计金额单独汇总，已取消交易不计入。不同币种分别显示，不进行汇率换算。日期按交易日期归属月份。', cashflowCount: '笔',
     },
     en: {
       transactions: 'Transactions', documents: 'Documents', newTransaction: 'New transaction', newDocument: 'New document', editTransaction: 'Edit transaction', editDocument: 'Edit document',
@@ -55,7 +56,8 @@ import {
       saved: 'Saved.', deleted: 'Deleted.', failed: 'Operation failed. Please try again.', hasAttachments: 'This record still has attachments. Delete them first.', relationError: 'This record is still referenced by other records.', authFailed: 'Authentication failed. Please sign in again.', loginRequired: 'Sign in from the planner workspace first.',
       attachments: 'Attachments', attachmentsTitle: 'Private attachments', upload: 'Upload', uploading: 'Uploading…', download: 'Download', noAttachments: 'No attachments yet', attachmentLimit: 'Up to 10 MB per file: PDF, images (PNG/JPEG/WebP), TXT/CSV and common Office files. Files are stored privately; download links expire after 5 minutes.',
       chooseFile: 'Choose a file first.', fileTooLarge: 'The file is larger than 10 MB.', fileEmpty: 'The file is empty.', fileTypeNotAllowed: 'This file type is not supported.', fileNameInvalid: 'Invalid file name.', uploaded: 'Attachment uploaded.', confirmDeleteFile: 'Delete this attachment? The file will be removed from private storage permanently.',
-      storageUnavailable: 'File storage is temporarily unavailable.', fileMissing: 'The stored file is missing. Delete this attachment and upload it again.', uploadFailed: 'Upload failed. Check your connection and try again.', fileContentMismatch: 'The file content does not match its type, so the upload was rejected.', rateLimited: 'Too many requests. Please wait a moment.', viewCustomer: 'View customer', viewProject: 'View project', footnote: 'Transactions, documents and attachment metadata are stored in the business database; file contents live in private Storage and are not part of planner backups.'
+      storageUnavailable: 'File storage is temporarily unavailable.', fileMissing: 'The stored file is missing. Delete this attachment and upload it again.', uploadFailed: 'Upload failed. Check your connection and try again.', fileContentMismatch: 'The file content does not match its type, so the upload was rejected.', rateLimited: 'Too many requests. Please wait a moment.', viewCustomer: 'View customer', viewProject: 'View project', footnote: 'Transactions, documents and attachment metadata are stored in the business database; file contents live in private Storage and are not part of planner backups.',
+      cashflowTrends: 'Monthly cashflow', cashflowTitle: 'Monthly cashflow by currency', cashflowSubtitle: 'Last 12 calendar months; completed transactions are grouped by transaction date.', cashflowIncome: 'Completed income', cashflowExpense: 'Completed expense', cashflowNet: 'Net cashflow', cashflowPlanned: 'Planned income / expense', cashflowMonth: 'Month', cashflowNoData: 'No completed transactions for this currency in the last 12 months.', cashflowNote: 'Only completed transactions are included in actual income and expense. Planned amounts are shown separately; cancelled transactions are excluded. Currencies are never converted or added together. Months use the transaction date.', cashflowCount: 'transactions',
     },
     ja: {
       transactions: '取引・収支', documents: '業務文書', newTransaction: '取引を追加', newDocument: '文書を追加', editTransaction: '取引を編集', editDocument: '文書を編集',
@@ -71,7 +73,8 @@ import {
       saved: '保存しました。', deleted: '削除しました。', failed: '処理に失敗しました。もう一度お試しください。', hasAttachments: '添付ファイルが残っています。先に添付を削除してください。', relationError: '他の業務記録から参照されているため削除できません。', authFailed: '認証に失敗しました。再ログインしてください。', loginRequired: '先に計画ワークスペースでログインしてください。',
       attachments: '添付', attachmentsTitle: '非公開の添付ファイル', upload: 'アップロード', uploading: 'アップロード中…', download: 'ダウンロード', noAttachments: '添付ファイルはありません', attachmentLimit: '1ファイル最大10 MB。PDF、画像（PNG/JPEG/WebP）、TXT/CSV、一般的なOfficeファイルに対応。ファイルは非公開ストレージに保存され、ダウンロードリンクは5分で失効します。',
       chooseFile: 'ファイルを選択してください。', fileTooLarge: 'ファイルが10 MBを超えています。', fileEmpty: 'ファイルが空です。', fileTypeNotAllowed: 'このファイル形式には対応していません。', fileNameInvalid: 'ファイル名が無効です。', uploaded: '添付ファイルをアップロードしました。', confirmDeleteFile: 'この添付ファイルを削除しますか？非公開ストレージから完全に削除されます。',
-      storageUnavailable: 'ファイルストレージを一時的に利用できません。', fileMissing: '保存済みファイルが見つかりません。この添付を削除して再アップロードしてください。', uploadFailed: 'アップロードに失敗しました。通信状況を確認してください。', fileContentMismatch: 'ファイルの内容が種類と一致しないため、アップロードを拒否しました。', rateLimited: 'リクエストが多すぎます。しばらくお待ちください。', viewCustomer: '顧客を見る', viewProject: 'プロジェクトを見る', footnote: '取引・文書・添付のメタデータは業務データベースに、ファイル本体は非公開Storageに保存され、計画モジュールのバックアップには含まれません。'
+      storageUnavailable: 'ファイルストレージを一時的に利用できません。', fileMissing: '保存済みファイルが見つかりません。この添付を削除して再アップロードしてください。', uploadFailed: 'アップロードに失敗しました。通信状況を確認してください。', fileContentMismatch: 'ファイルの内容が種類と一致しないため、アップロードを拒否しました。', rateLimited: 'リクエストが多すぎます。しばらくお待ちください。', viewCustomer: '顧客を見る', viewProject: 'プロジェクトを見る', footnote: '取引・文書・添付のメタデータは業務データベースに、ファイル本体は非公開Storageに保存され、計画モジュールのバックアップには含まれません。',
+      cashflowTrends: '月次収支推移', cashflowTitle: '通貨別の月次収支', cashflowSubtitle: '直近12暦月。完了した取引を取引日ごとに集計します。', cashflowIncome: '完了済み収入', cashflowExpense: '完了済み支出', cashflowNet: '収支差額', cashflowPlanned: '予定収入 / 支出', cashflowMonth: '月', cashflowNoData: '直近12か月にこの通貨の完了済み取引はありません。', cashflowNote: '実績の収入・支出には「完了」状態の取引のみを含みます。予定額は別集計し、取消済み取引は除外します。通貨間の換算・合算は行いません。取引日を基準に月を分類します。', cashflowCount: '件',
     }
   };
   const t = key => words[locale()][key] || words.zh[key] || key;
@@ -132,7 +135,7 @@ import {
   function dateText(value) { if (!value) return ''; const d = new Date(value); return Number.isNaN(d.getTime()) ? String(value).slice(0, 10) : d.toLocaleDateString(locale() === 'ja' ? 'ja-JP' : locale() === 'en' ? 'en-US' : 'zh-CN'); }
   function customerName(id) { return state.customers.find(c => c.id === id)?.title || ''; }
   function projectName(id) { return state.projects.find(p => p.id === id)?.title || ''; }
-  function feedback(message = '', kind = '') { const host = $('cw-records-feedback'); if (host) { host.textContent = message; host.className = 'cw-feedback' + (kind ? ' ' + kind : ''); } }
+  function feedback(message = '', kind = '') { const host = $(state.tab === 'cashflowTrends' ? 'cw-cashflow-feedback' : 'cw-records-feedback'); if (host) { host.textContent = message; host.className = 'cw-feedback' + (kind ? ' ' + kind : ''); } }
   function moneyText(record) { const micros = parseAmountMicros(record.amount); return micros === null ? '—' : record.currency + ' ' + formatAmountMicros(micros, record.currency); }
 
   function install() {
@@ -147,6 +150,9 @@ import {
     panel.innerHTML = '<div class="cw-records-toolbar"><form id="cw-records-search" class="cw-search"><label class="sr-only" for="cw-records-query"></label><input id="cw-records-query" type="search" maxlength="100"><button class="secondary" id="cw-records-search-button" type="submit"></button></form><select id="cw-records-filter-a"></select><select id="cw-records-filter-b"></select><select id="cw-records-filter-c"></select><select id="cw-records-filter-customer"></select><button class="primary" id="cw-records-new" type="button"></button><button class="secondary" id="cw-records-refresh" type="button"></button></div><div id="cw-records-summary" class="cw-records-summary"></div><div id="cw-records-feedback" class="cw-feedback" role="status" aria-live="polite"></div><div id="cw-records-list" class="cw-business-list"></div><nav id="cw-records-pagination" class="cw-pagination"></nav><p id="cw-records-footnote" class="cw-footnote"></p>';
     const anchor = $('cw-business-panel') || $('cw-customer-panel');
     anchor.insertAdjacentElement('afterend', panel);
+    const cashflowPanel = el('section', 'cw-panel cw-cashflow-panel'); cashflowPanel.id = 'cw-cashflow-panel'; cashflowPanel.hidden = true;
+    cashflowPanel.innerHTML = '<div class="cw-cashflow-heading"><div><h3 id="cw-cashflow-title"></h3><p id="cw-cashflow-subtitle"></p></div><div class="cw-cashflow-controls"><label for="cw-cashflow-currency" id="cw-cashflow-currency-label"></label><select id="cw-cashflow-currency"></select><button class="secondary" id="cw-cashflow-refresh" type="button"></button></div></div><div id="cw-cashflow-summary" class="cw-cashflow-summary"></div><div id="cw-cashflow-feedback" class="cw-feedback" role="status" aria-live="polite"></div><div id="cw-cashflow-chart" class="cw-cashflow-chart"></div><p id="cw-cashflow-note" class="cw-cashflow-note"></p>';
+    panel.insertAdjacentElement('afterend', cashflowPanel);
 
     const editor = el('dialog', 'cw-dialog'); editor.id = 'cw-records-editor';
     editor.innerHTML = '<form id="cw-records-form" class="cw-editor-form" novalidate><div class="cw-dialog-head"><div><p class="cw-eyebrow" id="cw-records-editor-eyebrow"></p><h2 id="cw-records-editor-title"></h2></div><button class="close-btn" id="cw-records-editor-close" type="button" aria-label="Close">×</button></div><div id="cw-records-fields" class="cw-form-grid"></div><p class="cw-form-error" id="cw-records-error" role="alert"></p><div class="cw-dialog-actions"><button class="secondary" id="cw-records-cancel" type="button"></button><button class="primary" id="cw-records-save" type="submit"></button></div></form>';
@@ -162,6 +168,8 @@ import {
     bindFilter('cw-records-filter-customer', () => 'customerId');
     $('cw-records-new').addEventListener('click', () => openEditor());
     $('cw-records-refresh').addEventListener('click', load);
+    $('cw-cashflow-refresh').addEventListener('click', load);
+    $('cw-cashflow-currency').addEventListener('change', () => { state.cashflowCurrency = $('cw-cashflow-currency').value; renderCashflowTrends(); });
     $('cw-records-form').addEventListener('submit', saveEditor);
     $('cw-records-editor-close').addEventListener('click', closeEditor); $('cw-records-cancel').addEventListener('click', closeEditor);
     editor.addEventListener('click', event => { if (event.target === editor) closeEditor(); });
@@ -177,6 +185,15 @@ import {
   function updateLabels() {
     document.querySelectorAll('[data-company-extension="records"]').forEach(tab => { tab.textContent = t(tab.dataset.tab); });
     if (!state.tab) return;
+    if (state.tab === 'cashflowTrends') {
+      $('cw-cashflow-title').textContent = t('cashflowTitle');
+      $('cw-cashflow-subtitle').textContent = t('cashflowSubtitle');
+      $('cw-cashflow-currency-label').textContent = t('currency');
+      $('cw-cashflow-refresh').textContent = t('refresh');
+      $('cw-cashflow-note').textContent = t('cashflowNote');
+      options($('cw-cashflow-currency'), CURRENCIES.map(code => [code, code]), state.cashflowCurrency);
+      return;
+    }
     const transactions = state.tab === 'transactions', filters = currentFilters();
     $('cw-records-query').placeholder = t(transactions ? 'searchTransaction' : 'searchDocument');
     $('cw-records-query').setAttribute('aria-label', $('cw-records-query').placeholder);
@@ -204,28 +221,33 @@ import {
     if (!TABS.includes(state.tab)) return;
     if (state.busy) { state.reloadPending = true; return; }
     const tab = state.tab;
-    state.busy = true; feedback(t('loading')); $('cw-records-refresh').disabled = true;
+    state.busy = true; feedback(t('loading')); $('cw-records-refresh').disabled = true; $('cw-cashflow-refresh').disabled = true;
     try {
       // Sequential reads keep well inside the company-api rate limit.
-      const customers = await fetchShared('customer');
-      const projects = await fetchShared('project');
-      const records = await fetchAll(tab === 'transactions' ? 'transaction' : 'document');
-      const files = await fetchAll('file');
+      if (tab === 'cashflowTrends') {
+        state.cashflowTransactions = await fetchAll('transaction');
+        if (state.tab === tab) { renderCashflowTrends(); feedback(t('loaded') + ' · ' + state.cashflowTransactions.length); }
+      } else {
+        const customers = await fetchShared('customer');
+        const projects = await fetchShared('project');
+        const records = await fetchAll(tab === 'transactions' ? 'transaction' : 'document');
+        const files = await fetchAll('file');
       state.customers = customers.sort((x, y) => String(x.title).localeCompare(String(y.title)));
       state.projects = projects.sort((x, y) => String(x.title).localeCompare(String(y.title)));
       state[tab] = sortByBusinessDate(records);
       state.filesByParent = groupFilesByParent(files);
       feedback('');
       if (state.tab === tab) render();
+      }
     } catch (error) { feedback(error.message || t('failed'), 'error'); }
     finally {
-      state.busy = false; $('cw-records-refresh').disabled = false;
+      state.busy = false; $('cw-records-refresh').disabled = false; $('cw-cashflow-refresh').disabled = false;
       if (state.reloadPending || (TABS.includes(state.tab) && state.tab !== tab)) { state.reloadPending = false; load(); }
     }
   }
 
   function render() {
-    if (!TABS.includes(state.tab)) return;
+    if (!TABS.includes(state.tab) || state.tab === 'cashflowTrends') return;
     updateLabels();
     const transactions = state.tab === 'transactions', filters = currentFilters();
     const filtered = transactions ? filterTransactions(state.transactions, filters) : filterDocuments(state.documents, filters);
@@ -250,6 +272,45 @@ import {
       previous.disabled = current <= 1; next.disabled = current >= pages;
       pager.append(previous, el('span', '', current + ' / ' + pages), next);
     }
+  }
+
+  function renderCashflowTrends() {
+    if (state.tab !== 'cashflowTrends') return;
+    updateLabels();
+    const report = getMonthlyCashflow(state.cashflowTransactions, state.cashflowCurrency, new Date(), 12);
+    const summary = $('cw-cashflow-summary'); summary.replaceChildren();
+    const metrics = [
+      [t('cashflowIncome'), report.totals.income, 'income'],
+      [t('cashflowExpense'), report.totals.expense, 'expense'],
+      [t('cashflowNet'), report.totals.net, report.totals.net < 0n ? 'expense' : 'income'],
+      [t('cashflowPlanned'), null, 'planned']
+    ];
+    metrics.forEach(([label, value, kind]) => {
+      const card = el('article', 'cw-cashflow-kpi'); card.append(el('small', '', label));
+      const display = kind === 'planned'
+        ? formatAmountMicros(report.totals.plannedIncome, report.currency) + ' / ' + formatAmountMicros(report.totals.plannedExpense, report.currency)
+        : formatAmountMicros(value, report.currency);
+      card.append(el('strong', kind === 'planned' ? '' : 'cw-amount-' + kind, display)); summary.append(card);
+    });
+    const chart = $('cw-cashflow-chart'); chart.replaceChildren();
+    const max = report.periods.reduce((largest, period) => [period.income, period.expense].reduce((value, amount) => amount > value ? amount : value, largest), 0n);
+    const hasCompleted = report.totals.completedCount > 0;
+    if (!hasCompleted) chart.append(el('p', 'cw-cashflow-empty', t('cashflowNoData')));
+    report.periods.forEach(period => {
+      const row = el('article', 'cw-cashflow-month');
+      const heading = el('div', 'cw-cashflow-month-heading');
+      const [year, month] = period.key.split('-').map(Number);
+      const monthLabel = new Date(year, month - 1, 1).toLocaleDateString(locale() === 'ja' ? 'ja-JP' : locale() === 'en' ? 'en-US' : 'zh-CN', { year: 'numeric', month: 'short' });
+      heading.append(el('strong', '', monthLabel), el('span', '', period.completedCount + ' ' + t('cashflowCount'))); row.append(heading);
+      for (const [key, label, kind] of [['income', t('cashflowIncome'), 'income'], ['expense', t('cashflowExpense'), 'expense']]) {
+        const amount = period[key], line = el('div', 'cw-cashflow-line');
+        const top = el('div', 'cw-cashflow-line-meta'); top.append(el('span', '', label), el('strong', 'cw-amount-' + kind, formatAmountMicros(amount, report.currency)));
+        const track = el('div', 'cw-cashflow-track'); const fill = el('span', 'cw-cashflow-fill cw-cashflow-fill-' + kind);
+        const width = max > 0n ? Number(amount * 10000n / max) / 100 : 0;
+        fill.style.width = Math.min(100, width) + '%'; track.append(fill); line.append(top, track); row.append(line);
+      }
+      chart.append(row);
+    });
   }
 
   function renderSummary(records) {
@@ -503,19 +564,20 @@ import {
 
   function onTabChange(event) {
     const tab = event.detail?.tab;
-    const panel = $('cw-records-panel'); if (!panel) return;
-    if (!TABS.includes(tab)) { state.tab = ''; panel.hidden = true; return; }
+    const panel = $('cw-records-panel'), cashflowPanel = $('cw-cashflow-panel'); if (!panel || !cashflowPanel) return;
+    if (!TABS.includes(tab)) { state.tab = ''; panel.hidden = true; cashflowPanel.hidden = true; return; }
     const changed = state.tab !== tab;
-    state.tab = tab; panel.hidden = false;
+    state.tab = tab;
+    const cashflow = tab === 'cashflowTrends'; panel.hidden = cashflow; cashflowPanel.hidden = !cashflow;
     updateLabels();
-    if (changed) { $('cw-records-list').replaceChildren(); renderSummary(null); }
+    if (changed) { $('cw-records-list').replaceChildren(); renderSummary(null); if (cashflow) $('cw-cashflow-chart').replaceChildren(); }
     load();
   }
   function init() {
     if (!install()) return;
     window.addEventListener('company-business-tab-change', onTabChange);
-    window.addEventListener('planner-language-change', () => { updateLabels(); if (state.tab) render(); });
-    window.addEventListener('planner-auth-change', () => { state.customers = []; state.projects = []; state.transactions = []; state.documents = []; state.filesByParent = {}; });
+    window.addEventListener('planner-language-change', () => { updateLabels(); if (state.tab === 'cashflowTrends') renderCashflowTrends(); else if (state.tab) render(); });
+    window.addEventListener('planner-auth-change', () => { state.customers = []; state.projects = []; state.transactions = []; state.documents = []; state.cashflowTransactions = []; state.filesByParent = {}; });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
   window.CompanyRecords = Object.freeze({ version: '1.1.0', reload: load, openAttachments, maxFileBytes: FILE_MAX_BYTES });

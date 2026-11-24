@@ -226,3 +226,33 @@ html[data-theme="dark"] .cw-direction-income{background:#1d382d;color:#a8dfc1}
 html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 @media(max-width:760px){.cw-records-toolbar{grid-template-columns:1fr 1fr}.cw-records-toolbar .cw-search{grid-column:1/-1}.cw-records-summary-card{grid-template-columns:1fr 1fr}.cw-records-summary-currency{grid-column:1/-1;justify-self:start}}
 @media(max-width:480px){.cw-files-item{flex-direction:column;align-items:stretch}.cw-records-summary-card{padding:10px}}
+
+/* Phase 3-B-B: monthly cashflow by currency */
+.cw-cashflow-panel[hidden]{display:none!important}
+.cw-cashflow-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.cw-cashflow-heading h3{margin:0 0 6px;font-size:18px}
+.cw-cashflow-heading p{margin:0;color:var(--muted);font-size:12px}
+.cw-cashflow-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cw-cashflow-controls label{font-size:12px;color:var(--muted)}
+.cw-cashflow-controls select{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--surface);color:var(--ink);font:inherit}
+.cw-cashflow-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0 18px}
+.cw-cashflow-kpi{display:grid;gap:7px;min-width:0;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.cw-cashflow-kpi small{font-size:11px;color:var(--muted)}
+.cw-cashflow-kpi strong{font-size:clamp(15px,2vw,21px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cw-cashflow-chart{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.cw-cashflow-month{min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.cw-cashflow-month-heading,.cw-cashflow-line-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cw-cashflow-month-heading{margin-bottom:9px}
+.cw-cashflow-month-heading strong{font-size:12px}
+.cw-cashflow-month-heading span{font-size:10px;color:var(--muted)}
+.cw-cashflow-line{display:grid;gap:5px;margin-top:7px}
+.cw-cashflow-line-meta span{font-size:10px;color:var(--muted)}
+.cw-cashflow-line-meta strong{font-size:11px;font-variant-numeric:tabular-nums}
+.cw-cashflow-track{height:7px;overflow:hidden;border-radius:99px;background:var(--line)}
+.cw-cashflow-fill{display:block;height:100%;min-width:0;border-radius:99px}
+.cw-cashflow-fill-income{background:var(--green)}
+.cw-cashflow-fill-expense{background:var(--danger)}
+.cw-cashflow-empty{grid-column:1/-1;margin:0;padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:12px}
+.cw-cashflow-note{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+@media(max-width:760px){.cw-cashflow-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-cashflow-chart{grid-template-columns:1fr}}
+@media(max-width:480px){.cw-cashflow-heading{display:grid}.cw-cashflow-controls{width:100%}.cw-cashflow-controls select{flex:1;min-width:0}.cw-cashflow-kpi{padding:10px}}
