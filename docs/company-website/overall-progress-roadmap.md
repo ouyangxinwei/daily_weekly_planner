@@ -11,8 +11,8 @@
 - Phase 2：2-A、2-B、2-C、2-D 均已验收；**Phase 2 全部完成并正式关闭**。2-D V10.54.0 已合并、部署并通过用户真实浏览器验收。
 - 当前已完成子阶段：**3-A——交易收支、业务文档与私有附件（V10.56.0，已通过用户生产环境浏览器验收；阶段正式完成）**。V10.57.0 是独立的「开发日记」模块，V10.58.0 是公司业务数据完整读取修复。**3-B-A——客户、项目、任务与跟进附件入口（V10.59.0）已通过 PR #72 合并；用户暂缓实际浏览器验收，后续开发不受阻。3-B-B——按币种的月度收支趋势（V10.60.0）已通过 PR #74 合并，验证 run #427 成功；Pages 部署和真实浏览器验收状态分别待确认/暂缓。**
 - Phase 2 目标：从分散的业务记录管理，升级为统一的日常业务决策与执行工作台。
-- 当前 main 应用版本：**V10.61.0**（PR #76 已合并）。
-- 生产 API：Supabase Edge Function `company-api` v8，ACTIVE；Phase 3-B-D 合并后目标部署 v9。
+- 当前 main 应用版本：**V10.62.0**（PR #78 已合并）。
+- 生产 API：Supabase Edge Function `company-api` v9，ACTIVE；包含状态历史和活动历史读取路由。
 - 生产数据库：慢慢计划 Supabase 项目中的 public.company_records；Phase 2 沿用现有结构。
 
 ## 2. 阶段总览
@@ -35,7 +35,7 @@
 | 3-A | 交易收支、业务文档与私有附件 | **已完成：前端、私有 Storage、company-api v6 均已部署，并通过用户真实浏览器验收** |
 | 3-B-A | 客户、项目、任务与跟进附件入口 | **代码已合并：V10.59.0 / PR #72；用户实际浏览器验收暂缓，不阻断后续开发** |
 | 3-B-B | 按币种的月度收支趋势 | **代码已合并：V10.60.0 / PR #74；验证 run #427 成功；Pages 部署待确认，用户真实浏览器验收暂缓** |
-| 3-B-C | 业务状态变更历史 | **已合并：V10.61.0 / PR #76；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署待确认，真实浏览器验收暂缓** |
+| 3-B-C | 业务状态变更历史 | **已合并：V10.61.0 / PR #76；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署待确认，真实浏览器验收暂缓** |\n| 3-B-D | 业务活动时间线 | **已合并：V10.62.0 / PR #78；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署待确认，真实浏览器验收暂缓** |
 | 3-B-D | 业务活动时间线 | **开发中：目标 V10.62.0；数据库 migration 已应用，应用/API 待合并部署** |
 
 截至 2026-11-20，当前定义的 **13 个阶段工作项（1-A 至 1-H、1-I-A 至 1-I-E）均已完成并通过各自阶段验收**。这意味着 Phase 1 核心业务工作区目标已达成，不代表整个公司网站产品或未来功能已经全部完成。
@@ -110,8 +110,8 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 
 1. 确认 GitHub 仓库 `ouyangxinwei/daily_weekly_planner` 的 `main` 最新提交和当前 Actions 状态。
 2. 查看本文的“当前完成位置”和“下一步”。
-3. 2-A V10.51.0、2-B V10.52.0 与 2-C V10.53.0 均已合并、部署并于 2026-11-20 通过用户真实浏览器验收；Phase 2 的 2-A 至 2-D 均已完成并通过用户真实浏览器验收；当前继续 Phase 3-B-D。
-4. 功能开发从最新 `main` 创建独立分支；不直接在 `main` 开发。当前接续：Phase 3-B-D（业务活动时间线，V10.62.0；数据库已应用五个 migration）。
+3. 2-A V10.51.0、2-B V10.52.0 与 2-C V10.53.0 均已合并、部署并于 2026-11-20 通过用户真实浏览器验收；Phase 2 的 2-A 至 2-D 均已完成并通过用户真实浏览器验收；Phase 3-B-D 已完成；下一阶段范围待规划。
+4. 功能开发从最新 `main` 创建独立分支；不直接在 `main` 开发。Phase 3-B-D（业务活动时间线，V10.62.0）已合并；下一阶段开始前更新路线与交接文档。
 5. 沿用现有数据库和生产 `company-api` v8，除非用户明确批准架构变更。
 6. 按必要范围做静态检查和针对性验证；不把 Playwright 浏览器安装或完整 E2E 作为默认合并前提。
 7. PR squash merge 后检查 GitHub Actions 的 build 和 deploy。只有两者成功，才能报告 Pages 已部署。
@@ -124,7 +124,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - Pages：https://ouyangxinwei.github.io/daily_weekly_planner/
 - Supabase 项目：`kopvznygsqsheibsjjvv`（不要误用 TOEIC 项目）。
 - 业务表：`public.company_records`。
-- Edge Function：生产 `company-api` v8（ACTIVE）；Phase 3-B-D 合并后部署目标 v9。
+- Edge Function：生产 `company-api` v9（ACTIVE），包含 `/activity-history`。
 - 业务记录差异字段沿用 JSONB `data`。
 - 公司业务数据与 planner 快照分离。
 - 现有自定义账号认证继续沿用。
