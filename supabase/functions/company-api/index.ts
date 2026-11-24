@@ -785,6 +785,26 @@ Deno.serve(async (req: Request) => {
       p_password: credentials.password,
     };
 
+    if (route === "/activity-history" && req.method === "GET") {
+      const recordId = url.searchParams.get("record_id") ?? "";
+      const rawLimit = url.searchParams.get("limit") ?? "100";
+      const rawOffset = url.searchParams.get("offset") ?? "0";
+      const limit = Number(rawLimit);
+      const offset = Number(rawOffset);
+      if (!UUID_RE.test(recordId) ||
+          !Number.isInteger(limit) || limit < 1 || limit > 100 ||
+          !Number.isInteger(offset) || offset < 0 || offset > 1_000_000) {
+        throw new ApiError(400, "VALIDATION_ERROR");
+      }
+      const result = await rpc("company_list_activity_history", {
+        ...auth,
+        p_record_id: recordId,
+        p_limit: limit,
+        p_offset: offset,
+      }, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+
     if (route === "/status-history" && req.method === "GET") {
       const rawRecordId = url.searchParams.get("record_id");
       const recordId = rawRecordId === null ? null : rawRecordId;
