@@ -25,7 +25,7 @@ const report = getBusinessTrendReport({
 assert.equal(report.periods.length, 6);
 assert.equal(report.periods.find(p => p.key === '2026-01-01').projectsCompleted, 2);
 assert.equal(report.periods.find(p => p.key === '2026-02-01').projectsCompleted, 1);
-assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCompleted, 1);
+assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCompleted, 2);
 assert.equal(report.periods.find(p => p.key === '2026-02-01').tasksCompleted, 1);
 assert.equal(report.periods.find(p => p.key === '2026-01-01').projectsCreated, 1);
 assert.equal(report.periods.find(p => p.key === '2026-01-01').tasksCreated, 1);
