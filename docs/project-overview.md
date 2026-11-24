@@ -5,7 +5,7 @@
 慢慢计划是一个以个人计划和工作管理为核心的综合 Web/PWA 工作区。项目逐步扩展为多个职责和数据边界清晰的工作区，并增加个人公司业务管理能力。
 
 - 仓库：`ouyangxinwei/daily_weekly_planner`
-- 当前仓库版本：`10.56.0`（以根目录 `VERSION` 为准）
+- 当前仓库版本：`10.58.0`（以根目录 `VERSION` 为准）
 - GitHub Pages 入口：https://ouyangxinwei.github.io/daily_weekly_planner/
 - 主分支：`main`
 - 当前参考实现：原生 HTML、CSS、JavaScript；部署于 GitHub Pages。
