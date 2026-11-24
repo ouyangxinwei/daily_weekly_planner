@@ -47,5 +47,5 @@
 - 目标版本：V10.62.0。
 - Supabase 项目：`kopvznygsqsheibsjjvv`。
 - 数据库：五个 migration 均已应用；最终活动表存在，RLS 开启，过渡表已删除。
-- Edge Function 需在代码合并后部署为 company-api v9。
+- 功能 PR #78 已 squash merge；合并提交：`5441c765f02c1547a2bb247506b67690955c265e`。\n- PR 验证 workflow run #460（`45504537485`）：completed / success；JavaScript 语法检查、历史回归和 V10.62 专项验证均通过。\n- Supabase Edge Function `company-api` v9 已部署，状态 ACTIVE，`verify_jwt=false`（沿用函数内部 Basic 认证）。\n- 数据库最终状态：RLS enabled；anon/authenticated 无法执行历史 RPC；service_role 可执行；活动历史表当前 0 行（未插入测试业务数据）。\n- GitHub Pages 对应 build/deploy 成功证据尚未取得，因此不标记为已部署；真实浏览器验收按用户安排暂缓。
 - GitHub Pages build/deploy 需以合并后对应 Actions 成功结果为准；未确认前不报告前端已部署。
