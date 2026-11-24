@@ -21,7 +21,7 @@ assert.match(records, /window\.CompanyRecords = Object\.freeze\(\{[^}]*openAttac
 assert.match(records, /\/files\/upload-url/);
 assert.match(records, /\/files\/abort/);
 assert.match(records, /\/download-url/);
-assert.match(records, /localStorage|sessionStorage|indexedDB/i) === false;
+assert.doesNotMatch(records, /localStorage|sessionStorage|indexedDB/i);
 
 assert.match(website, /attachments:\{zh:'附件',en:'Attachments',ja:'添付ファイル'\}/);
 assert.match(website, /window\.CompanyRecords\?\.openAttachments\(customer\)/);
