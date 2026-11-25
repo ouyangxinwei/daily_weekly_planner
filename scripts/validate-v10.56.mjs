@@ -127,10 +127,10 @@ assert.match(business, /button:not\(\[data-company-extension\]\)/);
 
 const html = fs.readFileSync('index.html', 'utf8');
 assert.ok(html.indexOf('company-business.js') < html.indexOf('company-records-workspace.js'), 'records module loads after company-business');
-assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history)'/);
+assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history|63_business_decision_center)'/);
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-|60-|61-company-status-history|62-business-activity-history)/);
+assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-|60-|61-company-status-history|62-business-activity-history|63-business-decision-center)/);
 assert.ok(sw.includes("'./company-records-rules.js'") && sw.includes("'./company-records-workspace.js'"));
-assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
+assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
 
 console.log('V10.56 company transactions, documents and attachments validation passed.');
