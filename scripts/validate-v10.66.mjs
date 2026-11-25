@@ -64,7 +64,7 @@ assert.match(sw, /daily-weekly-planner-v10-66-project-delivery-analysis/);
 assert.ok(sw.includes('company-project-delivery-analysis.js'));
 assert.match(ui, /deliveryAnalysis/);
 assert.match(ui, /loadProjectDeliveryAnalysis/);
-assert.match(ui, /state\\.tab==='deliveryAnalysis'\\)return loadProjectDeliveryAnalysis/);
+assert.ok(ui.includes("if(state.tab==='deliveryAnalysis')return loadProjectDeliveryAnalysis();"));
 assert.match(ui, /getProjectDeliveryAnalysis/);
 assert.match(css, /cw-delivery-kpis/);
 assert.ok(workflow.includes('node scripts/validate-v10.66.mjs'));
