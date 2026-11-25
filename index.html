@@ -156,6 +156,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       <div class="storage-error" id="storage-error" role="status"></div>
       <div class="progress-row"><span class="progress-label" id="progress-label">今日进度</span><span class="progress-count" id="progress-count">0 / 0 完成</span></div>
       <div class="progress-track" role="progressbar" aria-label="完成进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+      <!-- Quick add form: creates a plan for today from a title only, separate from the full plan editor dialog -->
       <form class="quick-add" id="quick-add-form" aria-label="快速添加今天的计划"><label class="sr-only" for="quick-add-title">计划名称</label><input id="quick-add-title" type="text" maxlength="120" autocomplete="off" placeholder="快速添加今天的计划…" aria-describedby="quick-add-error"><button class="primary" type="submit">＋ 添加</button></form><p class="quick-add-error" id="quick-add-error" role="alert"></p>
       <div class="clear-tools"><span class="clear-scope" id="clear-scope">仅清理当前标签中的计划</span><div class="clear-buttons"><button type="button" class="clear-btn" id="clear-period">清空当前标签计划</button><button type="button" class="clear-btn" id="clear-completed">清空当前标签已完成</button></div></div>
       <ul class="tasks" id="task-list" aria-live="polite"></ul>
