@@ -630,6 +630,79 @@ import { createRecordCache } from './company-record-loader.js';
     }
   }
 
+  function updateCustomerHealthLabels() {
+    $('cw-customer-health-title').textContent = t('customerHealthTitle');
+    $('cw-customer-health-subtitle').textContent = t('customerHealthSubtitle');
+    $('cw-customer-health-refresh').textContent = t('customerHealthRefresh');
+    $('cw-customer-health-note').textContent = t('customerHealthNote');
+  }
+
+  function renderCustomerRelationshipHealth(data) {
+    updateCustomerHealthLabels();
+    const report = getCustomerRelationshipHealth(data, getLocalDateKey(), 30);
+    const metrics = report.metrics;
+    const kpis = $('cw-customer-health-kpis'); kpis.replaceChildren();
+    [
+      ['customerHealthCustomers', metrics.customers],
+      ['customerHealthActiveProjects', metrics.customersWithActiveProjects],
+      ['customerHealthOverdue', metrics.customersWithOverdueFollowups],
+      ['customerHealthNoNextDate', metrics.customersWithPendingNoDate],
+      ['customerHealthStale', metrics.staleCustomersWithProjects],
+      ['customerHealthNoHistory', metrics.customersWithoutHistory]
+    ].forEach(([label, value]) => {
+      const card = node('article', 'cw-customer-health-kpi');
+      card.append(node('small', '', t(label)), node('strong', '', String(value)));
+      kpis.append(card);
+    });
+    const host = $('cw-customer-health-list'); host.replaceChildren();
+    if (!report.rows.length) { host.append(node('p', 'cw-customer-health-empty', t('customerHealthNoCustomers'))); return; }
+    report.rows.forEach(customer => {
+      const card = node('article', 'cw-customer-health-card cw-customer-health-' + customer.priority);
+      const head = node('div', 'cw-customer-health-card-head');
+      head.append(button(customer.title, 'cw-customer-health-customer', () => openCustomer(customer.id)), node('span', 'cw-customer-health-priority', t('customerHealthPriority' + customer.priority[0].toUpperCase() + customer.priority.slice(1))));
+      card.append(head);
+      if (customer.reasons.length) {
+        const reasons = node('ul', 'cw-customer-health-reasons');
+        customer.reasons.forEach(reason => {
+          reasons.append(node('li', '', t('customerHealthReason' + reason.key[0].toUpperCase() + reason.key.slice(1)) + (reason.key === 'overdue' || reason.key === 'withoutNextDate' ? ' · ' + reason.count : '')));
+        });
+        card.append(reasons);
+      } else card.append(node('p', 'cw-customer-health-empty', t('customerHealthPriorityNone')));
+      const meta = node('div', 'cw-customer-health-meta');
+      meta.append(node('span', '', t('customerHealthProjects') + ': ' + customer.activeProjectCount));
+      meta.append(node('span', '', t('customerHealthPending') + ': ' + customer.pendingFollowups));
+      meta.append(node('span', '', t('customerHealthLastContact') + ': ' + (customer.lastContact ? dateText(customer.lastContact) : '—')));
+      meta.append(node('span', '', t('customerHealthNextContact') + ': ' + (customer.nextFollowup ? dateText(customer.nextFollowup) : '—')));
+      card.append(meta);
+      if (customer.activeProjects.length) {
+        const projects = node('div', 'cw-customer-health-projects');
+        customer.activeProjects.forEach(project => projects.append(button(project.title, 'cw-customer-health-project-link', () => openProjectById(project.id))));
+        card.append(projects);
+      }
+      host.append(card);
+    });
+  }
+
+  async function loadCustomerRelationshipHealth(maxAgeMs=ENTRY_MAX_AGE_MS) {
+    if (state.customerHealthBusy) return;
+    state.customerHealthBusy = true;
+    const feedback = $('cw-customer-health-feedback');
+    feedback.classList.remove('error'); feedback.textContent = t('customerHealthLoading');
+    try {
+      const [customers, projects, followups] = await loadBusinessRecords(['customer', 'project', 'follow_up'], maxAgeMs);
+      const data = { customers, projects, followups };
+      state.customerHealthData = data;
+      state.customers = customers; state.projects = projects; state.followups = followups;
+      renderCustomerRelationshipHealth(data);
+      feedback.textContent = '';
+    } catch (error) {
+      state.customerHealthData = null;
+      feedback.classList.add('error'); feedback.textContent = error.message || t('customerHealthError');
+      $('cw-customer-health-kpis').replaceChildren();
+      $('cw-customer-health-list').replaceChildren();
+    } finally { state.customerHealthBusy = false; }
+  }
+
   async function loadBusinessContributionAnalysis(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if (state.contributionBusy) return;
     state.contributionBusy = true;
