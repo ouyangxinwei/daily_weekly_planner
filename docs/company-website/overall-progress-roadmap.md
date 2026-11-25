@@ -4,6 +4,8 @@
 
 ## 1. 项目定位与整体阶段
 
+- Phase 3-C（A/B/C）已完成；Phase 3-D：项目交付与资源规划开始设计。当前工作仅为设计/文档基线，尚无功能实现或部署。
+
 - 所属应用：慢慢计划（daily_weekly_planner）。
 - 子系统：个人公司网站。
 - 当前整体阶段：**Phase 3-C——业务分析与决策辅助**（Phase 2 已全部完成并通过用户验收）。
@@ -256,3 +258,8 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - PR #85（Phase 3-C-C 客户关系健康度与跟进机会）：已合并，merge commit `8e3bc14957fae6a83f6ea9f2ffbd15180d1b8363`；PR 验证 run #478 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
 - 当前开放 PR 状态以 GitHub 实时列表为准。testNisa 11 个页面的真实浏览器验收仍待用户方便时完成；未执行 Nightly Playwright。
 - Phase 1、Phase 2、Phase 3-A、Phase 3-B（A 至 D）及 Phase 3-C（A 至 C）代码均已合并。Phase 3-C-A、3-C-B、3-C-C 的 Pages 部署和真实浏览器验收状态仍待确认。下一候选为 Phase 3-D：项目交付与资源规划，尚未启动。
+
+
+## Phase 3-D 下一步
+
+当前正在规划项目交付与资源管理。详细边界、字段缺口和分阶段建议见 [Phase 3-D 规划](./phase-3d-delivery-planning.md)。下一步从 3-D-A/B 首个功能切片开始，复用现有数据进行项目期限风险与进度数据完整性分析，优先避免生产数据库/API 变更。
