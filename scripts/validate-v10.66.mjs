@@ -9,7 +9,9 @@ const project = (id, overrides = {}) => ({
 const report = getProjectDeliveryAnalysis({ projects: [
   project('ahead', { data: { progress_percent: 70 } }),
   project('slight', { data: { progress_percent: 45 } }),
+  project('slight-boundary', { data: { progress_percent: 40 } }),
   project('attention', { data: { progress_percent: 30 } }),
+  project('attention-boundary', { data: { progress_percent: 25 } }),
   project('high', { data: { progress_percent: 10 } }),
   project('future', { start_date: '2026-12-01', due_date: '2026-12-10', data: { progress_percent: 0 } }),
   project('overdue', { due_date: '2026-11-20', data: { progress_percent: 20 } }),
@@ -26,7 +28,9 @@ assert.equal(byId('ahead').plannedProgress, 50);
 assert.equal(byId('ahead').variance, 20);
 assert.equal(byId('ahead').risk, 'onTrack');
 assert.equal(byId('slight').risk, 'slight');
+assert.equal(byId('slight-boundary').risk, 'slight');
 assert.equal(byId('attention').risk, 'attention');
+assert.equal(byId('attention-boundary').risk, 'attention');
 assert.equal(byId('high').risk, 'high');
 assert.equal(byId('future').plannedProgress, 0);
 assert.equal(byId('overdue').overdue, false);
@@ -40,7 +44,7 @@ assert.equal(getProjectDeliveryAnalysis({ projects: [project('late', { due_date:
 assert.equal(getProjectDeliveryAnalysis({ projects: [project('past-start', { start_date: '2026-11-07' })] }, '2026-11-06').rows[0].plannedProgress, 0);
 assert.equal(getProjectDeliveryAnalysis({ projects: [project('past-due', { due_date: '2026-11-05' })] }, '2026-11-06').rows[0].plannedProgress, 100);
 assert.throws(() => getProjectDeliveryAnalysis({}, '2026-02-30'), TypeError);
-assert.equal(report.metrics.totalProjects, 11);
+assert.equal(report.metrics.totalProjects, 13);
 assert.equal(report.metrics.incomplete, 3);
 assert.equal(report.metrics.completed, 1);
 
@@ -60,6 +64,7 @@ assert.match(sw, /daily-weekly-planner-v10-66-project-delivery-analysis/);
 assert.ok(sw.includes('company-project-delivery-analysis.js'));
 assert.match(ui, /deliveryAnalysis/);
 assert.match(ui, /loadProjectDeliveryAnalysis/);
+assert.match(ui, /state\\.tab==='deliveryAnalysis'\\)return loadProjectDeliveryAnalysis/);
 assert.match(ui, /getProjectDeliveryAnalysis/);
 assert.match(css, /cw-delivery-kpis/);
 assert.ok(workflow.includes('node scripts/validate-v10.66.mjs'));
