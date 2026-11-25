@@ -11,7 +11,7 @@
 - Phase 2：2-A、2-B、2-C、2-D 均已验收；**Phase 2 全部完成并正式关闭**。2-D V10.54.0 已合并、部署并通过用户真实浏览器验收。
 - 当前已完成子阶段：**3-A——交易收支、业务文档与私有附件（V10.56.0，已通过用户生产环境浏览器验收；阶段正式完成）**。V10.57.0 是独立的「开发日记」模块，V10.58.0 是公司业务数据完整读取修复。**3-B-A——客户、项目、任务与跟进附件入口（V10.59.0）已通过 PR #72 合并；用户暂缓实际浏览器验收，后续开发不受阻。3-B-B——按币种的月度收支趋势（V10.60.0）已通过 PR #74 合并，验证 run #427 成功；Pages 部署和真实浏览器验收状态分别待确认/暂缓。**
 - Phase 2 目标：从分散的业务记录管理，升级为统一的日常业务决策与执行工作台。
-- 当前 main 应用版本：**V10.62.0**（PR #78 已合并）；Phase 3-C-A 目标版本 V10.63.0。
+- 当前 main 应用版本：**V10.63.0**（PR #81 已合并）。
 - 生产 API：Supabase Edge Function `company-api` v9，ACTIVE；包含状态历史和活动历史读取路由。
 - 生产数据库：慢慢计划 Supabase 项目中的 public.company_records；Phase 2 沿用现有结构。
 
@@ -37,7 +37,7 @@
 | 3-B-B | 按币种的月度收支趋势 | **代码已合并：V10.60.0 / PR #74；验证 run #427 成功；Pages 部署待确认，用户真实浏览器验收暂缓** |
 | 3-B-C | 业务状态变更历史 | **已合并：V10.61.0 / PR #76；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署待确认，真实浏览器验收暂缓** |
 | 3-B-D | 业务活动时间线 | **已合并：V10.62.0 / PR #78；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署待确认，真实浏览器验收暂缓** |
-| 3-C-A | 统一经营决策台 | **开发中：目标 V10.63.0；整合客户/项目/任务/跟进/交易/活动历史；无数据库和 API 变更** |
+| 3-C-A | 统一经营决策台 | **已合并：V10.63.0 / PR #81；验证 Run #467 成功；无数据库/API 变更；Pages 部署待确认，真实浏览器验收暂缓** |
 
 截至 2026-11-20，当前定义的 **13 个阶段工作项（1-A 至 1-H、1-I-A 至 1-I-E）均已完成并通过各自阶段验收**。这意味着 Phase 1 核心业务工作区目标已达成，不代表整个公司网站产品或未来功能已经全部完成。
 
@@ -226,7 +226,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 1. Phase 3-A 前端、私有 Storage 与 company-api v6 均已部署；用户于 2026-11-21 确认生产真实浏览器验收 OK，阶段正式完成。
 2. Phase 3-B-A 代码已通过 PR #72 合并：客户卡片、项目列表、任务列表和跟进列表增加附件入口，复用现有附件管理窗口与 API。验证 workflow run #423 成功；Pages 部署状态仍待确认。
 3. Phase 3-B-A 后续验证重点：四类记录均能打开正确附件列表；上传/下载/删除沿用私有 Storage；存在附件时业务记录删除仍受保护；三语与移动布局正常。
-4. Phase 3-B-C（V10.61.0 / PR #76）和 Phase 3-B-D（V10.62.0 / PR #78）均已合并；company-api v9 ACTIVE，五个 Phase 3-B-D migration 已应用。Phase 3-C-A 正在开发，目标是将现有业务模块整合为经营决策台。
+4. Phase 3-B-C（V10.61.0 / PR #76）和 Phase 3-B-D（V10.62.0 / PR #78）均已合并；company-api v9 ACTIVE，五个 Phase 3-B-D migration 已应用。Phase 3-C-A（V10.63.0 / PR #81）已合并，验证 Run #467 成功；下一步规划客户/项目维度的收支贡献分析。
 
 ## 15. V10.58.0：业务记录完整读取与限流保护（修复，2026-11-22）
 
@@ -240,7 +240,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 ## 16. 当前主分支核对（2026-11-25）
 
 - 当前 `main`：以 GitHub 仓库 `main` 分支 HEAD 为准；本路线文档不固定记录自身提交 SHA，避免文档提交后立即过期。
-- 应用版本：`10.62.0`（PR #78 已合并；`VERSION` 与 `package.json` 一致）；Phase 3-C-A 目标 `10.63.0`。
+- 应用版本：`10.63.0`（PR #81 已合并；`VERSION` 与 `package.json` 一致）。
 - PR #66（V10.58 公司业务完整读取修复）：已合并；其 main 验证与 Pages build/deploy 均成功。
 - PR #68（testNisa 完整演练区迁移）：已合并；迁移 38 个文件、11 个页面。
 - PR #69（testNisa 部署状态文档）：已合并；Pages Run #333 成功。
@@ -248,6 +248,6 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - PR #72（Phase 3-B-A 客户/项目/任务/跟进附件入口）：已合并；验证 run #423 success；用户暂缓实际浏览器验收。
 - PR #74（Phase 3-B-B 按币种的月度收支趋势）：已合并，merge commit `6b29839b0dbf7975597ac44ede571d068e89a941`；验证 run #427 success；Pages build/deploy 状态待确认，用户真实浏览器验收暂缓。
 - PR #76（Phase 3-B-C 业务状态变更历史）：已合并，merge commit `c14c1cbadd93bf8cb62ce092732f60e69116730d`；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署状态待确认。
-- PR #78（Phase 3-B-D 业务活动时间线）：已合并，merge commit `5441c765f02c1547a2bb247506b67690955c265e`；PR 验证 run #460 success；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署成功证据尚未取得。
+- PR #78（Phase 3-B-D 业务活动时间线）：已合并，merge commit `5441c765f02c1547a2bb247506b67690955c265e`；PR 验证 run #460 success；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署成功证据尚未取得。\n- PR #81（Phase 3-C-A 统一经营决策台）：已合并，merge commit `a147f23cb8c339cd8783f626e5964698d4bdcebf`；PR 验证 run #467 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
 - 当前开放 PR 状态以 GitHub 实时列表为准。testNisa 11 个页面的真实浏览器验收仍待用户方便时完成；未执行 Nightly Playwright。
-- Phase 1、Phase 2、Phase 3-A 已完成；Phase 3-B-A 至 3-B-D 代码均已合并。Phase 3-B-D 的 Pages 部署和真实浏览器验收状态仍待确认。
+- Phase 1、Phase 2、Phase 3-A 已完成；Phase 3-B-A 至 3-B-D 和 Phase 3-C-A 代码均已合并。Phase 3-C-A 的 Pages 部署和真实浏览器验收状态仍待确认。
