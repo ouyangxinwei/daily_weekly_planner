@@ -427,6 +427,140 @@ import { createRecordCache } from './company-record-loader.js';
     ]);
     updateBusinessTrendLabels();
   }
+  async function loadRecentActivityHistory(recordId) {
+    const params = new URLSearchParams({ record_id: recordId, limit: '20', offset: '0' });
+    try {
+      const page = await api('/activity-history?' + params.toString());
+      if (!Array.isArray(page?.items)) throw new Error(t('incompleteData'));
+      return page.items;
+    } catch (error) {
+      if (error?.code === 'RECORD_NOT_FOUND') return [];
+      throw error;
+    }
+  }
+
+  function updateDecisionLabels() {
+    $('cw-decision-title').textContent = t('decisionTitle');
+    $('cw-decision-subtitle').textContent = t('decisionSubtitle');
+    $('cw-decision-refresh').textContent = t('decisionRefresh');
+    $('cw-decision-finance-title').textContent = t('decisionFinanceTitle');
+    $('cw-decision-finance-note').textContent = t('decisionFinanceNote');
+    $('cw-decision-actions-title').textContent = t('decisionActionsTitle');
+    $('cw-decision-activity-title').textContent = t('decisionActivityTitle');
+    $('cw-decision-records-title').textContent = t('decisionRecordsTitle');
+  }
+
+  function openDecisionRecord(type, record) {
+    if (!record?.id) return;
+    if (type === 'customer') openCustomer(record.id);
+    else if (type === 'project') openProjectById(record.id);
+    else if (type === 'task') openRelatedRecord('tasks', record);
+    else if (type === 'follow_up') openRelatedRecord('followups', record);
+  }
+
+  function renderBusinessDecisionCenter(report) {
+    updateDecisionLabels();
+    const metrics = report.metrics;
+    const kpis = $('cw-decision-kpis'); kpis.replaceChildren();
+    [
+      ['decisionCustomers', metrics.customers],
+      ['decisionActiveProjects', metrics.activeProjects],
+      ['decisionOpenTasks', metrics.openTasks],
+      ['decisionPendingFollowups', metrics.pendingFollowups],
+      ['decisionTransactions', metrics.transactions]
+    ].forEach(([label, value]) => {
+      const card = node('article', 'cw-decision-kpi');
+      card.append(node('small', '', t(label)), node('strong', '', String(value)));
+      kpis.append(card);
+    });
+
+    const finance = $('cw-decision-finance'); finance.replaceChildren();
+    ['JPY', 'CNY', 'USD'].forEach(currency => {
+      const totals = report.finance[currency];
+      const card = node('article', 'cw-decision-currency');
+      card.append(node('h5', '', currency));
+      const rows = [
+        [t('decisionIncome'), formatAmountMicros(totals.income, currency), 'income'],
+        [t('decisionExpense'), formatAmountMicros(totals.expense, currency), 'expense'],
+        [t('decisionNet'), formatAmountMicros(totals.net, currency), totals.net < 0n ? 'expense' : 'income'],
+        [t('decisionPlanned'), formatAmountMicros(totals.plannedIncome, currency) + ' / ' + formatAmountMicros(totals.plannedExpense, currency), '']
+      ];
+      rows.forEach(([label, value, kind]) => {
+        const row = node('div', 'cw-decision-finance-row');
+        row.append(node('span', '', label), node('strong', kind ? 'cw-amount-' + kind : '', value));
+        card.append(row);
+      });
+      finance.append(card);
+    });
+
+    const actions = $('cw-decision-actions'); actions.replaceChildren();
+    if (!report.recommendations.length) actions.append(node('p', 'cw-decision-empty', t('decisionNoActions')));
+    report.recommendations.forEach(item => {
+      const card = node('article', 'cw-decision-action cw-decision-priority-' + item.priority);
+      const head = node('div', 'cw-decision-action-head');
+      head.append(node('strong', '', t('decision' + item.key[0].toUpperCase() + item.key.slice(1))), node('span', 'cw-decision-priority', t('decision' + item.priority[0].toUpperCase() + item.priority.slice(1))));
+      card.append(head, node('p', 'cw-decision-action-count', String(item.count)));
+      item.records.slice(0, 3).forEach(record => {
+        const row = button(record.title || '—', 'cw-decision-action-record', () => openDecisionRecord(item.type === 'projects' ? 'project' : item.type === 'tasks' ? 'task' : 'follow_up', record));
+        if (record.due_date) row.append(node('small', '', t('dueDate') + ': ' + dateText(record.due_date)));
+        card.append(row);
+      });
+      actions.append(card);
+    });
+
+    const activity = $('cw-decision-activity'); activity.replaceChildren();
+    if (!report.recentActivity.length) activity.append(node('p', 'cw-decision-empty', t('decisionNoActivity')));
+    report.recentActivity.forEach(event => {
+      const row = node('article', 'cw-decision-activity-item');
+      const typeLabel = t(event.record_type === 'customer' ? 'customer' : event.record_type === 'project' ? 'project' : event.record_type === 'task' ? 'task' : 'followup');
+      const title = node('strong', '', (event.title || '—') + ' · ' + typeLabel);
+      row.append(title);
+      const actionKey = event.event_type === 'created' ? 'activityCreated' : event.event_type === 'deleted' ? 'activityDeleted' : event.event_type === 'status_changed' ? 'activityStatusChanged' : 'activityUpdated';
+      let detail = t(actionKey);
+      if (event.event_type === 'status_changed') detail += ': ' + (t(event.old_status || 'statusCleared') || event.old_status || '—') + ' → ' + (t(event.new_status || 'statusCleared') || event.new_status || '—');
+      else if (Array.isArray(event.changed_fields) && event.changed_fields.length) detail += ' · ' + event.changed_fields.join(', ');
+      row.append(node('span', '', detail), node('time', '', dateText(event.occurred_at)));
+      if (event.event_type !== 'deleted' && event.record_id) row.append(button(t('decisionView'), 'cw-decision-inline-link', () => {
+        const record = report.recentRecords.find(item => item.id === event.record_id);
+        if (record) openDecisionRecord(record.record_type, record);
+      }));
+      activity.append(row);
+    });
+
+    const records = $('cw-decision-records'); records.replaceChildren();
+    if (!report.recentRecords.length) records.append(node('p', 'cw-decision-empty', t('decisionNoRecords')));
+    report.recentRecords.forEach(record => {
+      const typeLabel = t(record.record_type === 'customer' ? 'customer' : record.record_type === 'project' ? 'project' : record.record_type === 'task' ? 'task' : 'followup');
+      const row = button('', 'cw-decision-record', () => openDecisionRecord(record.record_type, record));
+      row.append(node('strong', '', record.title || '—'), node('span', '', typeLabel + ' · ' + dateText(record.updated_at || record.created_at)));
+      records.append(row);
+    });
+  }
+
+  async function loadBusinessDecisionCenter(maxAgeMs=ENTRY_MAX_AGE_MS) {
+    if (state.decisionBusy) return;
+    state.decisionBusy = true;
+    const feedback = $('cw-decision-feedback');
+    feedback.classList.remove('error'); feedback.textContent = t('decisionLoading');
+    try {
+      const [customers, projects, tasks, followups, transactions] = await loadBusinessRecords(['customer', 'project', 'task', 'follow_up', 'transaction'], maxAgeMs);
+      const latestRecords = [...customers, ...projects, ...tasks, ...followups]
+        .sort((a, b) => recordTimestamp(b) - recordTimestamp(a)).slice(0, 6);
+      const activityPages = await Promise.all(latestRecords.map(record => loadRecentActivityHistory(record.id)));
+      const activity = activityPages.flat().sort((a, b) => (Date.parse(b.occurred_at || '') || 0) - (Date.parse(a.occurred_at || '') || 0)).slice(0, 20);
+      const report = getBusinessDecisionReport({ customers, projects, tasks, followups, transactions, activity }, getLocalDateKey());
+      state.decisionData = report;
+      state.customers = customers; state.projects = projects; state.tasks = tasks; state.followups = followups;
+      rememberRelationshipRecords(projects, tasks, followups);
+      renderBusinessDecisionCenter(report);
+      feedback.textContent = '';
+    } catch (error) {
+      state.decisionData = null;
+      feedback.classList.add('error'); feedback.textContent = error.message || t('decisionLoadError');
+      ['cw-decision-kpis', 'cw-decision-finance', 'cw-decision-actions', 'cw-decision-activity', 'cw-decision-records'].forEach(id => $(id).replaceChildren());
+    } finally { state.decisionBusy = false; }
+  }
+
   async function loadBusinessTrends(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if(state.trendBusy)return;
     state.trendBusy=true;
