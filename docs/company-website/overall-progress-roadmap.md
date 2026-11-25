@@ -228,7 +228,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 1. Phase 3-A 前端、私有 Storage 与 company-api v6 均已部署；用户于 2026-11-21 确认生产真实浏览器验收 OK，阶段正式完成。
 2. Phase 3-B-A 代码已通过 PR #72 合并：客户卡片、项目列表、任务列表和跟进列表增加附件入口，复用现有附件管理窗口与 API。验证 workflow run #423 成功；Pages 部署状态仍待确认。
 3. Phase 3-B-A 后续验证重点：四类记录均能打开正确附件列表；上传/下载/删除沿用私有 Storage；存在附件时业务记录删除仍受保护；三语与移动布局正常。
-4. Phase 3-B-C（V10.61.0 / PR #76）和 Phase 3-B-D（V10.62.0 / PR #78）均已合并；company-api v9 ACTIVE，五个 Phase 3-B-D migration 已应用。Phase 3-C-A（V10.63.0 / PR #81）和 Phase 3-C-B（V10.64.0 / PR #83）已合并，验证 Run #467 / #474 成功；下一步进入客户关系健康度与跟进机会分析。
+4. Phase 3-B-C（V10.61.0 / PR #76）和 Phase 3-B-D（V10.62.0 / PR #78）均已合并；company-api v9 ACTIVE，五个 Phase 3-B-D migration 已应用。Phase 3-C-A（V10.63.0 / PR #81）、3-C-B（V10.64.0 / PR #83）和 3-C-C（V10.65.0 / PR #85）均已合并，验证 Run #467 / #474 / #478 成功；Phase 3-C 正式完成。
 
 ## 15. V10.58.0：业务记录完整读取与限流保护（修复，2026-11-22）
 
@@ -255,4 +255,4 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - PR #83（Phase 3-C-B 客户与项目收支贡献分析）：已合并，merge commit `6e6326ca40960b3ec9c99155373535c67752851c`；PR 验证 run #474 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
 - PR #85（Phase 3-C-C 客户关系健康度与跟进机会）：已合并，merge commit `8e3bc14957fae6a83f6ea9f2ffbd15180d1b8363`；PR 验证 run #478 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
 - 当前开放 PR 状态以 GitHub 实时列表为准。testNisa 11 个页面的真实浏览器验收仍待用户方便时完成；未执行 Nightly Playwright。
-- Phase 1、Phase 2、Phase 3-A 已完成；Phase 3-B-A 至 3-B-D 和 Phase 3-C-A 代码均已合并。Phase 3-C-A、3-C-B、3-C-C 的 Pages 部署和真实浏览器验收状态仍待确认。
+- Phase 1、Phase 2、Phase 3-A、Phase 3-B（A 至 D）及 Phase 3-C（A 至 C）代码均已合并。Phase 3-C-A、3-C-B、3-C-C 的 Pages 部署和真实浏览器验收状态仍待确认。下一候选为 Phase 3-D：项目交付与资源规划，尚未启动。
