@@ -20,6 +20,7 @@
 - [外语学习工作区（中文）](language-learning-workspace.md) · [English](language-learning-workspace.en.md) · [日本語](language-learning-workspace.ja.md)。
 - [公司网站开发文档](company-website/README.md)：客户、项目和业务跟进的设计、数据库、API 与阶段记录。
 - [AI 协作开发指南](ai_collaboration_guide.md)：与 AI 协作开发的约定。
+- [Agent 工作流实施指南](agent-workflow.md)：PowerShell 与 Claude Code 的当前单 Agent 自动化实践，以及 Master Agent / Worker Agent 多 Agent 架构规划。
 - [Git 分支工作流](git-branching-workflow.md)：分支命名、PR 和合并后清理规则。
 - [夜间 E2E 测试说明](nightly-e2e-testing.md)：现有自动化测试运行说明。
 
