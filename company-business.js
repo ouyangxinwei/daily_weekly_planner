@@ -721,7 +721,7 @@ import { createRecordCache } from './company-record-loader.js';
       const head = node('div', 'cw-delivery-card-head');
       head.append(button(project.title || '—', 'cw-delivery-project-title', () => openProjectById(project.id)));
       const badgeKey = row.overdue ? 'deliveryOverdueLabel' : row.risk === 'completed' ? 'deliveryCompletedLabel' : row.risk === 'incomplete' ? 'deliveryIncompleteLabel' : 'deliveryRisk' + row.risk[0].toUpperCase() + row.risk.slice(1);
-      head.append(node('span', 'cw-delivery-badge cw-delivery-' + row.risk, t(badgeKey)));
+      head.append(node('span', 'cw-delivery-badge cw-delivery-' + (row.overdue ? 'overdue' : row.risk), t(badgeKey)));
       card.append(head);
       const status = t(project.status) || project.status || '—';
       const dates = (project.start_date ? dateText(project.start_date) : '—') + ' – ' + (project.due_date ? dateText(project.due_date) : '—');
