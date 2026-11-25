@@ -4,6 +4,8 @@
 
 ## 当前状态
 
+- **下一候选阶段：Phase 3-D——项目交付与资源规划（设计基线已建立，功能开发尚未开始）。**
+
 - **整体阶段：Phase 3——财务与文档资料（Phase 2 已全部完成并通过用户验收）。**
 - **Phase 1：当前定义的 13 个核心工作项均已完成并通过阶段验收。**
 - **最新完成阶段：Phase 3-C-C——客户关系健康度与跟进机会（V10.65.0，PR #85 已合并；验证 Run #478 成功；无数据库/API 变更）。Phase 3-C（A/B/C）全部完成。**
@@ -31,6 +33,8 @@
 - [个人公司网站整体进度与后续路线](./overall-progress-roadmap.md)：重新进入项目时先读这里，了解整体阶段、已完成步骤、下一步和剩余工作估算。
 
 ## 阶段文档
+
+- [Phase 3-D：项目交付与资源规划](./phase-3d-delivery-planning.md)
 
 - [Phase 3-C-C：客户关系健康度与跟进机会](./phase-3c-c-customer-relationship-health.md)
 - [Phase 3-C-B：客户与项目收支贡献分析](./phase-3c-b-customer-project-contributions.md)
