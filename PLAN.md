@@ -71,7 +71,7 @@
 
 ### Step 1：标注启动阶段的工作区恢复
 
-- [ ] **目标：** 为启动时读取 `personal-planner:active-workspace:v1` 并设置页面 workspace 状态的内联脚本增加一行说明注释。
+- [x] **目标：** 为启动时读取 `personal-planner:active-workspace:v1` 并设置页面 workspace 状态的内联脚本增加一行说明注释。
 - **唯一文件：** `index.html`
 - **插入位置：** `<script data-workspace-boot>` 前一行。
 - **注释意图：** 说明该脚本在主界面初始化前恢复上次选择的工作区，以避免首次绘制时显示错误工作区。

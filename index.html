@@ -88,6 +88,7 @@ html[data-theme="dark"] .storage-note{color:#8994a6}
 html[data-theme="dark"] .due-at{color:#e6bd69}
 html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[data-theme="dark"] .clear-scope{color:#a6afbf}
 </style>
+  <!-- Restore the last selected workspace before the main UI initializes, so the first paint does not show the wrong workspace. -->
   <script data-workspace-boot>try{const ws=localStorage.getItem('personal-planner:active-workspace:v1');if(ws==='language'||ws==='company')document.documentElement.dataset.workspace=ws}catch(e){}</script>
   <style>
     .workspace-switch{display:inline-flex;gap:0;border-radius:999px;overflow:hidden}
