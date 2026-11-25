@@ -59,7 +59,8 @@ export function getBusinessDecisionReport(data = {}, today) {
   add('normal', 'dueSoonProjects', dueSoonProjects, 'projects');
   add('normal', 'unplannedFollowups', unplannedFollowups, 'followups');
   add('normal', 'tasksWithoutProject', tasksWithoutProject, 'tasks');
-  recommendations.sort((a, b) => ({ urgent: 0, high: 1, normal: 2 }[a.priority] - { urgent: 0, high: 1, normal: 2 }[b.priority]);
+  const priorityOrder = { urgent: 0, high: 1, normal: 2 };
+  recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
   const finance = Object.fromEntries(CURRENCIES.map(currency => {
     const report = getMonthlyCashflow(transactions, currency, new Date(date + 'T12:00:00'), 12);
     return [currency, report.totals];
