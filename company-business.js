@@ -6,6 +6,7 @@ import { getBusinessTrendReport } from './company-business-trends.js';
 import { getBusinessDecisionReport } from './company-decision-center.js';
 import { getBusinessContributionReport } from './company-contribution-analysis.js';
 import { getCustomerRelationshipHealth } from './company-customer-health.js';
+import { getProjectDeliveryAnalysis } from './company-project-delivery-analysis.js';
 import { formatAmountMicros } from './company-records-rules.js';
 import { createRecordCache } from './company-record-loader.js';
 
