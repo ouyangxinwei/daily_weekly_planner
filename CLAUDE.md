@@ -31,6 +31,8 @@ powershell -ExecutionPolicy Bypass -File .\run-plan.ps1                         
 - 不得自行运行 `run-plan.ps1`（不带 `-CheckOnly`），不得自动执行 Step 1～5，除非用户明确要求。
 - 不得修改 PLAN.md 中五个 Step 的任务内容。
 - 不得自动合并 PR、推送到 `main` 或部署。本工作流中此规则优先于 `docs/ai_collaboration_guide.md` 第 5 节的默认自主模式。
+- 不得删除 Agent 测试分支 `feat/agent-plan-steps`（本地和远程），即使已合并也不做常规清理；确需删除时必须先得到用户明确确认。
+- 该分支已全部完成，执行新的 PLAN 时用 `-WorkBranch <新分支名>` 指定新的工作分支，不要复用它。
 - 不得删除根目录本地辅助文件（`check.py`、`test_check.py`、`interactive_agent.py`、`agent_test/`、`tools/weather-cli/`、`__pycache__/` 等）。
 - 代码注释使用英文；`run-plan.ps1` 必须保持纯 ASCII（中文用 `\uXXXX` 转义），兼容 Windows PowerShell 5.1。
 - 修改 `run-plan.ps1` 后必须运行离线测试并给出真实输出，再用 `-CheckOnly` 确认五个 Step 分行显示。

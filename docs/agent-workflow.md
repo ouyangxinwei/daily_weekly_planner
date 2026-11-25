@@ -278,6 +278,7 @@ Suggested extension path: (1) add a `-PatchOnly` mode where each worker runs in 
 - The orchestrator pushes only to its work branch; merge and deploy require a human-reviewed PR.
 - Report commit, push, PR, merge, and deployment as separate states.
 - Record failed, skipped, and unexecuted checks honestly.
+- Never delete the protected test branch `feat/agent-plan-steps` without explicit owner confirmation (section 17).
 
 ## 12. Suggested Next Development Stages
 
@@ -306,7 +307,7 @@ Do not skip Stage A.
 - [ ] Browser/PWA behavior was not checked (comment-only change; section 16 proves no other byte changed).
 - [ ] Master Agent and parallel worker stages (B-E) are not implemented.
 
-**Next action:** decide on `feat/agent-plan-steps` (merge through a PR, or discard and delete the branch), then continue with Stage B.
+**Next action:** continue with Stage B. `feat/agent-plan-steps` is kept as the test record (see section 17); merging it into `main` is optional and is the owner's decision.
 
 ## 14. Known Risks and Limitations
 
@@ -421,3 +422,16 @@ Check 6 is the strongest one: if the file minus the five added lines is byte-ide
 ### 16.3 Plan state
 
 `run-plan.ps1 -CheckOnly` reads `PLAN.md` from the work branch on GitHub and must report all five steps as COMPLETED with "Next step: none". This shows the recorded plan state matches the verified code change.
+
+## 17. Protected Test Branch `feat/agent-plan-steps`
+
+`feat/agent-plan-steps` holds the result of the first real run (section 15) and is the reference for the verification in section 16. The repository owner has asked for it to be kept.
+
+- Do not delete it, locally or on GitHub, unless there is a specific need. It is excluded from the usual "delete after merge" cleanup in [Git branching workflow](git-branching-workflow.md), even if it is merged.
+- Deleting it requires explicit confirmation from the repository owner. AI assistants must not delete it on their own.
+- All five steps on this branch are completed. Because the runner reads `PLAN.md` from `origin/<WorkBranch>` when that branch exists, a run with the default `-WorkBranch` will only report "All 5 steps are marked as completed". For a new plan, start from an updated `main` and pass a new branch name, for example:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run-plan.ps1 -CheckOnly -WorkBranch feat/agent-plan-v2
+powershell -ExecutionPolicy Bypass -File .\run-plan.ps1 -WorkBranch feat/agent-plan-v2
+```

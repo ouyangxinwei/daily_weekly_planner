@@ -20,6 +20,7 @@
 | 部署、更新和故障排查 | [部署与故障排查](docs/deployment_and_troubleshooting.md) |
 | AI 协作开发约定 | [AI 协作开发指南](docs/ai_collaboration_guide.md) |
 | 分支、PR 和临时分支清理 | [Git 分支工作流](docs/git-branching-workflow.md) |
+| Agent 自动化工作流（PLAN.md + run-plan.ps1） | [Agent 工作流实施指南](docs/agent-workflow.md) |
 | 个人公司网站的设计、数据库、API 和阶段记录 | [公司网站开发文档](docs/company-website/README.md) |
 
 ## 当前功能概览
@@ -49,5 +50,11 @@
 ## 开发协作
 
 所有正式变更均通过独立临时分支和 PR 合并到 `main`。合并后按规范清理临时远程分支。详细规则见 [Git 分支工作流](docs/git-branching-workflow.md)。
+
+> [!WARNING]
+> **Agent 测试分支 `feat/agent-plan-steps` 必须保留。**
+> 该分支保存了 Agent 工作流（`run-plan.ps1` + Claude Code）首次真实执行 PLAN.md Step 1～5 的结果，用于 Agent 测试和验证留档（提交 `9295d0b`…`54c058c`，见 [Agent 工作流实施指南](docs/agent-workflow.md) 第 15、16 节）。
+> - 没有特殊需求不要删除该分支，包括本地和远程；合并到 `main` 后也不按常规自动清理。
+> - 确需删除时，必须先获得仓库所有者的明确确认；AI 助手不得自行删除。
 
 - **美股七巨头行情：** 天气预报下方展示最近交易周的七只美股行情，细节见 [股票看板说明](docs/stock-dashboard.md)。
