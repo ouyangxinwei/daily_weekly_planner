@@ -32,7 +32,8 @@
 
 ## 阶段文档
 
-- [Phase 3-C-A：统一经营决策台](./phase-3c-a-business-decision-center.md)\n- [Phase 3-B-D：业务活动时间线](./phase-3b-d-business-activity.md)
+- [Phase 3-C-A：统一经营决策台](./phase-3c-a-business-decision-center.md)
+- [Phase 3-B-D：业务活动时间线](./phase-3b-d-business-activity.md)
 - [Phase 3-B-C：业务状态变更历史](./phase-3b-c-status-history.md)
 - [Phase 3-B-B：按币种的月度收支趋势](./phase-3b-b-monthly-cashflow.md)
 - [Phase 2 路线与阶段规划](./phase-2-overview-workbench.md)
