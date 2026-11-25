@@ -359,3 +359,44 @@ html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 .cw-customer-health-empty{font-size:12px;color:var(--muted);margin:8px 0}
 @media(max-width:760px){.cw-customer-health-list{grid-template-columns:1fr}.cw-customer-health-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.cw-customer-health-heading{align-items:flex-start}.cw-customer-health-kpi{padding:10px}.cw-customer-health-kpi strong{font-size:19px}.cw-customer-health-meta{grid-template-columns:1fr}}
+
+
+/* V10.66: project delivery plan vs. actual progress */
+.cw-delivery-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+.cw-delivery-heading h3{margin:0 0 5px;font-size:17px}
+.cw-delivery-heading p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.cw-delivery-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:14px 0}
+.cw-delivery-kpi{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:grid;gap:5px}
+.cw-delivery-kpi small{color:var(--muted);font-size:11px;line-height:1.4}
+.cw-delivery-kpi strong{font-size:22px;font-variant-numeric:tabular-nums}
+.cw-delivery-list{display:grid;gap:10px}
+.cw-delivery-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--surface)}
+.cw-delivery-card.is-overdue{border-color:#d99a78}
+.cw-delivery-card.is-high-risk{border-inline-start:4px solid #c65b66}
+.cw-delivery-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cw-delivery-project-title{min-width:0;padding:0;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:700;text-align:start;overflow-wrap:anywhere}
+.cw-delivery-project-title:hover{color:var(--brand);text-decoration:underline}
+.cw-delivery-badge{flex:none;padding:5px 8px;border-radius:999px;background:var(--surface-secondary,var(--bg));color:var(--muted);font-size:10px;font-weight:700}
+.cw-delivery-overdue,.cw-delivery-high{background:#fff0f0;color:#a63e4b}
+.cw-delivery-attention{background:#fff4e6;color:#98621b}
+.cw-delivery-slight{background:#f5f1e8;color:#806b39}
+.cw-delivery-onTrack,.cw-delivery-completed{background:#eaf5ef;color:#28714f}
+.cw-delivery-incomplete{background:#f0f1f5;color:#666d7c}
+.cw-delivery-meta{margin:7px 0 10px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.cw-delivery-progress-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cw-delivery-progress-item{min-width:0;display:grid;gap:6px}
+.cw-delivery-progress-label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px}
+.cw-delivery-progress-label strong{color:var(--ink);font-variant-numeric:tabular-nums}
+.cw-delivery-track{display:block;height:8px;overflow:hidden;border-radius:99px;background:var(--line)}
+.cw-delivery-fill{display:block;height:100%;border-radius:inherit}
+.cw-delivery-fill-planned{background:#8b91a3}
+.cw-delivery-fill-actual{background:var(--brand)}
+.cw-delivery-variance{margin:10px 0 0;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.cw-delivery-issue{margin:8px 0 0;color:#98621b;font-size:12px}
+.cw-delivery-empty{padding:24px 12px;text-align:center;color:var(--muted)}
+html[data-theme="dark"] .cw-delivery-overdue,html[data-theme="dark"] .cw-delivery-high{background:#482c35;color:#ffb7be}
+html[data-theme="dark"] .cw-delivery-attention{background:#493a27;color:#f3cc86}
+html[data-theme="dark"] .cw-delivery-slight{background:#403b2d;color:#e4d29a}
+html[data-theme="dark"] .cw-delivery-onTrack,html[data-theme="dark"] .cw-delivery-completed{background:#263f36;color:#a8dfc0}
+@media(max-width:700px){.cw-delivery-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.cw-delivery-heading{align-items:flex-start}.cw-delivery-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.cw-delivery-kpi{padding:10px}.cw-delivery-kpi strong{font-size:19px}.cw-delivery-card{padding:12px}.cw-delivery-progress-grid{grid-template-columns:1fr;gap:9px}}
