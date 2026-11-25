@@ -103,7 +103,7 @@
 
 本仓库的 Agent 工作流实践和后续架构规划统一维护在 [Agent 工作流实施指南](agent-workflow.md)。
 
-当前已设计并试运行的基础模式是：由本地 PowerShell 脚本读取 GitHub 上的 `PLAN.md`，选择一个待执行步骤，调用 Claude Code 完成限定范围内的修改，再由脚本检查差异并逐步 Commit / Push。Claude Code 负责实现，脚本负责流程控制、范围校验和 Git 交付。
+当前已设计并试运行的基础模式是：由本地 PowerShell 脚本读取 GitHub 上的 `PLAN.md`，选择一个待执行步骤，调用 Claude Code 完成限定范围内的修改，再由脚本检查差异并逐步 Commit / Push 到工作分支 `feat/agent-plan-steps`（不直接推送 `main`，不自动合并或部署；进入 `main` 需人工审阅 PR）。Claude Code 负责实现，脚本负责流程控制、范围校验和 Git 交付。
 
 需要明确区分当前能力与目标架构：
 
