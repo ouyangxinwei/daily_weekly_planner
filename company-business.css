@@ -266,3 +266,45 @@ html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 .cw-status-history-time{color:var(--muted);font-size:11px}
 
 .cw-status-history-fields{margin:0 0 5px;color:var(--muted);font-size:11px;line-height:1.55}
+
+/* Phase 3-C-A: unified business decision center */
+.cw-decision-panel[hidden]{display:none!important}
+.cw-decision-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.cw-decision-heading h3{margin:0 0 6px;font-size:18px}
+.cw-decision-heading p,.cw-decision-note{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.cw-decision-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0 22px}
+.cw-decision-kpi{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--surface);display:grid;gap:7px}
+.cw-decision-kpi small{color:var(--muted);font-size:12px}
+.cw-decision-kpi strong{font-size:23px;font-variant-numeric:tabular-nums}
+.cw-decision-section{margin-top:22px}
+.cw-decision-section h4{margin:0 0 12px;font-size:15px}
+.cw-decision-finance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cw-decision-currency{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);min-width:0}
+.cw-decision-currency h5{margin:0 0 10px;font-size:14px}
+.cw-decision-finance-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:12px}
+.cw-decision-finance-row span{color:var(--muted)}
+.cw-decision-finance-row strong{text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cw-decision-note{margin-top:9px}
+.cw-decision-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cw-decision-action{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:12px;padding:12px;background:var(--surface);min-width:0}
+.cw-decision-priority-urgent{border-left-color:var(--danger)}
+.cw-decision-priority-high{border-left-color:#d28a34}
+.cw-decision-priority-normal{border-left-color:var(--brand)}
+.cw-decision-action-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.cw-decision-action-head strong{font-size:13px}
+.cw-decision-priority{font-size:10px;color:var(--muted);white-space:nowrap}
+.cw-decision-action-count{font-size:22px;font-weight:700;margin:8px 0}
+.cw-decision-action-record,.cw-decision-record{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:8px 0;border:0;border-top:1px solid var(--line);background:transparent;color:var(--ink);font:inherit}
+.cw-decision-action-record:hover,.cw-decision-record:hover,.cw-decision-inline-link:hover{text-decoration:underline;color:var(--brand)}
+.cw-decision-action-record small,.cw-decision-record span{color:var(--muted);font-size:11px}
+.cw-decision-activity{display:grid;gap:0;border:1px solid var(--line);border-radius:13px;padding:0 13px;background:var(--surface)}
+.cw-decision-activity-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px}
+.cw-decision-activity-item:last-child{border-bottom:0}
+.cw-decision-activity-item strong{min-width:0;overflow-wrap:anywhere}
+.cw-decision-activity-item span{color:var(--muted);overflow-wrap:anywhere}
+.cw-decision-activity-item time{grid-column:2;grid-row:1;color:var(--muted);white-space:nowrap;font-size:11px}
+.cw-decision-inline-link{justify-self:start;border:0;background:transparent;padding:0;color:var(--brand);font:inherit;font-size:11px}
+.cw-decision-records{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
+.cw-decision-empty{color:var(--muted);font-size:13px;padding:10px 0}
+@media(max-width:760px){.cw-decision-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-decision-finance{grid-template-columns:1fr}.cw-decision-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.cw-decision-heading{align-items:flex-start}.cw-decision-kpis{gap:7px}.cw-decision-kpi{padding:11px}.cw-decision-kpi strong{font-size:20px}.cw-decision-actions,.cw-decision-records{grid-template-columns:1fr}.cw-decision-activity-item{grid-template-columns:minmax(0,1fr)}.cw-decision-activity-item time{grid-column:1;grid-row:auto}.cw-decision-activity-item span{grid-column:1}}

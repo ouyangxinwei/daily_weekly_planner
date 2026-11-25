@@ -1,3 +1,12 @@
+# V10.63 Business Decision Center — 2026-11-25
+
+- Added a unified business decision center combining customers, projects, tasks, follow-ups and transactions.
+- Summarizes operating KPIs and overdue, blocked and upcoming work as prioritized actions with direct navigation.
+- Shows the last 12 months of completed income, expense, net cashflow and planned amounts separately for JPY / CNY / USD; no currency conversion.
+- Brings recent activity history and recently updated business records into one view. The activity feed reads histories for the six most recently updated customer/project/task/follow-up records; missing history is not interpreted as proof that no activity occurred.
+- No database schema changes or Supabase migrations; reuses complete paginated reads, Basic authentication and the existing activity-history API.
+- Clarifies that net cashflow is not accounting profit; supports Chinese, English, Japanese and responsive layouts.
+
 # V10.62 Business Activity Timeline — 2026-11-25
 
 - Added a unified per-record activity timeline for customer, project, task and follow-up records, covering creation, field edits, status transitions and deletion.
