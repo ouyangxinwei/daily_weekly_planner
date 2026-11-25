@@ -3,7 +3,7 @@ import { CURRENCIES, parseAmountMicros, recordRelations } from './company-record
 function dateKey(value) {
   const raw = String(value ?? '');
   const key = raw.slice(0, 10);
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(key)) return '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return '';
   const [year, month, day] = key.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? key : '';
