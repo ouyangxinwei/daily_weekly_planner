@@ -546,6 +546,99 @@ import { createRecordCache } from './company-record-loader.js';
     });
   }
 
+  function updateContributionLabels() {
+    $('cw-contribution-title').textContent = t('contributionTitle');
+    $('cw-contribution-subtitle').textContent = t('contributionSubtitle');
+    $('cw-contribution-refresh').textContent = t('contributionRefresh');
+    $('cw-contribution-currency-label').textContent = t('currency');
+    $('cw-contribution-customers-title').textContent = t('contributionCustomers');
+    $('cw-contribution-projects-title').textContent = t('contributionProjects');
+    $('cw-contribution-unassigned-title').textContent = t('contributionUnassigned');
+    $('cw-contribution-note').textContent = t('contributionNote');
+    $('cw-contribution-currency').value = state.contributionCurrency;
+  }
+
+  function renderContributionGroup(host, rows, type) {
+    host.replaceChildren();
+    if (!rows.length) { host.append(node('p', 'cw-contribution-empty', t('contributionNoGroups'))); return; }
+    rows.forEach(item => {
+      const card = node('article', 'cw-contribution-card');
+      const title = button(item.title || '—', 'cw-contribution-record-title', () => {
+        if (type === 'customer') openCustomer(item.id);
+        else openProjectById(item.id);
+      });
+      card.append(title);
+      const share = Number(item.incomeShareBps) / 100;
+      card.append(node('small', 'cw-contribution-share', t('contributionShare') + ': ' + share.toFixed(2) + '% · ' + t('contributionTransactions') + ': ' + (item.completedCount + item.plannedCount)));
+      const rows = [
+        [t('contributionIncome'), formatAmountMicros(item.income, state.contributionCurrency), 'income'],
+        [t('contributionExpense'), formatAmountMicros(item.expense, state.contributionCurrency), 'expense'],
+        [t('contributionNet'), formatAmountMicros(item.net, state.contributionCurrency), item.net < 0n ? 'expense' : 'income'],
+        [t('contributionPlanned'), formatAmountMicros(item.plannedIncome, state.contributionCurrency) + ' / ' + formatAmountMicros(item.plannedExpense, state.contributionCurrency), '']
+      ];
+      rows.forEach(([label, value, kind]) => {
+        const line = node('div', 'cw-contribution-value-row');
+        line.append(node('span', '', label), node('strong', kind ? 'cw-amount-' + kind : '', value));
+        card.append(line);
+      });
+      host.append(card);
+    });
+  }
+
+  function renderBusinessContributionAnalysis(data) {
+    updateContributionLabels();
+    const report = getBusinessContributionReport(data, state.contributionCurrency, new Date(), 12);
+    const summary = $('cw-contribution-summary'); summary.replaceChildren();
+    [
+      [t('contributionIncome'), report.totals.income, 'income'],
+      [t('contributionExpense'), report.totals.expense, 'expense'],
+      [t('contributionNet'), report.totals.net, report.totals.net < 0n ? 'expense' : 'income'],
+      [t('contributionPlanned'), null, 'planned']
+    ].forEach(([label, value, kind]) => {
+      const card = node('article', 'cw-contribution-kpi');
+      const amount = kind === 'planned'
+        ? formatAmountMicros(report.totals.plannedIncome, report.currency) + ' / ' + formatAmountMicros(report.totals.plannedExpense, report.currency)
+        : formatAmountMicros(value, report.currency);
+      card.append(node('small', '', label), node('strong', kind ? 'cw-amount-' + kind : '', amount));
+      summary.append(card);
+    });
+    renderContributionGroup($('cw-contribution-customers'), report.customers, 'customer');
+    renderContributionGroup($('cw-contribution-projects'), report.projects, 'project');
+    const unassigned = $('cw-contribution-unassigned'); unassigned.replaceChildren();
+    if (!report.unassigned.count) unassigned.append(node('p', 'cw-contribution-empty', t('contributionNoUnassigned')));
+    else {
+      unassigned.append(node('strong', '', String(report.unassigned.count) + ' · ' + t('contributionTransactions')));
+      const line = node('div', 'cw-contribution-value-row');
+      line.append(node('span', '', t('contributionIncome')), node('strong', 'cw-amount-income', formatAmountMicros(report.unassigned.income, report.currency)));
+      unassigned.append(line);
+      const expense = node('div', 'cw-contribution-value-row');
+      expense.append(node('span', '', t('contributionExpense')), node('strong', 'cw-amount-expense', formatAmountMicros(report.unassigned.expense, report.currency)));
+      unassigned.append(expense);
+      const net = node('div', 'cw-contribution-value-row');
+      net.append(node('span', '', t('contributionNet')), node('strong', report.unassigned.net < 0n ? 'cw-amount-expense' : 'cw-amount-income', formatAmountMicros(report.unassigned.net, report.currency)));
+      unassigned.append(net);
+    }
+  }
+
+  async function loadBusinessContributionAnalysis(maxAgeMs=ENTRY_MAX_AGE_MS) {
+    if (state.contributionBusy) return;
+    state.contributionBusy = true;
+    const feedback = $('cw-contribution-feedback');
+    feedback.classList.remove('error'); feedback.textContent = t('contributionLoading');
+    try {
+      const [customers, projects, transactions] = await loadBusinessRecords(['customer', 'project', 'transaction'], maxAgeMs);
+      const data = { customers, projects, transactions };
+      state.contributionData = data;
+      state.customers = customers; state.projects = projects;
+      renderBusinessContributionAnalysis(data);
+      feedback.textContent = '';
+    } catch (error) {
+      state.contributionData = null;
+      feedback.classList.add('error'); feedback.textContent = error.message || t('contributionError');
+      ['cw-contribution-summary', 'cw-contribution-customers', 'cw-contribution-projects', 'cw-contribution-unassigned'].forEach(id => $(id).replaceChildren());
+    } finally { state.contributionBusy = false; }
+  }
+
   async function loadBusinessDecisionCenter(maxAgeMs=ENTRY_MAX_AGE_MS) {
     if (state.decisionBusy) return;
     state.decisionBusy = true;
