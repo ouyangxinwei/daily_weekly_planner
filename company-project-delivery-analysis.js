@@ -1,4 +1,4 @@
-const DATE_KEY = /^\\d{4}-\\d{2}-\\d{2}$/;
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
 function validDate(value) {
   const key = String(value ?? '').slice(0, 10);
@@ -26,7 +26,7 @@ function riskFor(variance) {
 }
 
 /**
- * Compares the saved actual progress with a linear calendar-time plan.
+ * Compares saved actual progress with a linear calendar-time plan.
  * Same-day plans are 100% on their planned date; cancelled projects are omitted.
  */
 export function getProjectDeliveryAnalysis(data = {}, today) {
