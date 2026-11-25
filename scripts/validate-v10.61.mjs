@@ -47,6 +47,6 @@ assert.match(migration, /old_status is distinct from new_status/i);
 assert.match(migration, /company_assert_access\(p_username, p_password\)/);
 assert.match(pkg.version, /^10\.(?:61|62|63|64|65)\.0$/);
 assert.ok(pkg.scripts['test:validate:company-status-history']);
-assert.match(html, /V10\.(?:61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health)/);
-assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health)/);
+assert.match(html, /V10\.(?:61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis)/);
+assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis)/);
 console.log('V10.61 status history validation passed.');
