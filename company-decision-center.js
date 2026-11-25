@@ -28,9 +28,10 @@ export function getBusinessDecisionReport(data = {}, today) {
   const transactions = safeArray(data.transactions);
   const activity = safeArray(data.activity);
   const activeProjects = projects.filter(item => item.status === 'active');
+  const openProjects = projects.filter(item => !['completed', 'cancelled'].includes(item.status));
   const openTasks = tasks.filter(item => item.status !== 'completed');
-  const overdueProjects = activeProjects.filter(item => validDate(item.due_date) && validDate(item.due_date) < date);
-  const dueSoonProjects = activeProjects.filter(item => {
+  const overdueProjects = openProjects.filter(item => validDate(item.due_date) && validDate(item.due_date) < date);
+  const dueSoonProjects = openProjects.filter(item => {
     const due = validDate(item.due_date);
     return due && due >= date && due <= addDays(date, 7);
   });
