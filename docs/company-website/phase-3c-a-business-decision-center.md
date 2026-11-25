@@ -65,6 +65,10 @@
 ## 6. 交付状态
 
 - 目标版本：V10.63.0。
-- 开发分支：feature/phase-3c-a-business-decision-center。\n- 功能 PR #81 已 squash merge；合并提交：a147f23cb8c339cd8783f626e5964698d4bdcebf。\n- PR 验证 workflow Run #467（45515931274）：completed / success；JavaScript 语法检查、V10.63 专项规则验证、V10.50–V10.62 历史回归均通过。\n- 生产数据库与 company-api：无变更。\n- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
+- 开发分支：feature/phase-3c-a-business-decision-center。
+- 功能 PR #81 已 squash merge；合并提交：a147f23cb8c339cd8783f626e5964698d4bdcebf。
+- PR 验证 workflow Run #467（45515931274）：completed / success；JavaScript 语法检查、V10.63 专项规则验证、V10.50–V10.62 历史回归均通过。
+- 生产数据库与 company-api：无变更。
+- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
 - 数据库 / company-api：无变更。
 - Pages 与真实浏览器验收状态以合并后的 Actions 及用户确认记录为准。
