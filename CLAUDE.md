@@ -44,8 +44,8 @@ powershell -ExecutionPolicy Bypass -File .\run-plan.ps1                         
   - 不运行 Git 或 Shell 命令。
 
 ### 当前进度（2026-11-25）
-- 编排脚本已修复并通过 38 项离线测试；`-CheckOnly` 已确认显示五个独立 PENDING Step。
-- Step 1～5 均未执行；尚未用真实 Claude Code 完整跑通任何 Step。
-- Runner、测试、本文件和文档通过分支 `feat/agent-workflow-runner` 的 PR 提交到 `main`；是否合并由用户决定。
-- 下一步：PR 合并后同步本地 `main` → `-CheckOnly` → `run-plan.ps1`（默认只执行 Step 1）→ 检查 `feat/agent-plan-steps` 上的提交后再继续。
+- 编排脚本通过 38 项离线测试；Stage A 已用真实 Claude Code 跑通：Step 1～5 逐步执行并全部通过校验（提交 `9295d0b`…`54c058c`，位于 `feat/agent-plan-steps`）。
+- 执行记录见 `docs/agent-workflow.md` 第 15 节；如何确认五步都正确（Diff、numstat、删除新增行后哈希比对等）见第 16 节。
+- 五个 Step 的修改只在 `feat/agent-plan-steps` 上；合并进 `main` 还是放弃并删除该分支由用户决定。合并前 `main` 的 PLAN.md 仍显示五个 `[ ]`。
+- 下一步：处理 `feat/agent-plan-steps` → 进入 Stage B（基于补丁的多 Worker）。
 - 已知风险见 `docs/agent-workflow.md` 第 14 节。

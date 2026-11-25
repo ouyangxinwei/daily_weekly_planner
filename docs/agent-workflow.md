@@ -293,26 +293,131 @@ Do not skip Stage A.
 
 ## 13. Current Status (2026-11-25)
 
-- [x] Five independent low-risk tasks are described in root `PLAN.md` (all five still `[ ]`).
+- [x] Five independent low-risk tasks are described in root `PLAN.md`.
 - [x] `run-plan.ps1` implements sync, plan parsing, single-worker execution, validation, commit, and push to `feat/agent-plan-steps`.
 - [x] Fixed: Step 5 section boundary, prompt quote loss, Git stderr abort, raw URL cache, check-only now read-only.
 - [x] Added: anchor position check, English-only comment check, Edit-only worker tools, per-step logs, recovery hints.
 - [x] `tests/agent-workflow/test-run-plan.ps1`: 38 offline checks pass.
 - [x] `-CheckOnly` against GitHub shows five separate pending steps, each anchor found exactly once.
 - [x] `run-plan.ps1`, the test, `CLAUDE.md`, and this guide are submitted through a PR from `feat/agent-workflow-runner` to `main`. Merging is a human decision.
-- [ ] No step has been executed by a real Claude Code worker yet.
+- [x] Stage A proven: Step 1-5 were executed by the real headless Claude Code worker, one step per run, all validations passed (section 15).
+- [x] The final result was verified independently of the runner (section 16).
+- [ ] The five step commits live on `feat/agent-plan-steps` only. Whether they are merged into `main` or discarded is the owner's decision. Until they are merged, `PLAN.md` on `main` still shows all five steps as `[ ]`.
+- [ ] Browser/PWA behavior was not checked (comment-only change; section 16 proves no other byte changed).
 - [ ] Master Agent and parallel worker stages (B-E) are not implemented.
 
-**Next action:** after the PR is merged, update local `main`, run `-CheckOnly`, then execute Step 1 alone (default `-MaxLoops 1`) and inspect the commit on `feat/agent-plan-steps` before continuing.
+**Next action:** decide on `feat/agent-plan-steps` (merge through a PR, or discard and delete the branch), then continue with Stage B.
 
 ## 14. Known Risks and Limitations
 
 | Risk | Impact | Mitigation / follow-up |
 |---|---|---|
-| The real worker path is untested end-to-end | The worker may misread the prompt or fail on `dontAsk` permissions | Run Step 1 alone first and read `.git/run-plan-logs/` |
+| Only one real run exists (five comment-only steps, Claude Code 2.1.332) | Larger or different tasks may fail in ways not yet seen | Keep `-MaxLoops 1` for new plans and read `.git/run-plan-logs/` after each step |
 | Change detection covers tracked and non-ignored untracked files only | Edits to git-ignored files (for example `node_modules/`) or files outside the repository would not be detected | `Edit` is not path-restricted yet; follow-up: add a path-scoped permission rule such as `Edit(index.html)` after verifying the syntax, or hash ignored files too |
 | The worker inherits the user's Claude Code settings, hooks, and MCP servers | A user-level hook or MCP tool could act outside the stated tool list | Review user settings before a real run; consider `--strict-mcp-config` / a dedicated settings file |
 | `dontAsk` and `--allowedTools` behavior depends on the installed Claude Code version | A CLI upgrade could change flags | Re-run `claude --help` and the first step alone after upgrades |
 | Concurrent runs are not locked | Two runners could race on the same work branch | Run one instance at a time |
 | Step count (5), target file, and allowed files are hard-coded | New plans need script changes | Planned for the Master Agent stage |
 | Commits on `feat/agent-plan-steps` are pushed without review | Bad commits reach GitHub (not `main`) | Nothing reaches `main` without a reviewed PR |
+
+## 15. Execution Record (2026-11-25)
+
+First real end-to-end run of the runner with the headless Claude Code worker.
+
+- Base: `origin/main` = `968dcbd`. Work branch `feat/agent-plan-steps` was created by the runner from `origin/main`.
+- Runner version: `run-plan.ps1` from PR #91 (`feat/agent-workflow-runner`, commit `beb8045`). Because PR #91 was not merged yet, the file was copied to a temporary directory (`git show origin/feat/agent-workflow-runner:run-plan.ps1`) and started with the repository root as the current directory. The script depends only on the current directory, not on its own location.
+- Worker: `claude -p`, Claude Code 2.1.332, tools `Read,Edit,Grep,Glob`, `--permission-mode dontAsk`.
+
+| Order | Command | Result |
+|---|---|---|
+| 0 | `run-plan.ps1 -CheckOnly` | 5 x PENDING, every anchor found once |
+| 1 | `run-plan.ps1 -MaxLoops 1` | Step 1 -> `9295d0b`, all checks passed, pushed |
+| 2 | same | Step 2 -> `626935c` |
+| 3 | same | Step 3 -> `6e9936d` |
+| 4 | same | Step 4 -> `b330bb0` |
+| 5 | same | Step 5 -> `54c058c` |
+| 6 | independent verification (section 16) | all checks matched |
+| 7 | `run-plan.ps1 -CheckOnly` | PLAN source `origin/feat/agent-plan-steps`, 5 x COMPLETED, "Next step: none" |
+
+Each step was inspected (`git show --stat HEAD`) before the next one was started. Prompts and worker outputs are in `.git/run-plan-logs/step-N-<time>.*.txt` on the machine that ran them (not versioned).
+
+Comments added to `index.html` (one per step, each directly above its anchor):
+
+| Step | Anchor | Comment (start) |
+|---|---|---|
+| 1 | `<script data-workspace-boot>` | `<!-- Restore the last selected workspace before the main UI initializes, ...` |
+| 2 | `<div class="workspace-switch"` | `<!-- Workspace switch: toggles between the plan, standalone language learning, ...` |
+| 3 | `<section class="star-summary"` | `<!-- Star summary: shows the priority distribution of unfinished tasks ...` |
+| 4 | `<form class="quick-add" id="quick-add-form"` | `<!-- Quick add form: creates a plan for today from a title only, ...` |
+| 5 | `<section class="sync-panel" aria-label="云端同步"` | `<!-- Cloud sync: entry points for syncing the current module only and for syncing all modules ...` |
+
+Observation: the worker printed "Denying Bash also turns off the PowerShell tool" once. This is expected with `--disallowedTools Bash` and harmless.
+
+## 16. How to Verify That All Steps Are Correct
+
+Principle: **judge by the actual diff, never by the worker's report.** Three layers.
+
+### 16.1 Per step (automatic, inside the runner)
+
+Section 5 rules run before every commit; any failure stops the run before anything is committed.
+
+### 16.2 After all steps (independent, run by a human or reviewer)
+
+Run in Git Bash from the repository root. `M` is the base commit, `B` the work branch.
+
+```bash
+git fetch origin
+M=968dcbd; B=origin/feat/agent-plan-steps
+
+# 1. Exactly five commits, Step 1..5 in order
+git log --oneline $M..$B
+
+# 2. Every commit touches only PLAN.md and index.html
+for c in $(git rev-list --reverse $M..$B); do
+  echo "$(git log -1 --format=%s $c): $(git diff-tree --no-commit-id --name-only -r $c | tr '\n' ' ')"
+done
+
+# 3. Totals: index.html +5/-0, PLAN.md +5/-5
+git diff --numstat $M $B
+
+# 4. No whitespace errors
+git diff --check $M $B && echo OK
+
+# 5. Each added comment and the line right after it (must be the anchor)
+git diff -U0 $M $B -- index.html | grep '^@@' | sed -E 's/^@@ -[0-9,]+ \+([0-9]+).*/\1/' |
+  while read n; do git show $B:index.html | sed -n "${n}p;$((n+1))p" | cut -c1-110; echo; done
+
+# 6. Reverse check: remove the added lines -> must hash identical to the original
+git show $M:index.html | sha256sum
+git show $B:index.html | grep -vxF -f <(git diff -U0 $M $B -- index.html | grep '^+[^+]' | sed 's/^+//') | sha256sum
+
+# 7. Same for PLAN.md: turn the five target checkboxes back to [ ]
+git show $M:PLAN.md | sha256sum
+git show $B:PLAN.md | sed -E 's/^- \[x\] \*\*目标：\*\*/- [ ] **目标：**/' | sha256sum
+
+# 8. Comment markers balanced (0 -> 5 for both)
+for p in '<!--' '-->'; do echo "$p: $(git show $M:index.html | grep -o -- "$p" | wc -l) -> $(git show $B:index.html | grep -o -- "$p" | wc -l)"; done
+
+# 9. No non-ASCII characters in the added lines (expect 0)
+git diff -U0 $M $B -- index.html | grep '^+[^+]' | LC_ALL=C grep -c '[^ -~]'
+```
+
+Result of the 2026-11-25 run:
+
+| # | Check | Result |
+|---|---|---|
+| 1 | 5 commits, Step 1..5 | OK |
+| 2 | each commit: `PLAN.md index.html` only | OK |
+| 3 | `index.html` 5/0, `PLAN.md` 5/5 | OK |
+| 4 | `git diff --check` | OK |
+| 5 | every comment directly above its anchor | OK |
+| 6 | `index.html` without the 5 lines == original (`161f4e4b...`) | identical |
+| 7 | `PLAN.md` with boxes reverted == original (`5282dccb...`) | identical |
+| 8 | `<!--` and `-->`: 0 -> 5 | OK |
+| 9 | non-ASCII in added lines | 0 |
+
+Check 6 is the strongest one: if the file minus the five added lines is byte-identical to the original, then no existing JavaScript, CSS, attribute, or text can have changed. Reading a diff by eye can miss things; an identical hash cannot.
+
+### 16.3 Plan state
+
+`run-plan.ps1 -CheckOnly` reads `PLAN.md` from the work branch on GitHub and must report all five steps as COMPLETED with "Next step: none". This shows the recorded plan state matches the verified code change.
