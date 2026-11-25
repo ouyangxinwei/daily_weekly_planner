@@ -79,7 +79,17 @@
 
 GitHub Actions PR 验证应包含 JavaScript 语法检查和 V10.66 专项验证。Nightly Playwright 不作为本阶段默认验收步骤。
 
-## 8. 交付边界
+## 8. 交付状态
+
+- 目标版本：V10.66.0。
+- 功能 PR #92 已 squash merge 至 `main`。
+- 合并提交：`ddf732117dbf358cab0115a8109db6c09e55094a`。
+- PR 验证 workflow Run #505（`45710352098`）：completed / success；JavaScript 语法检查、历史兼容验证和 V10.66 专项规则验证均通过。
+- Pages build/deploy workflow Run #357（`45710420927`）：检查时仍在运行，尚未标记为部署成功。
+- Nightly Playwright 未运行；真实浏览器验收暂缓，等待用户验收。
+- 数据库/API/生产业务数据：无变更。
+
+## 9. 交付边界
 
 - 目标版本：V10.66.0。
 - 生产数据库/API：无变更。
