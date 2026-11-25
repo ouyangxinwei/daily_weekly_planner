@@ -64,7 +64,7 @@ export function getCustomerRelationshipHealth(data = {}, today, staleDays = 30) 
     let priority = 'none';
     if (overdue.length) { priority = 'urgent'; reasons.push({ key: 'overdue', count: overdue.length }); }
     if (withoutNextDate.length) { if (priority === 'none') priority = 'high'; reasons.push({ key: 'withoutNextDate', count: withoutNextDate.length }); }
-    if (customerProjects.length && stale) {
+    if (customerProjects.length && (stale || noHistory)) {
       if (priority === 'none') priority = 'high';
       reasons.push({ key: noHistory ? 'noHistoryWithProjects' : 'staleWithProjects', count: customerProjects.length });
     } else if (!customerProjects.length && stale && !pending.length) {
