@@ -40,6 +40,10 @@ scripts/validate-v10.65.mjs 覆盖：
 ## 6. 交付状态
 
 - 目标版本：V10.65.0。
-- 开发分支：feature/phase-3c-c-customer-relationship-health。\n- 功能 PR #85 已 squash merge；合并提交：8e3bc14957fae6a83f6ea9f2ffbd15180d1b8363。\n- PR 验证 workflow Run #478（45518013740）：completed / success；JavaScript 语法检查、V10.65 专项规则验证及 V10.50–V10.64 历史回归均通过。\n- 生产数据库与 company-api：无变更。\n- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
+- 开发分支：feature/phase-3c-c-customer-relationship-health。
+- 功能 PR #85 已 squash merge；合并提交：8e3bc14957fae6a83f6ea9f2ffbd15180d1b8363。
+- PR 验证 workflow Run #478（45518013740）：completed / success；JavaScript 语法检查、V10.65 专项规则验证及 V10.50–V10.64 历史回归均通过。
+- 生产数据库与 company-api：无变更。
+- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
 - 数据库 / company-api：无变更。
 - Pages 和真实浏览器验收状态以合并后的部署证据及用户确认记录为准。
