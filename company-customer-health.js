@@ -59,7 +59,7 @@ export function getCustomerRelationshipHealth(data = {}, today, staleDays = 30) 
     const nextDates = pending.map(item => validDate(item.data?.next_follow_up_date)).filter(key => key && key >= date).sort();
     const created = validDate(customer.created_at);
     const noHistory = customerFollowups.length === 0;
-    const stale = lastContact ? lastContact < staleBefore : (!created || created < staleBefore);
+    const stale = lastContact ? lastContact < staleBefore : (created ? created < staleBefore : false);
     const reasons = [];
     let priority = 'none';
     if (overdue.length) { priority = 'urgent'; reasons.push({ key: 'overdue', count: overdue.length }); }
