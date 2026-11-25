@@ -250,6 +250,7 @@ Phase 1 已具备客户、项目、任务、跟进、进度联动、跨模块关
 - PR #74（Phase 3-B-B 按币种的月度收支趋势）：已合并，merge commit `6b29839b0dbf7975597ac44ede571d068e89a941`；验证 run #427 success；Pages build/deploy 状态待确认，用户真实浏览器验收暂缓。
 - PR #76（Phase 3-B-C 业务状态变更历史）：已合并，merge commit `c14c1cbadd93bf8cb62ce092732f60e69116730d`；数据库 migration 已应用，company-api v8 ACTIVE；Pages 部署状态待确认。
 - PR #78（Phase 3-B-D 业务活动时间线）：已合并，merge commit `5441c765f02c1547a2bb247506b67690955c265e`；PR 验证 run #460 success；五个 migration 已应用，company-api v9 ACTIVE；Pages 部署成功证据尚未取得。
-- PR #81（Phase 3-C-A 统一经营决策台）：已合并，merge commit `a147f23cb8c339cd8783f626e5964698d4bdcebf`；PR 验证 run #467 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。\n- PR #83（Phase 3-C-B 客户与项目收支贡献分析）：已合并，merge commit `6e6326ca40960b3ec9c99155373535c67752851c`；PR 验证 run #474 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
+- PR #81（Phase 3-C-A 统一经营决策台）：已合并，merge commit `a147f23cb8c339cd8783f626e5964698d4bdcebf`；PR 验证 run #467 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
+- PR #83（Phase 3-C-B 客户与项目收支贡献分析）：已合并，merge commit `6e6326ca40960b3ec9c99155373535c67752851c`；PR 验证 run #474 success；无数据库/API 变更；Pages 部署成功证据尚未取得，真实浏览器验收暂缓。
 - 当前开放 PR 状态以 GitHub 实时列表为准。testNisa 11 个页面的真实浏览器验收仍待用户方便时完成；未执行 Nightly Playwright。
 - Phase 1、Phase 2、Phase 3-A 已完成；Phase 3-B-A 至 3-B-D 和 Phase 3-C-A 代码均已合并。Phase 3-C-A、3-C-B 的 Pages 部署和真实浏览器验收状态仍待确认。
