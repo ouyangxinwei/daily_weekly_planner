@@ -49,6 +49,10 @@ scripts/validate-v10.64.mjs 覆盖：
 ## 6. 交付状态
 
 - 目标版本：V10.64.0。
-- 开发分支：feature/phase-3c-b-customer-project-contributions。\n- 功能 PR #83 已 squash merge；合并提交：6e6326ca40960b3ec9c99155373535c67752851c。\n- PR 验证 workflow Run #474（45517173279）：completed / success；JavaScript 语法检查、V10.64 专项规则验证及 V10.50–V10.63 历史回归均通过。\n- 生产数据库与 company-api：无变更。\n- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
+- 开发分支：feature/phase-3c-b-customer-project-contributions。
+- 功能 PR #83 已 squash merge；合并提交：6e6326ca40960b3ec9c99155373535c67752851c。
+- PR 验证 workflow Run #474（45517173279）：completed / success；JavaScript 语法检查、V10.64 专项规则验证及 V10.50–V10.63 历史回归均通过。
+- 生产数据库与 company-api：无变更。
+- Pages 对应 build/deploy 成功证据尚未取得，不标记为已部署；真实浏览器验收暂缓。
 - 数据库 / company-api：无变更。
 - Pages 和真实浏览器验收状态以合并后的部署证据及用户确认记录为准。
