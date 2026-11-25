@@ -1,3 +1,12 @@
+# V10.64 Customer and project cashflow contribution — 2026-11-25
+
+- Added customer- and project-level cashflow contribution views for completed and planned transactions over the last 12 months.
+- Supports JPY / CNY / USD selection without currency conversion.
+- Shows customer income share, transaction counts and transactions not linked to a customer or project.
+- Customer and project views are independent attribution dimensions. A transaction linked to both appears in both views and must not be added across dimensions.
+- Cancelled transactions are excluded; planned and completed amounts remain separate; net cashflow is not profit.
+- No database/API changes or production business-data writes; zh/en/ja and responsive layouts are supported.
+
 # V10.63 Business Decision Center — 2026-11-25
 
 - Added a unified business decision center combining customers, projects, tasks, follow-ups and transactions.

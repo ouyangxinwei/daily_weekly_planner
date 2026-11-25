@@ -308,3 +308,29 @@ html[data-theme="dark"] .cw-direction-expense{background:#402a32;color:#f0b3bf}
 .cw-decision-empty{color:var(--muted);font-size:13px;padding:10px 0}
 @media(max-width:760px){.cw-decision-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-decision-finance{grid-template-columns:1fr}.cw-decision-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.cw-decision-heading{align-items:flex-start}.cw-decision-kpis{gap:7px}.cw-decision-kpi{padding:11px}.cw-decision-kpi strong{font-size:20px}.cw-decision-actions,.cw-decision-records{grid-template-columns:1fr}.cw-decision-activity-item{grid-template-columns:minmax(0,1fr)}.cw-decision-activity-item time{grid-column:1;grid-row:auto}.cw-decision-activity-item span{grid-column:1}}
+
+/* Phase 3-C-B: customer and project cashflow contribution */
+.cw-contribution-panel[hidden]{display:none!important}
+.cw-contribution-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.cw-contribution-heading h3{margin:0 0 6px;font-size:18px}
+.cw-contribution-heading p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.cw-contribution-controls{display:flex;align-items:center;gap:10px;margin:12px 0}
+.cw-contribution-controls label{font-size:12px;color:var(--muted)}
+.cw-contribution-controls select{border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);padding:8px 12px}
+.cw-contribution-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 20px}
+.cw-contribution-kpi{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:13px;display:grid;gap:7px;min-width:0}
+.cw-contribution-kpi small{font-size:12px;color:var(--muted)}
+.cw-contribution-kpi strong{font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cw-contribution-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.cw-contribution-section{margin-top:18px;min-width:0}
+.cw-contribution-section h4{margin:0 0 10px;font-size:15px}
+.cw-contribution-list{display:grid;gap:10px}
+.cw-contribution-card,.cw-contribution-unassigned{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px;min-width:0}
+.cw-contribution-record-title{border:0;background:transparent;color:var(--brand);padding:0;text-align:left;font-weight:650;font:inherit;cursor:pointer}
+.cw-contribution-share{display:block;color:var(--muted);font-size:11px;margin:6px 0 8px}
+.cw-contribution-value-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-top:1px solid var(--line);padding:7px 0;font-size:12px}
+.cw-contribution-value-row span{color:var(--muted)}
+.cw-contribution-value-row strong{text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.cw-contribution-empty{font-size:12px;color:var(--muted);padding:10px 0}
+@media(max-width:760px){.cw-contribution-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.cw-contribution-columns{grid-template-columns:1fr}}
+@media(max-width:480px){.cw-contribution-heading{align-items:flex-start}.cw-contribution-kpi{padding:10px}.cw-contribution-kpi strong{font-size:15px}}
