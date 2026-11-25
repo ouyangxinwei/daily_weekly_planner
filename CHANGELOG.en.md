@@ -1,3 +1,13 @@
+# V10.66 Project planned vs. actual progress analysis — 2026-11-26
+
+- Added a Project Delivery Analysis view to compare current actual progress with a linear calendar-time estimate based on project start and planned due dates.
+- Shows total projects, on-track projects, projects behind schedule, overdue projects and projects with incomplete plan dates; project titles open existing details.
+- Variance is shown in percentage points. Four configurable initial bands are used: 0 or above, -1 to -10, -11 to -25, and below -25.
+- A same-day plan is 100% on its planned date; dates before the start are 0%; projects past the due date are separately marked overdue. Completed projects are excluded from delay risk and cancelled projects are omitted.
+- Missing dates, invalid dates and start dates later than due dates are explicitly identified; no variance is calculated for them.
+- Reuses existing paginated project caching and data.progress_percent. No database/API, Supabase, RLS, Edge Function or production business-data changes. Supports Chinese, English, Japanese and responsive layouts.
+- Planned progress is a calendar-time estimate, not actual effort or a historically saved baseline.
+
 # V10.65 Customer relationship health and follow-up opportunities — 2026-11-25
 
 - Added a customer relationship health view combining customers, active projects and follow-up records.
