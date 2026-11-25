@@ -58,7 +58,7 @@ const html = read('../index.html');
 const pkg = JSON.parse(read('../package.json'));
 const version = read('../VERSION').trim();
 const workflow = read('../.github/workflows/validate-v10.13.yml');
-assert.equal(version, '10.63.0', '10.64.0');
+assert.ok(['10.63.0', '10.64.0'].includes(version));
 assert.equal(pkg.version, version);
 assert.ok(pkg.scripts['test:validate:company-decision-center']);
 assert.match(html, /APP_VERSION='V10\.(?:63_business_decision_center|64_customer_project_contributions)'/);
