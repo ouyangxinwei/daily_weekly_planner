@@ -368,6 +368,7 @@ import { createRecordCache } from './company-record-loader.js';
     if(state.tab==='decisionCenter')return loadBusinessDecisionCenter();
     if(state.tab==='contributionAnalysis')return loadBusinessContributionAnalysis();
     if(state.tab==='customerHealth')return loadCustomerRelationshipHealth();
+    if(state.tab==='deliveryAnalysis')return loadProjectDeliveryAnalysis();
     if(document.querySelector('[data-company-extension][data-tab="'+state.tab+'"]'))return window.CompanyRecords?.reload?.();
     if(state.tab!=='customers')return loadActive();
   }
