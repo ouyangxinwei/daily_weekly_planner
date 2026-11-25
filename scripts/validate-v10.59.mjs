@@ -11,10 +11,10 @@ const pkg = JSON.parse(read('package.json'));
 const sw = read('sw.js');
 const index = read('index.html');
 
-assert.ok(['10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0'].includes(version));
+assert.ok(['10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0', '10.65.0'].includes(version));
 assert.equal(pkg.version, version);
-assert.match(index, /APP_VERSION='V10\.(?:59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions)'/);
-assert.match(sw, /v10-(?:59-company-entity-attachments|60-monthly-cashflow|61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions)/);
+assert.match(index, /APP_VERSION='V10\.(?:59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health)'/);
+assert.match(sw, /v10-(?:59-company-entity-attachments|60-monthly-cashflow|61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health)/);
 
 assert.match(records, /function openAttachments\(record\)/);
 assert.match(records, /window\.CompanyRecords = Object\.freeze\(\{[^}]*openAttachments/);
