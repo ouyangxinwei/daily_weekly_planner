@@ -31,6 +31,8 @@ jobs:
           node --check company-business-trends.js
           node --check company-decision-center.js
           node --check company-contribution-analysis.js
+          node --check company-customer-health.js
+          node --check scripts/validate-v10.65.mjs
           node --check scripts/validate-v10.64.mjs
           node --check scripts/validate-v10.63.mjs
           node --check stock-dashboard.js
@@ -78,6 +80,7 @@ jobs:
           node scripts/validate-v10.62.mjs
           node scripts/validate-v10.63.mjs
           node scripts/validate-v10.64.mjs
+          node scripts/validate-v10.65.mjs
           node scripts/validate-v10.59.mjs
           node scripts/validate-v10.58.mjs
           node scripts/test-one-star-memo-migration.mjs

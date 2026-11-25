@@ -1,3 +1,11 @@
+# V10.65 Customer relationship health and follow-up opportunities — 2026-11-25
+
+- Added a customer relationship health view combining customers, active projects and follow-up records.
+- Identifies overdue follow-ups, pending follow-ups without a next date, active-project customers with stale contact, and customers without follow-up history.
+- Prioritizes urgent / needs-attention / opportunity signals and shows last contact, next follow-up and linked active projects with direct navigation.
+- The 30-day contact threshold is an explicit rule, not an AI customer score, customer-value estimate or churn prediction.
+- No database/API changes or production business-data writes; zh/en/ja and responsive layouts are supported.
+
 # V10.64 Customer and project cashflow contribution — 2026-11-25
 
 - Added customer- and project-level cashflow contribution views for completed and planned transactions over the last 12 months.
