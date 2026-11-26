@@ -10,11 +10,11 @@
 - 特别保留分支：feat/agent-plan-steps
 - 日常工作只在 development；只有用户明确允许才合并 main。
 - Supabase migration 已应用；company-api 已部署为 v10。
-- development 已准备合并 main；Pages 部署与浏览器验收仍待确认。
+- V10.68 已合并 main；Pages 部署与 GitHub Actions 验证均成功。development 已恢复并与 main 同步。
 
 ## 当前阶段
 
-**V10.68.0 — 仓库管理私有云端化（数据库/API 已部署，前端待发布验收）**
+**V10.68.0 — 仓库管理私有云端化（数据库/API/Pages 均已部署，浏览器验收待完成）**
 
 ### 已写入代码
 
@@ -40,12 +40,11 @@
 
 - SQL migration 已应用，`repository_cloud_data` 已存在且 RLS/权限检查通过。
 - company-api 已部署为 v10，包含 `index.ts`、`list-all.ts`、`validation.ts`。
-- GitHub Pages 前端尚未确认部署；尚未完成真实浏览器登录、16 条导入、刷新持久化与 CRUD 验收。
+- GitHub Pages 已成功部署（Run `45732359753`）；GitHub Actions 验证通过（Run `45732358997`）。尚未完成真实浏览器登录、16 条导入、刷新持久化与 CRUD 验收。
 - 本地 npm 专项验证和 Deno 类型检查未运行；前端 JS 语法解析及静态契约检查通过。
 
 ## 下一步
 
-1. 合并 main 后检查 GitHub Actions / Pages 的实际部署状态。
-2. 使用现有账号登录页面，确认仓库管理 GET 返回空列表。
-3. 导入本地 16 条 JSON，确认预览后写入云端；刷新页面再次打开，确认 16 条仍在。
-4. 验收 CRUD、重复导入预览/取消/确认、导出及保存失败保护。
+1. 使用现有账号登录页面，确认仓库管理 GET 返回空列表。
+2. 导入本地 16 条 JSON，确认预览后写入云端；刷新页面再次打开，确认 16 条仍在。
+3. 验收 CRUD、重复导入预览/取消/确认、导出及保存失败保护。
