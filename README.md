@@ -19,10 +19,9 @@
 | 技术架构、数据结构和关键实现 | [技术手册](docs/technical_manual.md) |
 | 部署、更新和故障排查 | [部署与故障排查](docs/deployment_and_troubleshooting.md) |
 | AI 协作开发约定 | [AI 协作开发指南](docs/ai_collaboration_guide.md) |
-| Git 分支规则 | [Git 分支工作流](docs/git-branching-workflow.md) |
+| Git 分支与固定开发工作流（本地 development → Actions → main 部署） | [Git 分支与固定开发工作流](docs/git-branching-workflow.md) |
 | 仓库管理模块 | [仓库管理说明](docs/repository-management.md) |
 | 当前开发状态 | [当前开发交接](docs/current-handoff.md) |
-| 分支、PR 和临时分支清理 | [Git 分支工作流](docs/git-branching-workflow.md) |
 | Agent 自动化工作流（PLAN.md + run-plan.ps1） | [Agent 工作流实施指南](docs/agent-workflow.md) |
 | 个人公司网站的设计、数据库、API 和阶段记录 | [公司网站开发文档](docs/company-website/README.md) |
 
@@ -53,7 +52,7 @@
 
 ## 开发协作
 
-日常开发、修复和文档维护统一在 `development` 完成；完成必要验证并向仓库所有者报告后，只有获得明确许可才将 `development` 合并到 `main`。`main` 是唯一正式部署分支；`feat/agent-plan-steps` 是独立保护的 Agent 实验分支。默认不创建大量临时分支。详细规则见 [Git 分支工作流](docs/git-branching-workflow.md)。
+固定开发流程为：**在 development 开发 → 本地页面测试 → GitHub Actions 自动化验证 → 获得明确许可后合并 main → 确认 GitHub Pages 正式部署成功**。GitHub Pages 只从 `main` 正式发布，不用同一个正式网址测试 development。本地页面默认使用 `http://127.0.0.1:4173/`；本地联调可能连接正式 Supabase，写操作会影响正式云端数据，测试时必须注意数据安全。完整步骤和命令见 [Git 分支与固定开发工作流](docs/git-branching-workflow.md)。
 
 > [!WARNING]
 > **Agent 测试分支 `feat/agent-plan-steps` 必须保留。**
@@ -62,7 +61,6 @@
 > - 确需删除时，必须先获得仓库所有者的明确确认；AI 助手不得自行删除。
 
 - **美股七巨头行情：** 天气预报下方展示最近交易周的七只美股行情，细节见 [股票看板说明](docs/stock-dashboard.md)。
-
 
 ## V10.68 仓库管理云端化进度
 
