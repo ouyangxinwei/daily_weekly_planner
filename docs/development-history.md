@@ -5,7 +5,7 @@
 - 新增 GitHub 全量仓库提取提示词入口及文档。要求使用已授权 GitHub 连接器分页读取全部可访问仓库，报告权限盲区，并输出可直接导入的 oooo.repository-management v1 JSON；元数据和项目分析写入 notes/techStack。
 - 受现有导入器 1000 条/文件和 company-api 1 MiB 限制，超出时拆分多个 JSON 文件。只读 GitHub，不读取/输出秘密、不执行 GitHub 写操作。
 - 新增 Playwright mock API E2E 与 V10.70 静态契约验证；无 Supabase migration、Edge Function 或 API schema 变更。
-- 当前：功能已写入 feature 分支，自动化验证、PR、合并和部署待完成。
+- 交付：PR #103 已 squash merge 到 development，合并提交 `26ed1d8aecf64adb66b718ac7c07c18e17902740`；GitHub Actions run `45740957853` 静态验证与 Playwright E2E 均成功。main 合并和 Pages 部署待完成；本地 Windows 页面手动验收未执行。
 
 # V10.69 界面模式（使用身份）选择（2026-11-26，main）
 
