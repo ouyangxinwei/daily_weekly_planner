@@ -43,6 +43,9 @@
       errTitle: '请填写名称。', errStart: '请填写开始日期。', errEnd: '结束日期不能早于开始日期。', errEndTime: '填写结束时间前请先填写开始时间。',
       errJson: 'JSON 格式错误：{m}', errArray: 'JSON 必须是数组。', errNothing: '没有可导入的会议。', exportNone: '没有可导出的会议。',
       errLoad: '读取本地数据失败：{m}', errSave: '保存失败：{m}',
+      jsonHint: '（请检查引号、逗号和括号是否完整匹配）',
+      clearAll: '🗑️ 清空已导入', countInfo: '当前共 {n} 条会议记录', clearNone: '当前没有可清空的数据。',
+      clearConfirm: '⚠️ 确定要清空全部 {n} 条会议记录吗？\n此操作不可撤销！需要保留的话请先「导出 JSON 备份」。', cleared: '✅ 已清空所有会议记录。',
       exportJson: '导出 JSON 备份', importJson: '导入 JSON 文件',
       localNote: '数据只保存在当前浏览器（不同步到云端）。换设备或清除浏览器数据前，请先「导出 JSON 备份」；在新设备用「导入 JSON 文件」恢复（同名同日的会议会跳过）。'
     },
@@ -75,6 +78,9 @@
       errTitle: 'Enter a title.', errStart: 'Enter a start date.', errEnd: 'The end date cannot be before the start date.', errEndTime: 'Enter a start time before the end time.',
       errJson: 'Invalid JSON: {m}', errArray: 'The JSON must be an array.', errNothing: 'Nothing to import.', exportNone: 'No meetings to export.',
       errLoad: 'Could not read local data: {m}', errSave: 'Could not save: {m}',
+      jsonHint: ' (check that quotes, commas and brackets are complete and matched)',
+      clearAll: '🗑️ Clear all', countInfo: '{n} meetings in total', clearNone: 'There is nothing to clear.',
+      clearConfirm: '⚠️ Clear all {n} meetings?\nThis cannot be undone. Export a JSON backup first if you want to keep them.', cleared: '✅ All meetings cleared.',
       exportJson: 'Export JSON backup', importJson: 'Import JSON file',
       localNote: 'Data is stored only in this browser (not synced to the cloud). Export a JSON backup before switching devices or clearing browser data, then use Import JSON file on the new device (meetings with the same title and date are skipped).'
     },
@@ -107,6 +113,9 @@
       errTitle: '名称を入力してください。', errStart: '開始日を入力してください。', errEnd: '終了日は開始日より前にできません。', errEndTime: '終了時刻の前に開始時刻を入力してください。',
       errJson: 'JSON の形式が正しくありません：{m}', errArray: 'JSON は配列である必要があります。', errNothing: '取り込めるイベントがありません。', exportNone: '出力するイベントがありません。',
       errLoad: 'ローカルデータの読み込みに失敗しました：{m}', errSave: '保存に失敗しました：{m}',
+      jsonHint: '（引用符・カンマ・括弧の対応を確認してください）',
+      clearAll: '🗑️ すべて消去', countInfo: '全 {n} 件', clearNone: '消去するデータはありません。',
+      clearConfirm: '⚠️ {n} 件のイベントをすべて消去しますか？\nこの操作は元に戻せません。残したい場合は先に「JSON バックアップを書き出す」を行ってください。', cleared: '✅ すべてのイベントを消去しました。',
       exportJson: 'JSON バックアップを書き出す', importJson: 'JSON ファイルを読み込む',
       localNote: 'データはこのブラウザだけに保存されます（クラウド同期なし）。端末を変える前やブラウザのデータを消す前に「JSON バックアップを書き出す」を行い、新しい端末で「JSON ファイルを読み込む」で復元してください（同名・同日のイベントはスキップ）。'
     }
@@ -122,6 +131,8 @@
   let meetings = [];
   let loaded = false;
   let view = 'list'; // list | form | ai
+  let renderedView = 'list';
+  let importError = ''; // JSON parse / import errors, shown only inside the AI import view
   let editingId = null;
   let pendingImport = null;
   let aiMonth = '';   // YYYY-MM selected in the AI helper
@@ -224,7 +235,7 @@
       loaded = true;
     } catch (e) {
       meetings = []; loaded = true;
-      setMessage(T('errLoad', { m: e.message }), true);
+      console.warn('[learning-meetings] ' + T('errLoad', { m: e.message }));
     }
   }
   async function persist(next, okMessage) {
@@ -256,8 +267,8 @@
       if (!file) return;
       const text = await file.text();
       view = 'ai';
-      try { pendingImport = Object.assign({ text }, parseImport(text)); message = ''; render(); }
-      catch (e) { pendingImport = null; setMessage(e.message, true); }
+      try { pendingImport = Object.assign({ text }, parseImport(text)); message = ''; importError = ''; render(); }
+      catch (e) { pendingImport = null; importError = e.message; message = ''; render(); }
     };
     input.click();
   }
@@ -363,7 +374,7 @@
   function parseImport(text, month) {
     const cleaned = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
     let data;
-    try { data = JSON.parse(cleaned); } catch (e) { throw new Error(T('errJson', { m: e.message })); }
+    try { data = JSON.parse(cleaned); } catch (e) { throw new Error(T('errJson', { m: e.message }) + T('jsonHint')); }
     if (!Array.isArray(data)) throw new Error(T('errArray'));
     const range = month ? monthRange(month) : null;
     const existing = new Set(meetings.map(m => m.title + '|' + m.startDate));
@@ -434,7 +445,9 @@
       h('button', { type: 'button', className: 'secondary', text: T('aiOpen'), onclick: () => { pendingImport = null; view = 'ai'; render(); } }),
       h('button', { type: 'button', className: 'secondary', text: T('exportAll'), onclick: () => download(upcoming.length ? upcoming : sorted, 'learning-meetings-' + todayJst() + '.ics') }),
       h('button', { type: 'button', className: 'secondary', text: T('exportJson'), onclick: exportJson }),
-      h('button', { type: 'button', className: 'secondary', text: T('importJson'), onclick: importJsonFile })
+      h('button', { type: 'button', className: 'secondary', text: T('importJson'), onclick: importJsonFile }),
+      h('button', { type: 'button', className: 'secondary lm-danger', id: 'btn-clear-meetings', text: T('clearAll'), onclick: clearAll }),
+      h('span', { className: 'lm-count-info', id: 'meeting-count-info', text: T('countInfo', { n: meetings.length }) })
     ]);
     const localNote = h('p', { className: 'lm-note', text: T('localNote') });
     if (!meetings.length) return [toolbar, localNote, h('p', { className: 'lm-empty', text: T('empty') })];
@@ -510,7 +523,8 @@
       ]),
       h('div', { className: 'lm-import-box' }, [
         h('p', { className: 'lm-note', text: T('aiStep3') }),
-        paste
+        paste,
+        importError ? h('p', { id: 'parse-error-area', className: 'lm-message lm-danger-text', role: 'alert', text: importError }) : null
       ])
     ];
     if (pendingImport) {
@@ -525,8 +539,8 @@
       h('button', { type: 'button', className: 'secondary', text: T('back'), onclick: () => { pendingImport = null; view = 'list'; render(); } }),
       h('button', { type: 'button', className: 'secondary', text: T('preview'), onclick: () => {
         if (!monthRange(aiMonth)) { setMessage(T('errMonth'), true); return; }
-        try { pendingImport = Object.assign({ text: paste.value }, parseImport(paste.value, aiMonth)); message = ''; render(); }
-        catch (e) { pendingImport = null; setMessage(e.message, true); }
+        try { pendingImport = Object.assign({ text: paste.value }, parseImport(paste.value, aiMonth)); message = ''; importError = ''; render(); }
+        catch (e) { pendingImport = null; importError = e.message; message = ''; render(); }
       } }),
       pendingImport && pendingImport.ok.length ? h('button', { type: 'button', className: 'primary', text: T('importConfirm', { n: pendingImport.ok.length }), onclick: importPending }) : null
     ]));
@@ -534,6 +548,11 @@
   }
   function render() {
     if (!root) return;
+    if (view !== renderedView) {
+      if (renderedView === 'ai') importError = '';
+      if (messageDanger) message = '';
+      renderedView = view;
+    }
     const t = $('learning-meetings-title'); if (t) t.textContent = T('title');
     const sub = $('learning-meetings-subtitle'); if (sub) sub.textContent = T('subtitle');
     const closeBtn = $('learning-meetings-close'); if (closeBtn) closeBtn.setAttribute('aria-label', T('close'));
@@ -560,6 +579,11 @@
     if (!confirm(T('confirmDelete', { t: m.title }))) return;
     await persist(meetings.filter(x => x.id !== m.id), T('deleted'));
   }
+  async function clearAll() {
+    if (!meetings.length) { setMessage(T('clearNone')); return; }
+    if (!confirm(T('clearConfirm', { n: meetings.length }))) return;
+    if (await persist([], T('cleared'))) { pendingImport = null; render(); }
+  }
   async function importPending() {
     if (!pendingImport || !pendingImport.ok.length) { setMessage(T('errNothing'), true); return; }
     const n = pendingImport.ok.length;
@@ -567,7 +591,7 @@
   }
 
   async function openDialog() {
-    view = 'list'; editingId = null; pendingImport = null;
+    view = 'list'; editingId = null; pendingImport = null; importError = ''; message = '';
     if (!dialog.open) dialog.showModal();
     load();
     render();

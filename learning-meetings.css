@@ -42,3 +42,5 @@ html[data-theme="dark"] .lm-danger-text{background:#3a1d24;color:#ffb7c4}
 .lm-filter{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:650}
 .lm-filter select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--surface);color:var(--ink);font:inherit;font-size:12px}
 .lm-filter-count{margin-left:auto;font-size:12px;opacity:.75}
+.lm-count-info{align-self:center;margin-left:4px;font-size:12px;opacity:.75}
+#parse-error-area{margin:0}
