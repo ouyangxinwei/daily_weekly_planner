@@ -103,6 +103,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
     html[data-workspace="company"] #language-workspace-root{display:none!important}
     html[data-workspace="company"] #app-shell>.top~*:not(#company-workspace-root):not(dialog){display:none!important}
     html[data-workspace="company"] #app-shell>.top .top-actions>:not(.language-control-home):not(.workspace-switch):not(#theme-toggle):not(#open-repository-management){display:none!important}
+    html[data-workspace="company"] #app-shell>.top .top-actions>#open-repository-management{display:inline-flex!important;visibility:visible!important}
     html[data-workspace="language"] #app-shell>.top [id^="module-"],
     html[data-workspace="language"] #manage-categories,html[data-workspace="language"] #open-trash,html[data-workspace="language"] #open-archive,
     html[data-workspace="language"] #export-pdf,html[data-workspace="language"] #export-backup,html[data-workspace="language"] #export-full-backup,
@@ -357,55 +358,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       }).join('');
       const html=`<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(({plan:'慢慢计划',work:'工作',language:'外语任务',organize:'慢慢整理',results:'成绩',future:'未来',memo:'备忘'})[activeModule])}_${escapeHtml(periodLabel)}_${localDate()}</title><style>
         :root{color-scheme:light;font-family:Arial,"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#20243a}*{box-sizing:border-box}body{margin:0;background:#fff;font-size:10pt;line-height:1.5;overflow-wrap:anywhere}.document{max-width:190mm;margin:0 auto}.document-header{padding:0 0 5mm;border-bottom:1.2pt solid #6658d3;margin-bottom:5mm}.document-header h1{font-size:20pt;margin:0 0 2mm}.metadata{display:flex;flex-wrap:wrap;gap:1.5mm 6mm;color:#555b70;font-size:8.5pt}.plan-record{border:0.6pt solid #dfe2ec;border-radius:2mm;padding:3.5mm 4mm;margin:0 0 3mm;break-inside:avoid;page-break-inside:avoid;overflow-wrap:anywhere}.record-heading{display:flex;align-items:flex-start;gap:2mm}.record-heading h2{font-size:12pt;line-height:1.4;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}.record-number{font-weight:bold;color:#6658d3;flex:none}.status{font-size:8pt;border:0.5pt solid #d8dbe6;border-radius:10mm;padding:.5mm 2mm;white-space:nowrap;flex:none}.record-meta{display:flex;flex-wrap:wrap;gap:1mm 5mm;color:#646a7e;font-size:8.5pt;margin-top:2mm}.record-due,.record-reference{margin:2mm 0 0;font-size:9pt}.record-reference .url{font-size:8pt;color:#555;word-break:break-all}.record-note{margin-top:2mm;font-size:9pt;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.is-done h2{text-decoration:line-through;color:#85899e}.empty{padding:20mm;text-align:center;color:#777}@page{size:A4;margin:13mm 13mm 15mm;@bottom-right{content:"${locale==="en"?"Page ":locale==="ja"?"": "第 "}" counter(page) "${locale==="ja"?" ページ":locale==="en"?"":" 页"}";font-size:8pt;color:#666}}@media screen{body{background:#f4f5f9;padding:10mm}.document{background:white;padding:12mm;box-shadow:0 3px 20px #0001}.print-tip{max-width:190mm;margin:0 auto 6mm;background:#fff7df;border:1px solid #f0d58b;padding:3mm 4mm;border-radius:2mm;font-size:9pt}.print-actions{display:flex;justify-content:flex-end;gap:8px;max-width:190mm;margin:0 auto 8mm}.print-actions button{padding:8px 12px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer}}@media print{.print-tip,.print-actions{display:none!important}body{padding:0}.document{max-width:none;margin:0}.plan-record{box-shadow:none}}
-      </style></head><body><div class="print-tip">${t("请在打印窗口中选择“另存为 PDF”。导出仅包含当前页面可见计划，并按整条记录分页；特别长的单条记录若超过整页可打印高度，浏览器仍可能被迫拆页。")}</div><div class="print-actions"><button onclick="window.close()">${t("关闭预览")}</button><button onclick="window.print()">${t("打印 / 保存为 PDF")}</button></div><main class="document"><header class="document-header"><h1>${escapeHtml(({plan:'慢慢计划',work:'工作',language:'外语任务',organize:'慢慢整理',results:'成绩',future:'未来',memo:'备忘'})[activeModule])} · ${escapeHtml(periodLabel)}</h1><div class="metadata">${metadata.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div></header>${records}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script>  <dialog id="repository-management-dialog" aria-labelledby="repository-management-title">
-    <div class="rm-shell">
-      <header class="rm-header">
-        <div class="rm-header-copy">
-          <h2 id="repository-management-title" data-rm-i18n="title">仓库管理</h2>
-          <p class="rm-subtitle" data-rm-i18n="subtitle">独立维护 GitHub 仓库信息；不会混入计划数据或云端快照。</p>
-        </div>
-        <div class="rm-actions">
-          <button class="secondary" id="repository-add" type="button" data-rm-i18n="add">＋ 新增仓库</button>
-          <button class="secondary" id="repository-export" type="button" data-rm-i18n="export">导出 JSON</button>
-          <button class="secondary" id="repository-import" type="button" data-rm-i18n="import">导入 JSON</button>
-          <button class="close-btn" id="repository-close" type="button" aria-label="关闭">×</button>
-        </div>
-      </header>
-      <div class="rm-stats" id="repository-stats" aria-live="polite"></div>
-      <div class="rm-toolbar">
-        <input class="rm-search" id="repository-search" type="search" data-rm-placeholder="search" placeholder="搜索仓库名称、地址、技术栈、标签或备注">
-        <label><span class="sr-only">分类筛选</span><select id="repository-category-filter"><option value="all">全部分类</option></select></label>
-        <label><span class="sr-only">状态筛选</span><select id="repository-status-filter"><option value="all">全部状态</option></select></label>
-        <label><span class="sr-only">标记筛选</span><select id="repository-tag-filter"><option value="all">全部标记</option></select></label>
-      </div>
-      <p class="rm-status" id="repository-status-message" role="status" aria-live="polite"></p>
-      <section class="rm-list" id="repository-list" aria-live="polite"></section>
-      <form class="rm-editor rm-hidden" id="repository-editor" novalidate>
-        <h3 id="repository-editor-title">新增仓库</h3>
-        <input id="repository-id" type="hidden">
-        <div class="rm-form-grid">
-          <div class="rm-field"><label for="repository-name" data-rm-i18n="name">仓库名称</label><input id="repository-name" maxlength="120" required></div>
-          <div class="rm-field"><label for="repository-url" data-rm-i18n="url">GitHub 地址</label><input id="repository-url" type="url" placeholder="https://github.com/owner/repository" required></div>
-          <div class="rm-field"><label for="repository-category" data-rm-i18n="categoryLabel">分类</label><input id="repository-category" maxlength="60" list="repository-category-options" value="待分类"><datalist id="repository-category-options"><option value="计划管理"><option value="技术扩展"><option value="金融研究"><option value="数据采集"><option value="开发规范"><option value="生活工具"><option value="知识管理"><option value="外语学习"><option value="游戏"><option value="待分类"></datalist></div>
-          <div class="rm-field"><label for="repository-status" data-rm-i18n="statusLabel">状态</label><select id="repository-status"><option value="待整理">待整理</option><option value="进行中">进行中</option><option value="已暂停">已暂停</option><option value="已完成">已完成</option><option value="未完成">未完成</option></select></div>
-          <div class="rm-field"><label for="repository-priority" data-rm-i18n="priority">优先级</label><select id="repository-priority"><option value="高">高</option><option value="中" selected>中</option><option value="低">低</option></select></div>
-          <div class="rm-field"><label for="repository-branch" data-rm-i18n="branchLabel">默认分支</label><input id="repository-branch" maxlength="120"></div>
-          <div class="rm-field rm-wide"><label for="repository-tech" data-rm-i18n="stack">技术栈（逗号分隔）</label><input id="repository-tech" placeholder="JavaScript, Python, FastAPI"></div>
-          <div class="rm-field rm-wide"><label for="repository-tags" data-rm-i18n="tags">特殊标记（逗号分隔）</label><input id="repository-tags" placeholder="待部署, 待测试, 未完成"></div>
-          <div class="rm-field rm-wide"><label for="repository-notes" data-rm-i18n="notes">备注</label><textarea id="repository-notes" maxlength="5000"></textarea><small class="rm-hint" data-rm-i18n="notesHint">暂时卡住的问题可添加「未完成」标记，并在备注中记录原因和后续处理。</small></div>
-        </div>
-        <div class="rm-editor-actions"><button class="secondary" id="repository-cancel-edit" type="button" data-rm-i18n="cancel">取消</button><button class="primary" type="submit" data-rm-i18n="save">保存</button></div>
-      </form>
-      <section class="rm-preview rm-hidden" id="repository-import-preview">
-        <h3 data-rm-i18n="importTitle">导入预览</h3>
-        <div class="rm-stats" id="repository-import-summary"></div>
-        <p class="rm-muted" data-rm-i18n="importSummary">导入采用合并方式：相同仓库按 GitHub 地址或 ID 匹配，不会清空未出现在文件中的现有记录。</p>
-        <pre class="rm-preview-list" id="repository-import-details"></pre>
-        <div class="rm-editor-actions"><button class="secondary" id="repository-import-cancel" type="button" data-rm-i18n="discard">取消导入</button><button class="primary" id="repository-import-confirm" type="button" data-rm-i18n="confirmImport">确认导入并合并</button></div>
-      </section>
-      <input id="repository-import-file" type="file" accept="application/json,.json" hidden>
-    </div>
-  </dialog>
+      </style></head><body><div class="print-tip">${t("请在打印窗口中选择“另存为 PDF”。导出仅包含当前页面可见计划，并按整条记录分页；特别长的单条记录若超过整页可打印高度，浏览器仍可能被迫拆页。")}</div><div class="print-actions"><button onclick="window.close()">${t("关闭预览")}</button><button onclick="window.print()">${t("打印 / 保存为 PDF")}</button></div><main class="document"><header class="document-header"><h1>${escapeHtml(({plan:'慢慢计划',work:'工作',language:'外语任务',organize:'慢慢整理',results:'成绩',future:'未来',memo:'备忘'})[activeModule])} · ${escapeHtml(periodLabel)}</h1><div class="metadata">${metadata.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div></header>${records}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script>  
 </body></html>`;
       popup.document.open();popup.document.write(html);popup.document.close();
     }
@@ -632,5 +585,54 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <script type="module" src="./company-website.js"></script>
   <script type="module" src="./company-business.js"></script>
   <script type="module" src="./company-records-workspace.js"></script>
+<dialog id="repository-management-dialog" aria-labelledby="repository-management-title">
+    <div class="rm-shell">
+      <header class="rm-header">
+        <div class="rm-header-copy">
+          <h2 id="repository-management-title" data-rm-i18n="title">仓库管理</h2>
+          <p class="rm-subtitle" data-rm-i18n="subtitle">独立维护 GitHub 仓库信息；不会混入计划数据或云端快照。</p>
+        </div>
+        <div class="rm-actions">
+          <button class="secondary" id="repository-add" type="button" data-rm-i18n="add">＋ 新增仓库</button>
+          <button class="secondary" id="repository-export" type="button" data-rm-i18n="export">导出 JSON</button>
+          <button class="secondary" id="repository-import" type="button" data-rm-i18n="import">导入 JSON</button>
+          <button class="close-btn" id="repository-close" type="button" aria-label="关闭">×</button>
+        </div>
+      </header>
+      <div class="rm-stats" id="repository-stats" aria-live="polite"></div>
+      <div class="rm-toolbar">
+        <input class="rm-search" id="repository-search" type="search" data-rm-placeholder="search" placeholder="搜索仓库名称、地址、技术栈、标签或备注">
+        <label><span class="sr-only">分类筛选</span><select id="repository-category-filter"><option value="all">全部分类</option></select></label>
+        <label><span class="sr-only">状态筛选</span><select id="repository-status-filter"><option value="all">全部状态</option></select></label>
+        <label><span class="sr-only">标记筛选</span><select id="repository-tag-filter"><option value="all">全部标记</option></select></label>
+      </div>
+      <p class="rm-status" id="repository-status-message" role="status" aria-live="polite"></p>
+      <section class="rm-list" id="repository-list" aria-live="polite"></section>
+      <form class="rm-editor rm-hidden" id="repository-editor" novalidate>
+        <h3 id="repository-editor-title">新增仓库</h3>
+        <input id="repository-id" type="hidden">
+        <div class="rm-form-grid">
+          <div class="rm-field"><label for="repository-name" data-rm-i18n="name">仓库名称</label><input id="repository-name" maxlength="120" required></div>
+          <div class="rm-field"><label for="repository-url" data-rm-i18n="url">GitHub 地址</label><input id="repository-url" type="url" placeholder="https://github.com/owner/repository" required></div>
+          <div class="rm-field"><label for="repository-category" data-rm-i18n="categoryLabel">分类</label><input id="repository-category" maxlength="60" list="repository-category-options" value="待分类"><datalist id="repository-category-options"><option value="计划管理"><option value="技术扩展"><option value="金融研究"><option value="数据采集"><option value="开发规范"><option value="生活工具"><option value="知识管理"><option value="外语学习"><option value="游戏"><option value="待分类"></datalist></div>
+          <div class="rm-field"><label for="repository-status" data-rm-i18n="statusLabel">状态</label><select id="repository-status"><option value="待整理">待整理</option><option value="进行中">进行中</option><option value="已暂停">已暂停</option><option value="已完成">已完成</option><option value="未完成">未完成</option></select></div>
+          <div class="rm-field"><label for="repository-priority" data-rm-i18n="priority">优先级</label><select id="repository-priority"><option value="高">高</option><option value="中" selected>中</option><option value="低">低</option></select></div>
+          <div class="rm-field"><label for="repository-branch" data-rm-i18n="branchLabel">默认分支</label><input id="repository-branch" maxlength="120"></div>
+          <div class="rm-field rm-wide"><label for="repository-tech" data-rm-i18n="stack">技术栈（逗号分隔）</label><input id="repository-tech" placeholder="JavaScript, Python, FastAPI"></div>
+          <div class="rm-field rm-wide"><label for="repository-tags" data-rm-i18n="tags">特殊标记（逗号分隔）</label><input id="repository-tags" placeholder="待部署, 待测试, 未完成"></div>
+          <div class="rm-field rm-wide"><label for="repository-notes" data-rm-i18n="notes">备注</label><textarea id="repository-notes" maxlength="5000"></textarea><small class="rm-hint" data-rm-i18n="notesHint">暂时卡住的问题可添加「未完成」标记，并在备注中记录原因和后续处理。</small></div>
+        </div>
+        <div class="rm-editor-actions"><button class="secondary" id="repository-cancel-edit" type="button" data-rm-i18n="cancel">取消</button><button class="primary" type="submit" data-rm-i18n="save">保存</button></div>
+      </form>
+      <section class="rm-preview rm-hidden" id="repository-import-preview">
+        <h3 data-rm-i18n="importTitle">导入预览</h3>
+        <div class="rm-stats" id="repository-import-summary"></div>
+        <p class="rm-muted" data-rm-i18n="importSummary">导入采用合并方式：相同仓库按 GitHub 地址或 ID 匹配，不会清空未出现在文件中的现有记录。</p>
+        <pre class="rm-preview-list" id="repository-import-details"></pre>
+        <div class="rm-editor-actions"><button class="secondary" id="repository-import-cancel" type="button" data-rm-i18n="discard">取消导入</button><button class="primary" id="repository-import-confirm" type="button" data-rm-i18n="confirmImport">确认导入并合并</button></div>
+      </section>
+      <input id="repository-import-file" type="file" accept="application/json,.json" hidden>
+    </div>
+  </dialog>
 </body>
 </html>
