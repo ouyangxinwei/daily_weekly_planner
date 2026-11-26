@@ -1,3 +1,10 @@
+# V10.72.0 入口分流与学习会议整合（2026-11-26，integration）
+
+- 基础提交：最新 main `12449b7683ce51be30fb693a8b9ae95cc56ebbd2`；入口分流来源：development `7892290c488a2ea05a63569c968009cfa9e6706c`。
+- 保留 main 的学习会议本地存储实现、JSON 导入/导出、`learning-meetings.js` / CSS、Supabase migration 与 company-api 路由（云端路由当前未由前端调用）。
+- 整合个人/管理员启动入口、三语文案、Service Worker 缓存及文档；统一版本号为 10.72.0。
+- 当前为整合分支，尚待 CI 与浏览器验收；未合并 main、未部署 Pages。
+
 # V10.71 修订：学习会议改为本地手动维护（2026-11-27，main）
 
 - 现象：执行 migration 并部署 company-api 后，打开「学习会议」仍显示 `NOT_FOUND`。

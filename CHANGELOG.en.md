@@ -1,3 +1,9 @@
+# V10.72.0 Entry Routing and Learning Meetings Integration — 2026-11-26
+
+- Preserves the latest learning-meetings implementation from main: browser-local storage with JSON backup import/export. The Supabase migration and company-api routes remain in the repository but are not called by the frontend for now.
+- Integrates the startup entry chooser: personal entry uses the existing sign-in flow; the administrator entry opens a public, read-only monitoring view and is not an authorization boundary.
+- Merges localized entry strings, learning-meetings UI references, scripts and service-worker cache entries. Aligns VERSION, package.json and runtime version to 10.72.0.
+
 # V10.71 amendment: learning meetings maintained locally — 2026-11-27 (committed directly to main; testing pending)
 
 - company-api still returned NOT_FOUND after deployment (cause under investigation). Learning meetings now bypass company-api and are stored in this browser (localStorage `planner:learning_meetings`), so no cloud is needed.
