@@ -9,11 +9,12 @@
 - 正式稳定/部署分支：main
 - 特别保留分支：feat/agent-plan-steps
 - 日常工作只在 development；只有用户明确允许才合并 main。
-- 本阶段没有创建 PR、没有合并 main、没有部署 Pages 或 Supabase Edge Function。
+- Supabase migration 已应用；company-api 已部署为 v10。
+- development 已准备合并 main；Pages 部署与浏览器验收仍待确认。
 
 ## 当前阶段
 
-**V10.68.0 — 仓库管理私有云端化（仅 development，未部署）**
+**V10.68.0 — 仓库管理私有云端化（数据库/API 已部署，前端待发布验收）**
 
 ### 已写入代码
 
@@ -37,15 +38,14 @@
 
 ## 尚未执行 / 不可宣称完成
 
-- SQL migration 尚未应用到 Supabase。
-- company-api Edge Function 尚未部署（线上仍为原版本）。
-- GitHub Pages 尚未部署。
-- 未执行本地 npm 验证、Deno 类型检查、浏览器验收或真实 API 测试。
-- 因上述原因，V10.68 云端仓库功能目前还不能在线使用。
+- SQL migration 已应用，`repository_cloud_data` 已存在且 RLS/权限检查通过。
+- company-api 已部署为 v10，包含 `index.ts`、`list-all.ts`、`validation.ts`。
+- GitHub Pages 前端尚未确认部署；尚未完成真实浏览器登录、16 条导入、刷新持久化与 CRUD 验收。
+- 本地 npm 专项验证和 Deno 类型检查未运行；前端 JS 语法解析及静态契约检查通过。
 
 ## 下一步
 
-1. 用户本地运行 npm run test:validate:repositories-cloud 和 npm run test:validate:repositories；修复任何问题。
-2. 用户明确授权后，应用 SQL migration 并部署更新后的 company-api Edge Function。
-3. 再进行真实浏览器测试：未登录拒绝访问、登录读取空列表、导入 16 条、刷新读取、CRUD、重复导入预览/取消/确认、导出、保存失败保护。
-4. 仅在用户明确允许时将 development 合并 main；随后检查 Actions 和 Pages 部署。
+1. 合并 main 后检查 GitHub Actions / Pages 的实际部署状态。
+2. 使用现有账号登录页面，确认仓库管理 GET 返回空列表。
+3. 导入本地 16 条 JSON，确认预览后写入云端；刷新页面再次打开，确认 16 条仍在。
+4. 验收 CRUD、重复导入预览/取消/确认、导出及保存失败保护。
