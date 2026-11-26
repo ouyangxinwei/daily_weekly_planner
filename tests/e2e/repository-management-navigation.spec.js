@@ -4,7 +4,7 @@ import { openLocalTestApp } from './helpers.js';
 test('repository management remains available from the company workspace', async ({ page }) => {
   await openLocalTestApp(page);
 
-  await page.route('**/functions/v1/company-api/repositories', async route => {
+  await page.route('**/functions/v1/company-api/**', async route => {
     const method = route.request().method();
     const headers = {
       'Access-Control-Allow-Origin': 'http://127.0.0.1:4173',
@@ -15,7 +15,12 @@ test('repository management remains available from the company workspace', async
       await route.fulfill({ status: 204, headers });
       return;
     }
-    if (method === 'GET') {
+    const path = new URL(route.request().url()).pathname.replace('/functions/v1/company-api', '');
+    if (method === 'POST' && path === '/auth/verify') {
+      await route.fulfill({ status: 200, contentType: 'application/json', headers, body: JSON.stringify({ data: { authenticated: true, username: 'oooo' } }) });
+      return;
+    }
+    if (method === 'GET' && path === '/repositories') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
