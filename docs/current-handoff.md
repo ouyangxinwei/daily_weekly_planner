@@ -36,7 +36,7 @@
 - 现有单账号认证在 API 和数据库 RPC 两层验证。
 - 旧版浏览器 LocalStorage 中的仓库记录不会自动迁移；如需保留，先导出 JSON 再导入。
 
-## 尚未执行 / 不可宣称完成
+## 当前部署与验收状态
 
 - SQL migration 已应用，`repository_cloud_data` 已存在且 RLS/权限检查通过。
 - company-api 已部署为 v10，包含 `index.ts`、`list-all.ts`、`validation.ts`。
