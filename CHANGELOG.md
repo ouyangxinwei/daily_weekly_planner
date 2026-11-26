@@ -1,3 +1,9 @@
+# V10.72.0 入口分流与学习会议整合 — 2026-11-26
+
+- 基于最新 main 保留学习会议模块：当前使用浏览器 localStorage，并支持 JSON 备份导入/导出；Supabase migration 与 company-api 路由保留在仓库中但前端暂不调用。
+- 整合启动入口分流：个人入口沿用现有账号登录；管理员入口无需登录，提供只读运行监控视图。此入口不是权限控制。
+- 合并中英日入口文案、学习会议页面入口、脚本引用与 Service Worker 缓存；统一 VERSION、package.json 与运行版本标识为 10.72.0。
+
 # V10.71 修订：学习会议改为本地手动维护 — 2026-11-27（直接提交 main，测试待完成）
 
 - 部署后 company-api 仍返回 NOT_FOUND，原因待查。学习会议暂时绕过 company-api，改为保存在当前浏览器（localStorage `planner:learning_meetings`），不需要云端即可使用。
