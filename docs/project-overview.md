@@ -5,9 +5,11 @@
 慢慢计划是一个以个人计划和工作管理为核心的综合 Web/PWA 工作区。项目逐步扩展为多个职责和数据边界清晰的工作区，并增加个人公司业务管理能力。
 
 - 仓库：`ouyangxinwei/daily_weekly_planner`
-- 当前仓库版本：`10.58.0`（以根目录 `VERSION` 为准）
+- 当前仓库版本：`10.67.0`（以根目录 `VERSION` 为准）
 - GitHub Pages 入口：https://ouyangxinwei.github.io/daily_weekly_planner/
-- 主分支：`main`
+- 日常开发分支：`development`
+- 稳定与部署分支：`main`
+- Agent 特别保留分支：`feat/agent-plan-steps`
 - 当前参考实现：原生 HTML、CSS、JavaScript；部署于 GitHub Pages。
 
 ## 产品工作区
@@ -30,6 +32,10 @@
 - [专项文档](company-website/README.md)：独立子系统的详细设计与阶段记录。
 
 当前功能状态以产品规范和对应专项文档为准；代码合并、自动化测试、真实浏览器验证和线上部署是不同的状态，不能相互替代。
+
+## 仓库管理
+
+V10.67.0 在 `development` 增加独立仓库管理模块，用于手动维护 GitHub 仓库清单、分类、技术栈、状态、优先级、特殊标记和备注。初始导入 16 个账号仓库；初始分类仅为整理建议，状态统一为「待整理」，技术栈留空并标记「待核实」，不得将未经审计的信息当作事实。数据使用独立 LocalStorage key `planner-repositories:v1`，不参与计划模块 JSON 备份、七模块云端同步或 Supabase 数据分区。JSON 导入先校验并显示新增/更新/跳过预览，确认后按仓库 ID 或 GitHub URL 合并，不会删除未出现在导入文件中的现有记录。
 
 ## 核心数据边界
 

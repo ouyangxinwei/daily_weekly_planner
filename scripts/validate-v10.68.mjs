@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const js = readFileSync(new URL('../repository-management.js', import.meta.url), 'utf8');
+const api = readFileSync(new URL('../supabase/functions/company-api/index.ts', import.meta.url), 'utf8');
+const sql = readFileSync(new URL('../supabase/migrations/20261126100000_repository_management_cloud.sql', import.meta.url), 'utf8');
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+assert.equal(pkg.version, '10.68.0');
+assert.match(js, /PlannerCompanyContext/);
+assert.match(js, /cloudRequest\('PUT'/);
+assert.doesNotMatch(js, /localStorage/);
+assert.match(api, /route === "\/repositories" && req.method === "GET"/);
+assert.match(api, /route === "\/repositories" && req.method === "PUT"/);
+assert.match(api, /validateRepositorySnapshot/);
+assert.match(sql, /enable row level security/i);
+assert.match(sql, /revoke all on public\.repository_cloud_data from public, anon, authenticated/i);
+assert.match(sql, /grant execute on function public\.repository_get_data\(text, text\) to service_role/i);
+console.log('V10.68 repository cloud static contract checks passed.');

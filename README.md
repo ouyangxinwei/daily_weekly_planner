@@ -2,10 +2,10 @@
 
 个人计划与工作管理 PWA，持续演进为包含学习、资料整理和个人公司业务管理的综合工作区。
 
-- **当前仓库版本：** `10.66.0`（以根目录 `VERSION` 为准）
+- **当前仓库版本：** `10.68.0`（以根目录 `VERSION` 为准）
 - **在线入口：** https://ouyangxinwei.github.io/daily_weekly_planner/
 - **主要技术形态：** 静态 HTML / CSS / JavaScript，部署到 GitHub Pages，支持 PWA。
-- **开发主分支：** `main`。
+- **日常开发分支：** `development`；**稳定部署分支：** `main`。
 
 > 在线入口可用于访问应用；某个提交是否已部署，以 GitHub Actions 中 GitHub Pages 的实际部署结果为准。
 
@@ -19,6 +19,9 @@
 | 技术架构、数据结构和关键实现 | [技术手册](docs/technical_manual.md) |
 | 部署、更新和故障排查 | [部署与故障排查](docs/deployment_and_troubleshooting.md) |
 | AI 协作开发约定 | [AI 协作开发指南](docs/ai_collaboration_guide.md) |
+| Git 分支规则 | [Git 分支工作流](docs/git-branching-workflow.md) |
+| 仓库管理模块 | [仓库管理说明](docs/repository-management.md) |
+| 当前开发状态 | [当前开发交接](docs/current-handoff.md) |
 | 分支、PR 和临时分支清理 | [Git 分支工作流](docs/git-branching-workflow.md) |
 | Agent 自动化工作流（PLAN.md + run-plan.ps1） | [Agent 工作流实施指南](docs/agent-workflow.md) |
 | 个人公司网站的设计、数据库、API 和阶段记录 | [公司网站开发文档](docs/company-website/README.md) |
@@ -31,6 +34,7 @@
 - **成绩与未来：** 独立工作区入口，承载相应的个人记录与规划功能。
 - **个人公司网站：** 客户、项目、任务和业务跟进管理，业务总览/待办/概况/趋势、经营决策、收支贡献、客户关系健康和项目交付分析工作台，以及交易收支、业务文档和私有附件（Phase 3-B-A V10.59.0 已合并；当前新增 Phase 3-D-A 项目交付分析 V10.66.0）；业务数据通过 `company-api` 保存到 Supabase 的 `company_records`，附件保存在私有 Storage，与计划模块数据分离。
 - **开发日记：** 独立记录已经发生的活动，支持日/周浏览、空白日回顾、历史补记、编辑、删除、标题/详情/标签搜索（最多 50 条）和固定分类筛选；复用现有账号认证，日记数据独立于计划 JSON 备份和云端快照。详细设计与生产迁移记录见 [开发日记 V1](docs/development-diary.md)。
+- **仓库管理（V10.68.0）：** 独立维护 GitHub 仓库清单，支持 16 个初始仓库、手动 CRUD、分类/状态/优先级/特殊标记/备注、筛选统计及带预览的 JSON 合并导入和导出。数据保存在 Supabase 独立私有表，通过现有账号登录和 company-api 访问；不进入计划备份或 Supabase 计划快照。migration 已应用、company-api v10 已部署；前端 Pages 发布与真实浏览器验收待完成。
 - **首页天气看板：** 东京与横滨天气信息，细节见 [天气看板说明](docs/home-weather-dashboard.md)。
 - **运行日志与健康检查：** 在当前设备查看诊断信息；日志不作为业务数据上传云端。
 
@@ -49,7 +53,7 @@
 
 ## 开发协作
 
-所有正式变更均通过独立临时分支和 PR 合并到 `main`。合并后按规范清理临时远程分支。详细规则见 [Git 分支工作流](docs/git-branching-workflow.md)。
+日常开发、修复和文档维护统一在 `development` 完成；完成必要验证并向仓库所有者报告后，只有获得明确许可才将 `development` 合并到 `main`。`main` 是唯一正式部署分支；`feat/agent-plan-steps` 是独立保护的 Agent 实验分支。默认不创建大量临时分支。详细规则见 [Git 分支工作流](docs/git-branching-workflow.md)。
 
 > [!WARNING]
 > **Agent 测试分支 `feat/agent-plan-steps` 必须保留。**
@@ -58,3 +62,8 @@
 > - 确需删除时，必须先获得仓库所有者的明确确认；AI 助手不得自行删除。
 
 - **美股七巨头行情：** 天气预报下方展示最近交易周的七只美股行情，细节见 [股票看板说明](docs/stock-dashboard.md)。
+
+
+## V10.68 仓库管理云端化进度
+
+仓库管理复用现有账号认证，保存到 Supabase 独立私有数据表；migration 已应用、company-api v10 已部署，Pages 发布与浏览器验收待完成。详见 `docs/repository-management.md` 和 `docs/current-handoff.md`。
