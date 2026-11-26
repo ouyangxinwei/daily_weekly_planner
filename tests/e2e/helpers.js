@@ -27,6 +27,9 @@ export async function installCloudIsolation(page) {
 
 export async function loginToLocalTestApp(page) {
   await expect(page.locator('#access-gate')).toBeVisible();
+  const personalEntry = page.locator('#choose-personal');
+  if (await personalEntry.isVisible().catch(() => false)) await personalEntry.click();
+  await expect(page.locator('#access-form')).toBeVisible();
   await page.locator('#gate-key').fill('playwright-test-public-key');
   await page.locator('#gate-password').fill('not-a-real-password');
   await page.locator('#access-form button[type="submit"]').click();

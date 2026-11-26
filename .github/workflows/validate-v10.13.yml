@@ -112,4 +112,4 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Test repository management navigation
-        run: npx playwright test tests/e2e/repository-management-*.spec.js
+        run: npx playwright test tests/e2e/repository-management-*.spec.js tests/e2e/entry-flow.spec.js tests/e2e/learning-meetings.spec.js
