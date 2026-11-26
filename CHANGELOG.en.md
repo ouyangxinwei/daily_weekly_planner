@@ -1,3 +1,10 @@
+# V10.70 Bulk clear repository list and GitHub full export — 2026-11-26 (merged to development; Actions passed; main deployment pending)
+
+- Added a “Clear list” action with a confirmation dialog showing the number of records. Cancel makes no cloud write; confirm replaces only the current account's repository array with an empty array.
+- The confirmation explains that the operation cannot be undone in the app. It does not delete GitHub repositories, original JSON backups, the Supabase table row, or other business data. Export a JSON backup first if needed.
+- Added a “GitHub export prompt” link. An AI tool uses its already-authorized GitHub connector to paginate through accessible repositories and produce the existing import-compatible JSON v1 format; exports are split when exceeding 1,000 records or 1 MiB.
+- Added Playwright mock-API coverage for cancel/confirm and static contract validation. No database migration or company-api deployment is required.
+
 # V10.69 Interface mode (role) selection — 2026-11-26 (committed directly to main; browser testing pending)
 
 - After sign-in, users are asked once to choose a role: "Personal user" (simple interface hiding release notes, runtime logs, health check and automated tests) or "Administrator" (full interface). Closing the dialog without choosing keeps the full interface.

@@ -6,7 +6,7 @@
 
 ## 2. 当前状态
 
-- 版本：V10.68.0。
+- 版本：V10.70.0（PR #103 已合并 development；Actions run `45740957853` 成功；main 合并和 Pages 部署待完成）。
 - 开发分支：development。
 - V10.67 本地管理 UI 已有；V10.68 已增加私有云端数据层、认证 API 和前端接入代码。
 - **Supabase migration、company-api v10 和 GitHub Pages V10.68 均已部署；GitHub Actions 验证通过，真实浏览器验收尚未完成。**
@@ -71,3 +71,23 @@ Envelope 保持兼容 V10.67：
 - 认证失败、网络错误、限流或云端写入失败时不得提示保存成功。
 - migration 已应用；company-api v10 已部署；V10.68 已合并 main，Pages 部署 Run `45732359753` 与验证 Run `45732358997` 均成功。
 - 后续进行登录、导入 16 条、刷新读取、CRUD、重复导入、取消导入、导出和未登录拒绝访问测试。
+
+
+## 8. V10.70 批量清空与 GitHub 全量提取
+
+### 一键清空
+- 工具栏增加「清空清单」按钮；清单为空时禁用。
+- 二次确认提示当前记录数量、云端清除范围、无法在应用内撤销，以及 GitHub 仓库和原始 JSON 备份不会被删除。
+- 取消不发送云端请求；确认后仅调用现有 `PUT /repositories`，提交空的 `repositories: []` 快照。
+- 只有云端写入成功后才更新前端状态；失败时保留当前列表并显示错误。
+- 清空前建议使用现有「导出 JSON」保存备份。清空只是把当前账号的仓库数组替换为空数组，不删除 Supabase 表行、planner 数据、公司业务记录、GitHub 真实仓库或备份文件。
+
+### GitHub 全量仓库提取
+- 工具栏提供「GitHub 提取提示词」入口，打开 [全量仓库提取提示词](github-repository-export-prompt.md)。
+- 提示词要求 AI 使用已授权 GitHub 连接器逐页读取当前账号实际可访问的仓库，涵盖个人/组织/协作者权限下的 Public、Private、Archived 和 Fork 仓库；报告权限盲区，不得声称未读取的仓库已完整提取。
+- 输出严格使用现有 `oooo.repository-management` v1 envelope 和 12 个允许字段，可直接通过现有 JSON 导入预览与合并，不改变 Supabase API 或数据库 schema。
+- GitHub 元数据、README 摘要、项目用途、技术栈、部署信息等写入 `notes`；技术栈放入 `techStack`。提示词禁止 GitHub 写操作及秘密信息输出。
+- 当前导入器单文件最多 1000 条、company-api 单次保存请求最多 1 MiB；超出时提示词要求拆分多个兼容 JSON 文件，逐个导入。
+- 应用本身不持有 GitHub Token，也不绕过 GitHub 连接器权限。私有仓库读取取决于用户所选 AI 工具的 GitHub 授权范围。
+- 本次没有 Supabase migration 或 company-api 部署要求；复用现有 GET/PUT API。
+- 自动化覆盖取消确认不写云端、确认后只提交空仓库数组；生产账号的破坏性清空不作为 E2E 测试步骤，Playwright 使用 mock API 数据。
