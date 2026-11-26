@@ -1,4 +1,4 @@
-# V10.68 リポジトリ管理のプライベートクラウド化 — 2026-11-26（development、未デプロイ）
+# V10.68 リポジトリ管理のプライベートクラウド化 — 2026-11-26（migration 適用済み、company-api v10 デプロイ済み、Pages 検証待ち）
 
 - 既存の oooo 単一アカウント認証を PlannerCompanyContext と company-api 経由で再利用。
 - 専用 Supabase テーブル repository_cloud_data を追加。RLS を有効化し、anon/authenticated の直接アクセスを禁止。サーバー RPC でも既存資格情報を再検証。
