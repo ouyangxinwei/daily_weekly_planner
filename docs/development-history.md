@@ -1,3 +1,12 @@
+# V10.70 仓库清单批量清空与 GitHub 全量提取 — 2026-11-26（development，待验证）
+
+- 仓库管理工具栏增加「清空清单」按钮。弹出包含当前记录数量、清除范围和不可撤销提醒的确认框；取消不发送请求，确认后通过现有 PUT /repositories 写入空数组。
+- 清空成功后刷新列表和统计；云端写入失败时保留当前列表并显示错误。仅清除当前账号仓库管理数组，不删除 GitHub 仓库、原始 JSON 备份、Supabase 表行或其他业务数据。
+- 新增 GitHub 全量仓库提取提示词入口及文档。要求使用已授权 GitHub 连接器分页读取全部可访问仓库，报告权限盲区，并输出可直接导入的 oooo.repository-management v1 JSON；元数据和项目分析写入 notes/techStack。
+- 受现有导入器 1000 条/文件和 company-api 1 MiB 限制，超出时拆分多个 JSON 文件。只读 GitHub，不读取/输出秘密、不执行 GitHub 写操作。
+- 新增 Playwright mock API E2E 与 V10.70 静态契约验证；无 Supabase migration、Edge Function 或 API schema 变更。
+- 当前：功能已写入 feature 分支，自动化验证、PR、合并和部署待完成。
+
 # V10.69 界面模式（使用身份）选择（2026-11-26，main）
 
 - 需求：《用户角色区分功能设计文档 V1.0》；与用户确认的调整：定位为界面模式而非权限控制；`<html data-role>` + CSS 隐藏；登录后弹 `<dialog>`；「账号与同步」切换；退出登录清除；未选择时按完整界面。
