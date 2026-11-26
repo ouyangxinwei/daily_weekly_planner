@@ -51,16 +51,16 @@
 ## 5. 个人公司网站
 
 - 前端入口和资源：`company-website.js`、`company-website.css`、`company-business.js`、`company-business.css`，以及 V10.56.0 的 `company-records-rules.js`（纯规则）和 `company-records-workspace.js`（交易/文档/附件界面）、V10.63.0 的 `company-decision-center.js`（经营分析纯规则）、V10.64.0 的 `company-contribution-analysis.js`（客户/项目收支归属分析纯规则）、V10.65.0 的 `company-customer-health.js`（客户关系健康度规则）；V10.66.0 的 `company-project-delivery-analysis.js`（计划进度与实际进度偏差分析规则）；`company-business.js` 增加统一经营决策台入口，整合客户、项目、任务、跟进、交易和近期活动。V10.58.0 新增 `company-record-loader.js`：公司业务记录的完整分页读取（total 一致、无空页/短页、最终数量等于 total，否则报错）和短时缓存（进入页面 15 秒、页面内筛选/翻页 60 秒、刷新重读、写入后清空），所有需要全量数据的地方都经由它读取。
-- 后端：Supabase Edge Function `company-api` v9（ACTIVE）；V10.61.0 新增 `GET /status-history`，通过现有 Basic 账号认证调用 `company_list_status_history` RPC，前端仅获取当前账号记录。
+- 后端：Supabase Edge Function `company-api` v10（ACTIVE）；V10.61.0 新增 `GET /status-history`，通过现有 Basic 账号认证调用 `company_list_status_history` RPC，前端仅获取当前账号记录。
 - 业务表：`company_records`，通过 `record_type` 区分 customer、project、task、follow_up 等对象；任务通过 `parent_record_id` 关联项目，`due_date` 保存截止日期。V10.45.0 使用 `data.progress_mode`（manual/auto）、`data.manual_progress_percent`、`data.progress_percent` 及自动统计字段；数据库触发器在任务变化时更新自动进度。
 - 前端复用当前登录会话，通过 HTTPS Basic Authorization 请求 API；不得把密码持久化到 LocalStorage，也不得暴露 service-role/secret key。
-- V10.59.0：客户卡片及项目、任务、跟进列表通过 `window.CompanyRecords.openAttachments(record)` 复用统一附件管理窗口；上传/下载仍由 company-api v9 签发短时 URL，前端不得持久化签名 URL。
+- V10.59.0：客户卡片及项目、任务、跟进列表通过 `window.CompanyRecords.openAttachments(record)` 复用统一附件管理窗口；上传/下载仍由 company-api v10 签发短时 URL，前端不得持久化签名 URL。
 - 客户、项目、项目任务和跟进记录与计划模块 LocalStorage、云端快照隔离。
 - 项目删除受下游关联保护，不应擅自改成级联删除。
 - 交易（`transaction`）：`amount`/`currency` 原值、`record_date`、`data.direction`（income/expense）；文档（`document`）：`data.document_type`、`data.document_number`、`record_date`、`due_date`。两者的 `parent_record_id` 为关联项目或客户，与业务跟进相同。
 - 附件（`file`）：元数据在 `company_records`（`parent_record_id` 指向所属记录，`data.file` 保存 bucket/path/fileName/mimeType/fileSize/uploadedAt），内容在私有 Bucket `company-documents`。只能通过 `company-api` 的 `/files` 端点管理：`POST /files/upload-url`、`POST /files`、`GET /files?parent_record_id=`、`GET /files/:id/download-url`、`DELETE /files/:id`；`/records` 不能创建、修改或删除 file 记录。
 - 签名下载 URL 有效期 300 秒，属于短期凭据，不得写入日志、LocalStorage 或业务记录。
-- `supabase/migrations/20261124223326` 至 `20261124224743`：Phase 3-B-D 业务活动审计。最终表 `company_record_activity_history` 记录客户/项目/任务/跟进的创建、普通字段变更（仅字段名）和删除；项目/任务/跟进状态沿用 `company_record_status_history`，客户状态变化记录为字段名；查询时合并。RLS 开启、客户端直接权限撤销；`company_list_activity_history` 由 company-api v9 认证后调用。活动不存储字段值，自动进度派生字段不产生活动噪声。
+- `supabase/migrations/20261124223326` 至 `20261124224743`：Phase 3-B-D 业务活动审计。最终表 `company_record_activity_history` 记录客户/项目/任务/跟进的创建、普通字段变更（仅字段名）和删除；项目/任务/跟进状态沿用 `company_record_status_history`，客户状态变化记录为字段名；查询时合并。RLS 开启、客户端直接权限撤销；`company_list_activity_history` 由 company-api v10 认证后调用。活动不存储字段值，自动进度派生字段不产生活动噪声。
 - `supabase/migrations/20261124120058_company_record_status_history_phase_3b_c.sql`：为 project/task/follow_up 创建状态历史审计表；数据库触发器记录初始状态和每次实际状态变化，时间由 PostgreSQL 生成。历史表启用 RLS 并撤销客户端角色直接权限；`company_list_status_history` RPC 仅授予 service_role，且在函数内验证现有账号密码与 owner。company-api 提供认证后的 `/status-history` 读取入口。V10.61.0 起业务趋势按真实进入 completed 状态的事件时间统计；此前历史不回填。
 - `supabase/migrations/20261121090000_company_documents_storage_stage_3a.sql`：创建私有 Bucket（10 MB、MIME 允许列表），不创建 `storage.objects` 客户端策略。
 - `supabase/migrations/20261120065100_company_project_progress_linkage_stage_1h.sql`：增加项目进度同步触发器；触发器使用 SECURITY DEFINER、空 search_path、按 owner/project 过滤并撤销普通角色直接执行权限。
@@ -103,7 +103,7 @@
 - 页面输出用户文本使用 DOM `textContent`，不把仓库备注或标签作为 HTML 注入。删除按钮仅删除云端仓库资料条目，不调用 GitHub 删除 API。
 - Service Worker 缓存名升级至 V10.68，并预缓存模块 JS/CSS；私有仓库清单不作为公开静态资源缓存。
 - 云端首次为空时由用户导入 JSON；写入成功后才更新前端内存。旧版浏览器 LocalStorage 记录不自动迁移。
-- 迁移文件 `supabase/migrations/20261126100000_repository_management_cloud.sql` 创建独立表和认证 RPC。当前 migration 和 company-api 源码仅在 development，未应用/部署。
+- 迁移文件 `supabase/migrations/20261126100000_repository_management_cloud.sql` 创建独立表和认证 RPC。migration 已应用，company-api v10 已部署；V10.68 Pages 已成功部署，GitHub Actions 验证通过。真实浏览器登录与 16 条 JSON 导入/刷新验收仍待完成。
 - 初始 16 条记录只确认仓库名称、GitHub URL 和默认分支；用途分类为暂定整理标签，技术栈不猜测，状态统一为「待整理」，并标记「待核实」。
 
 详细 schema 和操作边界见 [仓库管理说明](repository-management.md)。

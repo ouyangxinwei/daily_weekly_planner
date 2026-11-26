@@ -1,11 +1,11 @@
-# V10.68 リポジトリ管理のプライベートクラウド化 — 2026-11-26（migration 適用済み、company-api v10 デプロイ済み、Pages 検証待ち）
+# V10.68 リポジトリ管理のプライベートクラウド化 — 2026-11-26（migration 適用済み、company-api v10 デプロイ済み、Pages デプロイ済み、ブラウザー受け入れ確認待ち）
 
 - 既存の oooo 単一アカウント認証を PlannerCompanyContext と company-api 経由で再利用。
 - 専用 Supabase テーブル repository_cloud_data を追加。RLS を有効化し、anon/authenticated の直接アクセスを禁止。サーバー RPC でも既存資格情報を再検証。
 - 認証済み GET/PUT /repositories を追加。CRUD と確認済み JSON インポートを専用クラウドテーブルに保存し、計画スナップショットから分離。
 - 既存の oooo.repository-management v1 JSON 形式を維持。初回は空のクラウド一覧にユーザーがローカル保管する16件 JSON を明示的にインポートし、個人リポジトリ一覧を公開静的ファイルとして配布しない。
 - リポジトリ専用 LocalStorage 保存を廃止。既存のブラウザ内データは自動移行しないため、必要なら事前にエクスポートしてからクラウドへインポート。
-- migration と Edge Function ソースは development のみ。DB migration 未適用、Edge Function/Pages 未デプロイ。ローカル・ブラウザ・実 API 検証は未実施。
+- Supabase migration 適用済み、company-api v10 デプロイ済み、GitHub Pages V10.68 デプロイ成功（Run `45732359753`）。GitHub Actions 検証も成功（Run `45732358997`）。実ブラウザーでのログイン・16件インポート・再読み込み確認は未完了。
 
 # V10.67 GitHub リポジトリ管理 — 2026-11-26（development）
 

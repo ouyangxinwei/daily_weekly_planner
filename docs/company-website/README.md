@@ -14,12 +14,12 @@
 - **V10.58.0：业务记录完整读取与限流保护修复（PR #66，已合并、已部署；自动化验证通过，真实浏览器验收状态未单独记录）。**
 - 2-D 业务趋势与周期复盘（V10.54.0）：已合并、部署并通过用户真实浏览器验收（2026-11-21）；Phase 2 正式完成。
 - **Phase 2 路线：2-A 业务总览 → 2-B 待办事项中心 → 2-C 项目与客户业务概况 → 2-D 业务趋势与周期复盘。**
-- 当前 main 应用版本：V10.66.0（PR #92 已合并）；Pages 部署 Run #362（`45710549224`）的 build、deploy、report-build-status 均成功；真实浏览器验收待用户确认。Pages 部署状态以对应 GitHub Actions build/deploy 结果为准。
+- 当前 main 应用版本：V10.68.0（PR #93 已合并；V10.68 Pages 部署成功）；V10.68 Pages 部署 Run `45732359753` 的 build、deploy、report-build-status 均成功；真实浏览器验收待用户确认。Pages 部署状态以对应 GitHub Actions build/deploy 结果为准。
 - Phase 3-B-C：状态变更历史（V10.61.0），项目/任务/跟进初始状态及每次状态变化由数据库触发器记录；业务趋势按真实完成事件时间统计。
 - 项目定位：个人开发练习优先，先实现可用版本，保持结构简单、易修改。
 - 业务数据：使用主要业务表 `company_records`，不同记录类型共用基础字段，差异字段放入 JSONB。
 - 认证：沿用慢慢计划现有自定义账号认证；Edge Function 在服务端再次验证请求身份。
-- API：生产 `company-api` v9（ACTIVE）；包含 `/status-history` 与认证分页 `/activity-history`。
+- API：生产 `company-api` v10（ACTIVE）；包含 `/status-history`、认证分页 `/activity-history` 与私有仓库管理 `/repositories` GET/PUT。
 - 文件存储：私有 Bucket `company-documents` 已部署，`public=false`，10 MiB 上限、12 种 MIME 类型；不开放客户端 Storage RLS 策略，附件只通过 company-api 签发的短时签名 URL 上传/下载。
 - 阶段 1-A 至 1-H：设计、数据库/API、客户、项目、任务和项目进度联动能力均已完成。
 - 阶段 1-I-A：跨模块导航 V10.46.0 已合并、部署并通过用户真实浏览器验收。

@@ -1,11 +1,11 @@
-# V10.68 Private cloud repository management — 2026-11-26 (migration applied, company-api v10 deployed; Pages verification pending)
+# V10.68 Private cloud repository management — 2026-11-26 (migration applied, company-api v10 deployed; Pages deployed; browser acceptance pending)
 
 - Reuses the existing single-account oooo login through PlannerCompanyContext and company-api.
 - Adds a dedicated Supabase repository_cloud_data table with RLS and no direct anon/authenticated access; server RPCs revalidate the existing credentials.
 - Adds authenticated GET/PUT /repositories routes. Repository CRUD and confirmed JSON imports persist to the dedicated cloud table, isolated from planner snapshots.
 - Keeps the existing oooo.repository-management v1 JSON format. An empty cloud library waits for the user's explicit import of the 16-record JSON held locally; the private repository list is not shipped as a public static asset.
 - Removes repository-specific LocalStorage persistence. Existing browser-only records are not migrated automatically; export them before importing to cloud if needed.
-- Supabase migration is applied and RLS/privilege checks passed; company-api v10 is deployed. Frontend Pages publication and real browser import/refresh verification remain pending.
+- Supabase migration is applied and RLS/privilege checks passed; company-api v10 is deployed. GitHub Pages deployment succeeded (Run `45732359753`) and GitHub Actions validation passed (Run `45732358997`); real browser import/refresh verification remains pending.
 
 # V10.67 GitHub Repository Management — 2026-11-26 (development)
 
