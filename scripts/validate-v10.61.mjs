@@ -47,6 +47,6 @@ assert.match(migration, /old_status is distinct from new_status/i);
 assert.match(migration, /company_assert_access\(p_username, p_password\)/);
 assert.match(pkg.version, /^10\.(?:61|62|63|64|65|66|68|69|70|71)\.0$/);
 assert.ok(pkg.scripts['test:validate:company-status-history']);
-assert.match(html, /V10\.(?:61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis|68_repository_cloud|69_ui_role_mode|70_repository_bulk_clear|71_learning_meetings)/);
-assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear|71-learning-meetings)/);
+assert.match(html, /V10\.(?:61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis|68_repository_cloud|69_ui_role_mode|70_repository_bulk_clear|71_learning_meetings|72_entry_and_learning_meetings)/);
+assert.match(sw, /v10-(?:61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear|71-learning-meetings|72-entry-learning-meetings)/);
 console.log('V10.61 status history validation passed.');
