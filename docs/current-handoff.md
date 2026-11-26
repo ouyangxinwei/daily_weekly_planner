@@ -2,16 +2,16 @@
 
 更新日期：2026-11-26
 
-## 最新开发交接：V10.70 仓库清单批量清空与 GitHub 全量提取（已合并 development）
+## 最新开发交接：V10.70 仓库清单批量清空与 GitHub 全量提取（已正式发布）
 
-- 开发分支：`development`；PR #103 已 squash merge，合并提交 `26ed1d8aecf64adb66b718ac7c07c18e17902740`。
-- 代码版本：V10.70.0。仓库管理增加清空清单二次确认；取消不发云端请求，确认后仅通过现有 `PUT /repositories` 写入空数组。
-- 清空仅影响当前账号的仓库管理数组，不删除 GitHub 真实仓库、原始 JSON 备份、Supabase 表行、planner 数据或 company records。
-- 新增 GitHub 全量提取提示词文档和界面入口；要求 AI 使用已授权连接器分页读取可访问仓库，并输出现有 `oooo.repository-management` v1 导入格式。
-- GitHub Actions run `45740957853` success：静态验证和 repository-management Playwright E2E 均通过（取消无写入、确认写入空数组）。
+- 版本：V10.70.0；PR #103 已合并 development，PR #104 已合并 main。
+- main 合并提交：`c4cdb0d3c8762bc3805c9d39e2a1262e36bba2a6`；development 已恢复并同步到同一提交。
+- 仓库管理「清空清单」具有数量提示和二次确认；取消不发送云端请求，确认后仅通过现有 `PUT /repositories` 写入空数组。
+- 清空只影响当前账号的仓库管理数组，不删除 GitHub 真实仓库、原始 JSON 备份、Supabase 表行、planner 数据或 company records。
+- GitHub 全量提取提示词已放入仓库管理界面入口和 `docs/github-repository-export-prompt.md`；要求使用已授权连接器分页读取可访问仓库，并输出现有 `oooo.repository-management` v1 导入格式。
+- GitHub Actions run `45741431942` success（静态验证与 Playwright E2E）；GitHub Pages deployment run `45741431344` success。
 - 无数据库 migration / company-api 部署变更。
-- 本地 Windows 页面手动验收未在本次执行环境完成；自动化浏览器 E2E 已通过。
-- 下一步：按用户授权创建 development → main PR，检查 Actions 后正式合并，并确认 Pages 部署成功。
+- 本地 Windows 页面手动验收未在本次执行环境完成；CI 浏览器 E2E 已通过。正式页面可由用户进行最终视觉/操作确认。
 
 ## 仓库与分支
 
