@@ -2,7 +2,7 @@
 html[data-workspace="company"] #company-workspace-root{display:block}
 html[data-workspace="company"] #language-workspace-root{display:none!important}
 html[data-workspace="company"] #app-shell>.top~*:not(#company-workspace-root):not(dialog){display:none!important}
-html[data-workspace="company"] #app-shell>.top .top-actions>:not(.language-control-home):not(.workspace-switch):not(#theme-toggle){display:none!important}
+html[data-workspace="company"] #app-shell>.top .top-actions>:not(.language-control-home):not(.workspace-switch):not(#theme-toggle):not(#open-repository-management){display:none!important}
 .cw-shell{width:min(100% - 32px,820px);margin:0 auto}
 .cw-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:4px 0 20px}
 .cw-header h2{font-size:26px;letter-spacing:-.03em;margin:3px 0 6px}
