@@ -1,3 +1,10 @@
+# V10.69 界面模式（使用身份）选择（2026-11-26，main）
+
+- 需求：《用户角色区分功能设计文档 V1.0》；与用户确认的调整：定位为界面模式而非权限控制；`<html data-role>` + CSS 隐藏；登录后弹 `<dialog>`；「账号与同步」切换；退出登录清除；未选择时按完整界面。
+- 实现与待测试清单：[docs/user-role-mode.md](user-role-mode.md)。
+- 验证：仅语法检查与 CI 静态校验（validate-v10.25～v10.68 全部通过）；浏览器测试未执行。
+- 交付：按用户要求直接提交并推送 `main`，同步 `development`；合并后的部署验证由其他人负责。
+
 # V10.68 仓库管理云端化 — 2026-11-26（development，未部署）
 
 - 仓库管理复用现有 `oooo` 单账号登录，经 `PlannerCompanyContext` 和 company-api 访问个人云端资料库。

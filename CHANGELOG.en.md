@@ -1,3 +1,11 @@
+# V10.69 Interface mode (role) selection — 2026-11-26 (committed directly to main; browser testing pending)
+
+- After sign-in, users are asked once to choose a role: "Personal user" (simple interface hiding release notes, runtime logs, health check and automated tests) or "Administrator" (full interface). Closing the dialog without choosing keeps the full interface.
+- Account & Sync gains "Switch role"; signing out clears the role so the next sign-in asks again.
+- This only changes what is shown; it is not access control. The role is stored in this browser only (planner:user_role) and is never synced or backed up.
+- The role is applied before first paint to avoid flicker; the dialog supports the dark theme and Chinese/English/Japanese. Adds role-control.js to the offline cache.
+- Only syntax checks and CI static validators were run; the browser test checklist is in docs/user-role-mode.md.
+
 # V10.68 Private cloud repository management — 2026-11-26 (migration applied, company-api v10 deployed; Pages deployed; browser acceptance pending)
 
 - Reuses the existing single-account oooo login through PlannerCompanyContext and company-api.

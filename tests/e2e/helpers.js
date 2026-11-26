@@ -35,6 +35,8 @@ export async function loginToLocalTestApp(page) {
 
 export async function openLocalTestApp(page) {
   await page.addInitScript(() => {
+    // V10.69: preset the interface mode so the first-login role dialog does not block tests.
+    if (!localStorage.getItem('planner:user_role')) localStorage.setItem('planner:user_role', 'admin');
     const marker = '__planner_e2e_workspace_baseline_v1';
     if (sessionStorage.getItem(marker) !== 'ready') {
       localStorage.setItem('personal-planner:active-workspace:v1', 'plan');
