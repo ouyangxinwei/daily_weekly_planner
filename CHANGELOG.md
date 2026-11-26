@@ -1,11 +1,11 @@
-# V10.68 仓库管理云端化 — 2026-11-26（migration 已应用，company-api v10 已部署；Pages 验收待完成）
+# V10.68 仓库管理云端化 — 2026-11-26（migration 已应用，company-api v10 已部署；Pages 已部署，浏览器验收待完成）
 
 - 仓库管理复用现有 `oooo` 单账号登录，经 `PlannerCompanyContext` 和 company-api 访问个人云端资料库。
 - 新增独立 Supabase 表 `repository_cloud_data`，启用 RLS，禁止 anon/authenticated 直接访问；服务端 RPC 再次验证现有账号凭据。
 - 新增 `GET/PUT /repositories` API。列表读取、单条新增/编辑/删除及 JSON 确认导入均保存到独立云端表；不进入计划云端快照。
 - JSON schema 保持 V10.67 的 `oooo.repository-management` v1。首次云端为空时由用户从本地 JSON 导入 16 条数据；个人仓库清单不作为公开静态文件保存在应用仓库。
 - 前端不再使用仓库专用 LocalStorage；旧浏览器记录不会自动迁移，需先导出再导入。
-- Supabase migration 已应用，`repository_cloud_data` RLS 与权限检查通过；company-api 已部署为 v10。前端 Pages 发布及真实浏览器导入/刷新验收仍待完成。
+- Supabase migration 已应用，`repository_cloud_data` RLS 与权限检查通过；company-api 已部署为 v10。GitHub Pages 已部署成功（Run `45732359753`），GitHub Actions 验证通过（Run `45732358997`）；真实浏览器导入/刷新验收仍待完成。
 
 # V10.67 GitHub 仓库管理模块 — 2026-11-26（development）
 
