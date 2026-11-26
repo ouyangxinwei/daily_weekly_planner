@@ -2,7 +2,7 @@
 
 个人计划与工作管理 PWA，持续演进为包含学习、资料整理和个人公司业务管理的综合工作区。
 
-- **当前仓库版本：** `10.67.0`（以根目录 `VERSION` 为准）
+- **当前仓库版本：** `10.68.0`（以根目录 `VERSION` 为准）
 - **在线入口：** https://ouyangxinwei.github.io/daily_weekly_planner/
 - **主要技术形态：** 静态 HTML / CSS / JavaScript，部署到 GitHub Pages，支持 PWA。
 - **日常开发分支：** `development`；**稳定部署分支：** `main`。
@@ -34,7 +34,7 @@
 - **成绩与未来：** 独立工作区入口，承载相应的个人记录与规划功能。
 - **个人公司网站：** 客户、项目、任务和业务跟进管理，业务总览/待办/概况/趋势、经营决策、收支贡献、客户关系健康和项目交付分析工作台，以及交易收支、业务文档和私有附件（Phase 3-B-A V10.59.0 已合并；当前新增 Phase 3-D-A 项目交付分析 V10.66.0）；业务数据通过 `company-api` 保存到 Supabase 的 `company_records`，附件保存在私有 Storage，与计划模块数据分离。
 - **开发日记：** 独立记录已经发生的活动，支持日/周浏览、空白日回顾、历史补记、编辑、删除、标题/详情/标签搜索（最多 50 条）和固定分类筛选；复用现有账号认证，日记数据独立于计划 JSON 备份和云端快照。详细设计与生产迁移记录见 [开发日记 V1](docs/development-diary.md)。
-- **仓库管理（V10.67.0，development）：** 独立维护 GitHub 仓库清单，支持 16 个初始仓库、手动 CRUD、分类/状态/优先级/特殊标记/备注、筛选统计及带预览的 JSON 合并导入和导出。数据只保存在独立 LocalStorage，不进入计划备份或 Supabase 快照；尚未合并到 `main`，未部署。
+- **仓库管理（V10.68.0）：** 独立维护 GitHub 仓库清单，支持 16 个初始仓库、手动 CRUD、分类/状态/优先级/特殊标记/备注、筛选统计及带预览的 JSON 合并导入和导出。数据保存在 Supabase 独立私有表，通过现有账号登录和 company-api 访问；不进入计划备份或 Supabase 计划快照。migration 已应用、company-api v10 已部署；前端 Pages 发布与真实浏览器验收待完成。
 - **首页天气看板：** 东京与横滨天气信息，细节见 [天气看板说明](docs/home-weather-dashboard.md)。
 - **运行日志与健康检查：** 在当前设备查看诊断信息；日志不作为业务数据上传云端。
 
@@ -66,4 +66,4 @@
 
 ## V10.68 仓库管理云端化进度
 
-仓库管理复用现有账号认证，保存到 Supabase 独立私有数据表；当前代码仅在 development，数据库迁移与 company-api Edge Function 尚未部署。详见 `docs/repository-management.md` 和 `docs/current-handoff.md`。
+仓库管理复用现有账号认证，保存到 Supabase 独立私有数据表；migration 已应用、company-api v10 已部署，Pages 发布与浏览器验收待完成。详见 `docs/repository-management.md` 和 `docs/current-handoff.md`。
