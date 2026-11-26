@@ -1,12 +1,22 @@
-# V10.71 Startup entry selection and administrator monitoring — 2026-11-26 (development only; not merged or deployed)
+# V10.72.0 Entry Routing and Learning Meetings Integration — 2026-11-26
 
-- Added two choices on the startup screen: “Personal entry” and “Administrator entry”.
-- Personal entry reuses the existing database sign-in and opens the existing personal planning, work, study and task workspace. Signing out returns to the entry chooser.
-- Administrator entry requires no sign-in and opens a separate read-only monitoring view for system health, local runtime logs, app version / Pages deployment and GitHub Actions test status.
-- The monitoring view does not expose personal plans, account sync, repository lists or company-business editing. Health checks skip Supabase data reads that require account credentials when signed out.
-- No permission system, role authentication, database migration, RPC, RLS or API changes. “Administrator” is a public learning-stage monitoring entry, not a security boundary.
-- Updated PWA cache, version and Chinese/English/Japanese documentation. Browser acceptance checklist is in docs/user-role-mode.md. No new automated tests or E2E run for this change.
-- Changes are on development only; main was not merged and Pages was not deployed.
+- Preserves the latest learning-meetings implementation from main: browser-local storage with JSON backup import/export. The Supabase migration and company-api routes remain in the repository but are not called by the frontend for now.
+- Integrates the startup entry chooser: personal entry uses the existing sign-in flow; the administrator entry opens a public, read-only monitoring view and is not an authorization boundary.
+- Merges localized entry strings, learning-meetings UI references, scripts and service-worker cache entries. Aligns VERSION, package.json and runtime version to 10.72.0.
+
+# V10.71 amendment: learning meetings maintained locally — 2026-11-27 (committed directly to main; testing pending)
+
+- company-api still returned NOT_FOUND after deployment (cause under investigation). Learning meetings now bypass company-api and are stored in this browser (localStorage `planner:learning_meetings`), so no cloud is needed.
+- Adds "Export JSON backup" and "Import JSON file" for backups and moving between devices; imports use the same preview as the AI helper and skip same title + date.
+- The cloud design (migration and the company-api /learning-meetings routes) stays in the repo but is no longer called by the front end; see docs/learning-meetings.md to restore it.
+
+# V10.71 Learning meetings — 2026-11-27 (committed directly to main; migration / company-api deployment and testing pending)
+
+- Adds "Learning Meetings" to track study sessions, talks, seminars and expos, grouped into upcoming and past, with add, edit and delete.
+- AI parsing helper: copy the provided prompt to an AI, paste the returned JSON back, preview and import in bulk; entries missing required fields or duplicating an existing title and date are skipped.
+- .ics export (single or all): timed events are converted to UTC, all-day end dates follow the exclusive-end rule, and files include DTSTAMP, stable UIDs and 75-octet line folding. Google Calendar ignores reminders on import.
+- Data is stored in the private learning_meetings_data table via company-api GET/PUT /learning-meetings with existing credential checks, separate from planner backups and snapshots.
+- Requires applying migration 20261127090000_learning_meetings_cloud.sql and redeploying company-api. Deployment steps and the test checklist are in docs/learning-meetings.md.
 
 # V10.70 Bulk clear repository list and GitHub full export — 2026-11-26 (merged to main; Actions and Pages deployment succeeded; local manual acceptance pending)
 

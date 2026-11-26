@@ -1,12 +1,22 @@
-# V10.71 启动入口分流与管理员后台监控 — 2026-11-26（development，未合并/未部署）
+# V10.72.0 入口分流与学习会议整合 — 2026-11-26
 
-- 启动首屏新增「个人入口」和「管理员入口」。
-- 个人入口沿用现有账号登录，登录后进入原个人计划、工作、学习和事务管理；退出后返回入口选择。
-- 管理员入口无需登录，直接进入独立只读监控页，可查看系统健康、当前设备运行日志、版本与 Pages 部署状态、GitHub Actions 自动化测试。
-- 管理员监控页不展示个人计划、账号同步、仓库清单或公司业务编辑入口；健康检查未登录时跳过需要账号凭据的 Supabase 数据读取。
-- 不新增权限系统、角色认证、数据库 migration、RPC、RLS 或 API 变更。管理员只是可公开进入的学习阶段监控视图，不是安全边界。
-- 更新 PWA 缓存、版本和中英日文档；浏览器验收项目记录在 docs/user-role-mode.md。本次未新增自动化测试或运行 E2E。
-- 当前仅在 development，未合并 main、未部署 Pages。
+- 基于最新 main 保留学习会议模块：当前使用浏览器 localStorage，并支持 JSON 备份导入/导出；Supabase migration 与 company-api 路由保留在仓库中但前端暂不调用。
+- 整合启动入口分流：个人入口沿用现有账号登录；管理员入口无需登录，提供只读运行监控视图。此入口不是权限控制。
+- 合并中英日入口文案、学习会议页面入口、脚本引用与 Service Worker 缓存；统一 VERSION、package.json 与运行版本标识为 10.72.0。
+
+# V10.71 修订：学习会议改为本地手动维护 — 2026-11-27（直接提交 main，测试待完成）
+
+- 部署后 company-api 仍返回 NOT_FOUND，原因待查。学习会议暂时绕过 company-api，改为保存在当前浏览器（localStorage `planner:learning_meetings`），不需要云端即可使用。
+- 新增「导出 JSON 备份」「导入 JSON 文件」，用于换设备或备份；导入走与 AI 解析助手相同的预览，同名同日跳过。
+- 云端方案（migration、company-api 的 /learning-meetings 路由）保留在仓库中但前端不再调用，恢复方法见 docs/learning-meetings.md。
+
+# V10.71 学习会议 — 2026-11-27（直接提交 main；migration / company-api 待部署，测试待完成）
+
+- 新增「学习会议」：记录学习会议、讲座、研讨会和展会，按即将举行 / 已结束分组，支持新增、编辑、删除。
+- AI 解析助手：页面提供提示词，复制给 AI 后把返回的 JSON 粘贴回来，预览后批量导入；自动跳过缺少必填项或同名同日的条目。
+- 导出 .ics（单条或全部）：有时间的活动换算为 UTC，全天活动的结束日按规范加一天，包含 DTSTAMP、稳定 UID 和 75 字节折行。Google 日历导入时会忽略提醒。
+- 数据保存在独立私有表 learning_meetings_data，通过 company-api 的 GET/PUT /learning-meetings 访问，再次校验现有账号；不进入计划备份或云端快照。
+- 需要执行 migration 20261127090000_learning_meetings_cloud.sql 并重新部署 company-api。部署步骤和待测试清单见 docs/learning-meetings.md。
 
 # V10.70 仓库清单批量清空与 GitHub 全量提取 — 2026-11-26（已合并 main，Actions 与 Pages 部署成功；本地手动验收待完成）
 

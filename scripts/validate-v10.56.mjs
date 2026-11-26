@@ -127,10 +127,10 @@ assert.match(business, /button:not\(\[data-company-extension\]\)/);
 
 const html = fs.readFileSync('index.html', 'utf8');
 assert.ok(html.indexOf('company-business.js') < html.indexOf('company-records-workspace.js'), 'records module loads after company-business');
-assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis|68_repository_cloud|69_ui_role_mode|70_repository_bulk_clear)'/);
+assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_entity_attachments|60_company_monthly_cashflow|61_company_status_history|62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis|68_repository_cloud|69_ui_role_mode|70_repository_bulk_clear|71_learning_meetings|72_entry_and_learning_meetings)'/);
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-|60-|61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear)/);
+assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-|60-|61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear|71-learning-meetings|72-entry-learning-meetings)/);
 assert.ok(sw.includes("'./company-records-rules.js'") && sw.includes("'./company-records-workspace.js'"));
-assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0', '10.65.0', '10.66.0', '10.68.0', '10.69.0', '10.70.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
+assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0', '10.65.0', '10.66.0', '10.68.0', '10.69.0', '10.70.0', '10.71.0', '10.72.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
 
 console.log('V10.56 company transactions, documents and attachments validation passed.');

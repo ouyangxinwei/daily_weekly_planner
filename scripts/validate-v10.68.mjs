@@ -4,7 +4,7 @@ const js = readFileSync(new URL('../repository-management.js', import.meta.url),
 const api = readFileSync(new URL('../supabase/functions/company-api/index.ts', import.meta.url), 'utf8');
 const sql = readFileSync(new URL('../supabase/migrations/20261126100000_repository_management_cloud.sql', import.meta.url), 'utf8');
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-assert.ok(['10.68.0', '10.69.0', '10.70.0'].includes(pkg.version));
+assert.ok(['10.68.0', '10.69.0', '10.70.0', '10.71.0', '10.72.0'].includes(pkg.version));
 assert.match(js, /PlannerCompanyContext/);
 assert.match(js, /cloudRequest\('PUT'/);
 assert.doesNotMatch(js, /localStorage/);

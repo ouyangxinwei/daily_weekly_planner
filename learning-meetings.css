@@ -1,0 +1,33 @@
+/* Learning meetings dialog — V10.71 */
+.learning-meetings-dialog{width:min(100% - 20px,760px);max-height:92vh}
+.learning-meetings-dialog .dialog-inner{max-height:92vh;overflow:auto}
+.lm-subtitle{margin:-10px 0 14px;color:var(--muted);font-size:12px;line-height:1.6}
+.lm-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.lm-message{margin:0 0 12px;padding:9px 12px;border-radius:10px;background:var(--brand-soft);color:var(--ink);font-size:13px}
+.lm-danger-text{background:#fff2f4;color:#9b2f43}
+.lm-note{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.6}
+.lm-empty{padding:28px 10px;text-align:center;color:var(--muted);font-size:13px}
+.lm-section h3,.lm-form h3,.learning-meetings-dialog h3{font-size:15px;margin:14px 0 8px}
+.lm-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--surface)}
+.lm-item.is-past{opacity:.65}
+.lm-item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.lm-item-head strong{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.lm-badges{display:flex;gap:5px;flex:none}
+.lm-badge{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);white-space:nowrap}
+.lm-badge.lm-format{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.lm-when{font-size:13px;font-weight:650;margin-top:6px}
+.lm-meta{font-size:12px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.lm-desc{font-size:12px;line-height:1.6;margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.lm-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.lm-actions button{font-size:12px;padding:6px 10px}
+.lm-link{font-size:12px;color:var(--brand);margin-right:4px}
+.lm-danger{color:#bf4d60}
+.lm-form{display:grid;gap:10px}
+.lm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lm-field{display:grid;gap:5px;font-size:12px;font-weight:650}
+.lm-field input,.lm-field select,.lm-field textarea,.lm-prompt,.lm-paste{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px}
+.lm-prompt,.lm-paste{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.5;margin-bottom:8px;resize:vertical}
+.lm-hint{color:var(--muted);font-size:11px}
+.lm-preview{display:grid;gap:4px;max-height:200px;overflow:auto;font-size:12px;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+html[data-theme="dark"] .lm-danger-text{background:#3a1d24;color:#ffb7c4}
+@media(max-width:560px){.lm-grid{grid-template-columns:1fr}.lm-item-head{flex-direction:column}}

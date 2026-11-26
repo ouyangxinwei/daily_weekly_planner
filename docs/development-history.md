@@ -1,13 +1,22 @@
-# V10.71 启动入口分流与管理员后台监控（2026-11-26，development，未部署）
+# V10.72.0 入口分流与学习会议整合（2026-11-26，integration）
 
-- 启动页增加「个人入口 / 管理员入口」分流。个人入口复用既有数据库登录和个人工作区；管理员入口不登录，打开独立只读监控页。
-- 管理员监控复用既有系统健康检查、运行日志、版本/部署状态和 GitHub Actions 测试状态；不显示个人计划、账号同步、仓库清单或公司业务编辑入口。
-- 不新增认证、权限、数据库 migration、RPC、RLS、Edge Function 或 API 变更。管理员入口是公开可进入的学习阶段监控页面，不构成安全边界。
-- 代码涉及 index.html、entry-flow.js、entry-flow.css、sw.js、i18n.js、VERSION、package.json、README、三语 CHANGELOG、当前交接与入口模式文档。
-- 遵循当前「开发优先、测试项记入文档」约定，未新增自动化测试、未运行本地 E2E；待测项见 docs/user-role-mode.md。
-- 当前只在 development，未合并 main、未部署 Pages。
+- 基础提交：最新 main `12449b7683ce51be30fb693a8b9ae95cc56ebbd2`；入口分流来源：development `7892290c488a2ea05a63569c968009cfa9e6706c`。
+- 保留 main 的学习会议本地存储实现、JSON 导入/导出、`learning-meetings.js` / CSS、Supabase migration 与 company-api 路由（云端路由当前未由前端调用）。
+- 整合个人/管理员启动入口、三语文案、Service Worker 缓存及文档；统一版本号为 10.72.0。
+- 当前为整合分支，尚待 CI 与浏览器验收；未合并 main、未部署 Pages。
 
----
+# V10.71 修订：学习会议改为本地手动维护（2026-11-27，main）
+
+- 现象：执行 migration 并部署 company-api 后，打开「学习会议」仍显示 `NOT_FOUND`。
+- 分析：company-api 先验证账号再匹配路由，NOT_FOUND 只会出现在路由未匹配时，说明线上运行的函数仍不含 /learning-meetings（可能部署到了其他函数名/项目，或部署的不是 main 最新代码）。**原因待查。**
+- 处理：按用户要求绕过 company-api，前端改为 localStorage 保存，并增加 JSON 导出/导入。云端代码保留不删。详见 [docs/learning-meetings.md](learning-meetings.md)。
+- 验证：语法检查；浏览器测试未执行。
+
+# V10.71 学习会议（2026-11-27，main）
+
+- 需求：学习会议实施方案（手动录入 + AI 提示词辅助、Supabase 独立表、独立模块、导出 .ics、Asia/Tokyo）。按评审调整：沿用 V10.68 仓库管理的账号校验与快照模式（不使用 Supabase Auth），只做 GET/PUT 两个接口，地区/形式改为英文代码，状态按日期计算，修正 .ics 全天结束日、时间格式、时区、DTSTAMP、UID 和折行。
+- 实现、部署步骤与待测试清单：[docs/learning-meetings.md](learning-meetings.md)。
+- 验证：语法检查与 CI 静态校验通过；.ics 输出人工核对一次。浏览器测试、migration 执行与 company-api 部署由其他人负责。
 
 # V10.70 仓库清单批量清空与 GitHub 全量提取 — 2026-11-26（development，待验证）
 
