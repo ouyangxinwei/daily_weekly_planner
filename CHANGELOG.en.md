@@ -1,4 +1,4 @@
-# V10.70 Bulk clear repository list and GitHub full export — 2026-11-26 (development; validation pending)
+# V10.70 Bulk clear repository list and GitHub full export — 2026-11-26 (merged to development; Actions passed; main deployment pending)
 
 - Added a “Clear list” action with a confirmation dialog showing the number of records. Cancel makes no cloud write; confirm replaces only the current account's repository array with an empty array.
 - The confirmation explains that the operation cannot be undone in the app. It does not delete GitHub repositories, original JSON backups, the Supabase table row, or other business data. Export a JSON backup first if needed.
