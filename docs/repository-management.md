@@ -9,7 +9,7 @@
 - 版本：V10.68.0。
 - 开发分支：development。
 - V10.67 本地管理 UI 已有；V10.68 已增加私有云端数据层、认证 API 和前端接入代码。
-- **当前仅提交 development：SQL migration 未应用，company-api Edge Function 未部署，Pages 未部署；线上云端功能尚不可用。**
+- **Supabase migration 已应用，company-api 已部署为 v10；前端 Pages 尚待合并后确认发布，真实浏览器验收尚未完成。**
 - 初始导入数据为 16 个仓库；名称、URL 和默认分支来自仓库清单。分类为暂定建议，技术栈留空，状态为「待整理」，均标记「待核实」。
 - 这份个人仓库清单不保存在公开应用仓库，也不由页面自动下载 seed；应由用户本地持有 JSON 并主动导入。
 
@@ -69,5 +69,5 @@ Envelope 保持兼容 V10.67：
 
 - API 服务端最多接受 1000 条记录，单次 JSON 请求最大 1 MiB；字段长度和数组数量均有服务端校验。
 - 认证失败、网络错误、限流或云端写入失败时不得提示保存成功。
-- 本阶段未应用 migration、未部署 Edge Function、未合并 main、未部署 Pages。
-- 后续需在用户明确授权后应用 migration、部署 company-api，再进行登录、导入 16 条、刷新读取、CRUD、重复导入、取消导入、导出和未登录拒绝访问测试。
+- 本阶段 migration 已应用，company-api 已部署为 v10；main 合并与 Pages 发布状态以 GitHub 实际结果为准。
+- 后续进行登录、导入 16 条、刷新读取、CRUD、重复导入、取消导入、导出和未登录拒绝访问测试。
