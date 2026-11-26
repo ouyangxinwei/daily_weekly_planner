@@ -1,3 +1,22 @@
+# V10.68 Private cloud repository management — 2026-11-26 (development, not deployed)
+
+- Reuses the existing single-account oooo login through PlannerCompanyContext and company-api.
+- Adds a dedicated Supabase repository_cloud_data table with RLS and no direct anon/authenticated access; server RPCs revalidate the existing credentials.
+- Adds authenticated GET/PUT /repositories routes. Repository CRUD and confirmed JSON imports persist to the dedicated cloud table, isolated from planner snapshots.
+- Keeps the existing oooo.repository-management v1 JSON format. An empty cloud library waits for the user's explicit import of the 16-record JSON held locally; the private repository list is not shipped as a public static asset.
+- Removes repository-specific LocalStorage persistence. Existing browser-only records are not migrated automatically; export them before importing to cloud if needed.
+- Source and migration are committed only to development. The migration and Edge Function are not applied/deployed; Pages is not deployed. Local, browser and live API validation remain pending.
+
+# V10.67 GitHub Repository Management — 2026-11-26 (development)
+
+- Added a standalone Repository Management entry and workspace, seeded with 16 GitHub repositories.
+- Supports manual create, edit and delete of planner entries, with category, tech stack, status, priority, special tags and notes.
+- Added search, category/status/tag filters, priority sorting and summary counts.
+- JSON import validates the schema and previews added/updated/skipped records. After explicit confirmation, records are merged by repository ID or GitHub URL; local entries absent from the file are preserved. Full JSON export is supported.
+- Repository data uses a dedicated LocalStorage key and is excluded from planner backups and Supabase snapshots. Deleting an entry never deletes the GitHub repository.
+- Initial categories are provisional, tech stacks are blank, statuses are “To review”, and every seed entry is tagged “To verify”.
+- This version is currently on development only. Browser acceptance is pending; it has not been merged into main or deployed.
+
 # V10.66 Project planned vs. actual progress analysis — 2026-11-26
 
 - Added a Project Delivery Analysis view to compare current actual progress with a linear calendar-time estimate based on project start and planned due dates.

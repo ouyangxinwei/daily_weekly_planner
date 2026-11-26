@@ -1,3 +1,22 @@
+# V10.68 仓库管理云端化 — 2026-11-26（development，未部署）
+
+- 仓库管理复用现有 `oooo` 单账号登录，经 `PlannerCompanyContext` 和 company-api 访问个人云端资料库。
+- 新增独立 Supabase 表 `repository_cloud_data`，启用 RLS，禁止 anon/authenticated 直接访问；服务端 RPC 再次验证现有账号凭据。
+- 新增 `GET/PUT /repositories` API。列表读取、单条新增/编辑/删除及 JSON 确认导入均保存到独立云端表；不进入计划云端快照。
+- JSON schema 保持 V10.67 的 `oooo.repository-management` v1。首次云端为空时由用户从本地 JSON 导入 16 条数据；个人仓库清单不作为公开静态文件保存在应用仓库。
+- 前端不再使用仓库专用 LocalStorage；旧浏览器记录不会自动迁移，需先导出再导入。
+- 当前仅在 development 写入迁移和 Edge Function 源码；数据库迁移未应用、Edge Function 未部署、Pages 未部署，尚未完成本地/浏览器/API 验证。
+
+# V10.67 GitHub 仓库管理模块 — 2026-11-26（development）
+
+- 新增独立「仓库管理」入口和管理界面，初始导入 16 个 GitHub 仓库。
+- 支持手动新增、编辑、删除仓库条目；维护分类、技术栈、状态、优先级、特殊标记和备注。
+- 支持搜索、分类/状态/标记筛选、优先级排序和统计。
+- JSON 导入先校验并展示新增/更新/跳过预览，用户确认后按仓库 ID 或 GitHub URL 合并；不会删除文件中未包含的本地记录。支持完整 JSON 导出。
+- 仓库数据保存在独立 LocalStorage，不进入计划备份或 Supabase 云端快照；删除仅影响本应用管理记录。
+- 初始分类为待核实的整理建议，技术栈留空，状态为「待整理」，所有记录带「待核实」标记。
+- 本版本当前只在 development，真实浏览器验收待执行，尚未合并 main 或部署。
+
 # V10.66 项目计划进度与实际进度偏差分析 — 2026-11-26
 
 - 公司业务工作区新增「项目交付分析」，对比按项目开始日期/预计完成日期线性估算的计划进度与现有实际进度。

@@ -1,3 +1,27 @@
+# V10.68 仓库管理云端化 — 2026-11-26（development，未部署）
+
+- 仓库管理复用现有 `oooo` 单账号登录，经 `PlannerCompanyContext` 和 company-api 访问个人云端资料库。
+- 新增独立 Supabase 表 `repository_cloud_data`，启用 RLS，禁止 anon/authenticated 直接访问；服务端 RPC 再次验证现有账号凭据。
+- 新增 `GET/PUT /repositories` API。CRUD 与确认 JSON 导入写入独立云端表，不进入计划云端快照。
+- JSON schema 保持 `oooo.repository-management` v1。首次云端为空时由用户导入 16 条数据，不自动上传 seed。
+- 前端不再使用仓库专用 LocalStorage；旧浏览器记录不会自动迁移，需先导出再导入。
+- migration 与 Edge Function 源码仅在 development；数据库迁移未应用、Edge Function 未部署、Pages 未部署。尚未完成本地、浏览器或真实 API 验证。
+
+# V10.67 GitHub 仓库管理模块（2026-11-26，development）
+
+- 新增独立「仓库管理」入口与管理界面，初始 seed 包含账号下 16 个已核实仓库名称、GitHub URL 和默认分支。
+- 支持仓库条目手动新增、编辑、删除；分类、技术栈、状态、优先级、特殊标记、备注和搜索/筛选/统计。
+- JSON 导入采用 schema 校验、重复检查、新增/更新/跳过预览和用户确认后的合并；不会删除导入文件未包含的现有条目；支持完整 JSON 导出。
+- 使用独立 LocalStorage `planner-repositories:v1`，不进入计划模块备份、整体云端快照或 Supabase；删除只作用于本应用条目。
+- 初始技术栈留空、状态为「待整理」、带「待核实」标签；初始分类仅作整理建议，等待用户逐项核实。
+- 新增 `repository-management.js/.css`、seed JSON 和 V10.67 验证脚本；更新 Service Worker 缓存版本、README、产品规范、功能说明、技术手册和交接文档。
+- 同步确立分支规则：日常开发统一在 `development`，合并到 `main` 必须先获仓库所有者明确许可；`feat/agent-plan-steps` 独立保护。
+- 静态检查：仓库管理 JS 与验证脚本语法解析通过；16 条 seed URL 唯一；模块 DOM 引用存在且新增 ID 无重复；Service Worker 预缓存包含模块资源和 seed JSON；VERSION 与 package.json 均为 10.67.0。
+- 尚未执行项目本地 `npm run test:validate:repositories`，真实浏览器验收待执行；页面原有重复 ID `sync-message` 已记录为独立未完成事项，不属于本次新增模块。
+- 当前状态：已写入 development；未合并 main、未部署。
+
+---
+
 # V10.60 Phase 3-B-B：按币种的月度收支趋势（2026-11-24）
 
 - 公司业务工作区新增「月度收支趋势」，按 JPY/CNY/USD 分别展示最近 12 个自然月的已完成收入、支出、净额和预计金额。

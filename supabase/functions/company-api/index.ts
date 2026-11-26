@@ -11,6 +11,7 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:4173",
 ]);
 const MAX_BODY_BYTES = 32 * 1024;
+const MAX_REPOSITORY_BODY_BYTES = 1024 * 1024;
 const RATE_LIMIT = 30;
 const RATE_WINDOW_SECONDS = 60;
 const RECORD_TYPES = new Set([
@@ -78,7 +79,7 @@ function getConfig() {
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
     "Access-Control-Max-Age": "600",
     "Cache-Control": "no-store",
@@ -252,6 +253,55 @@ async function readJson(req: Request): Promise<JsonObject> {
     throw new ApiError(400, "VALIDATION_ERROR");
   }
   return body as JsonObject;
+}
+
+async function readRepositoryBody(req: Request): Promise<JsonObject> {
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_REPOSITORY_BODY_BYTES) throw new ApiError(413, "REQUEST_TOO_LARGE");
+  if (!(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) throw new ApiError(415, "UNSUPPORTED_MEDIA_TYPE");
+  const raw = await req.text();
+  if (new TextEncoder().encode(raw).byteLength > MAX_REPOSITORY_BODY_BYTES) throw new ApiError(413, "REQUEST_TOO_LARGE");
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); } catch { throw new ApiError(400, "INVALID_JSON"); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new ApiError(400, "VALIDATION_ERROR");
+  return parsed as JsonObject;
+}
+
+function validateRepositorySnapshot(body: JsonObject): unknown[] {
+  assertAllowedKeys(body, ["repositories"]);
+  if (!Array.isArray(body.repositories) || body.repositories.length > 1000) throw new ApiError(400, "VALIDATION_ERROR");
+  const ids = new Set<string>(), urls = new Set<string>();
+  for (const raw of body.repositories) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new ApiError(400, "VALIDATION_ERROR");
+    const item = raw as JsonObject;
+    const allowed = ["id", "name", "url", "defaultBranch", "category", "techStack", "status", "priority", "tags", "notes", "createdAt", "updatedAt"];
+    assertAllowedKeys(item, allowed);
+    if (typeof item.id !== "string" || !item.id.trim() || item.id.length > 200 ||
+        typeof item.name !== "string" || !item.name.trim() || item.name.length > 120 ||
+        typeof item.url !== "string" || typeof item.category !== "string" || !item.category.trim() || item.category.length > 80 ||
+        typeof item.notes !== "string" || item.notes.length > 5000 ||
+        typeof item.defaultBranch !== "string" || item.defaultBranch.length > 120 ||
+        !Array.isArray(item.techStack) || item.techStack.length > 30 ||
+        !Array.isArray(item.tags) || item.tags.length > 30 ||
+        !["待整理", "进行中", "已暂停", "已完成", "未完成"].includes(String(item.status)) ||
+        !["高", "中", "低"].includes(String(item.priority))) throw new ApiError(400, "VALIDATION_ERROR");
+    for (const value of [...item.techStack, ...item.tags]) {
+      if (typeof value !== "string" || !value.trim() || value.length > 80) throw new ApiError(400, "VALIDATION_ERROR");
+    }
+    for (const key of ["createdAt", "updatedAt"]) {
+      if (typeof item[key] !== "string" || Number.isNaN(Date.parse(item[key] as string))) throw new ApiError(400, "VALIDATION_ERROR");
+    }
+    let parsedUrl: URL;
+    try { parsedUrl = new URL(item.url); } catch { throw new ApiError(400, "VALIDATION_ERROR"); }
+    const parts = parsedUrl.pathname.split("/").filter(Boolean);
+    if (parsedUrl.protocol !== "https:" || parsedUrl.hostname.toLowerCase() !== "github.com" ||
+        parts.length !== 2 || parsedUrl.search || parsedUrl.hash) throw new ApiError(400, "VALIDATION_ERROR");
+    const canonicalUrl = "https://github.com/" + parts.map(part => part.toLowerCase()).join("/");
+    const id = item.id.trim();
+    if (ids.has(id) || urls.has(canonicalUrl)) throw new ApiError(400, "VALIDATION_ERROR");
+    ids.add(id); urls.add(canonicalUrl);
+  }
+  return body.repositories;
 }
 
 function assertAllowedKeys(body: JsonObject, allowed: string[]) {
@@ -768,7 +818,7 @@ Deno.serve(async (req: Request) => {
     const functionIndex = segments.indexOf("company-api");
     if (functionIndex >= 0) segments.splice(0, functionIndex + 1);
     const route = "/" + segments.join("/");
-    if (!["GET", "POST", "PATCH", "DELETE"].includes(req.method)) {
+    if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
       throw new ApiError(405, "METHOD_NOT_ALLOWED");
     }
 
@@ -784,6 +834,16 @@ Deno.serve(async (req: Request) => {
       p_username: credentials.username,
       p_password: credentials.password,
     };
+
+    if (route === "/repositories" && req.method === "GET") {
+      const result = await rpc("repository_get_data", { ...auth }, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+    if (route === "/repositories" && req.method === "PUT") {
+      const repositories = validateRepositorySnapshot(await readRepositoryBody(req));
+      const result = await rpc("repository_put_data", { ...auth, p_repositories: repositories }, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
 
     if (route === "/activity-history" && req.method === "GET") {
       const recordId = url.searchParams.get("record_id") ?? "";

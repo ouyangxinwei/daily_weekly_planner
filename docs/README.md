@@ -5,6 +5,8 @@
 ## 当前项目入口
 
 - [项目总览](project-overview.md)：当前项目定位、模块组成和数据边界。
+- [当前开发交接](current-handoff.md)：当前分支、版本、阶段状态、验证和下一步。
+- [仓库管理说明](repository-management.md)：仓库字段、私有云端存储、账号认证和 JSON 导入导出规则。
 - [产品功能与业务规范](product-specification.md)：跨语言的产品目标、业务规则、数据生命周期、功能状态和未来重建基线。
 - [功能与系统说明](feature_and_system_guide.md)：当前应用各模块功能入口和行为摘要。
 - [技术手册](technical_manual.md)：当前 JavaScript 实现、数据分区、API/RPC 和关键技术约束。
@@ -21,7 +23,7 @@
 - [公司网站开发文档](company-website/README.md)：客户、项目和业务跟进的设计、数据库、API 与阶段记录。
 - [AI 协作开发指南](ai_collaboration_guide.md)：与 AI 协作开发的约定。
 - [Agent 工作流实施指南](agent-workflow.md)：PowerShell 与 Claude Code 的当前单 Agent 自动化实践，以及 Master Agent / Worker Agent 多 Agent 架构规划。
-- [Git 分支工作流](git-branching-workflow.md)：分支命名、PR 和合并后清理规则。
+- [Git 分支工作流](git-branching-workflow.md)：development 日常开发、main 合并许可和 Agent 分支保护规则。
 - [夜间 E2E 测试说明](nightly-e2e-testing.md)：现有自动化测试运行说明。
 
 ## 数据库脚本

@@ -34,7 +34,7 @@ claude -p (headless worker, tools: Read, Edit, Grep, Glob)
     v
 run-plan.ps1 validation --> git commit --> git push origin feat/agent-plan-steps
                                                |
-                                   human opens PR to main (manual)
+                                   protected experiment remains isolated; no automatic merge
 ```
 
 ## 3. How to Start
@@ -90,7 +90,7 @@ Preconditions for execution mode: `origin` points to `https://github.com/ouyangx
    6. `git add -- PLAN.md index.html`, commit `chore(plan): complete step N`, `git push -u origin feat/agent-plan-steps`.
 8. Print a reminder that nothing was merged or deployed.
 
-The orchestrator never pushes to `main`, never opens or merges a pull request, and never deploys. Pushing to `main` would trigger GitHub Pages, so `main` is reached only through a manually reviewed PR.
+The orchestrator never pushes to `main` or `development`, never opens or merges a pull request, and never deploys. `feat/agent-plan-steps` remains an isolated protected experiment. Normal product work takes place on `development`; it reaches `main` only after explicit owner approval.
 
 ## 5. Validation Rules (Machine-Checked)
 
@@ -150,7 +150,7 @@ Every failed command or validation throws, prints `STOPPED: <reason>` plus recov
 
 The recovery command for a failed step only touches the two allowed files. Do not use `git clean` or `git reset --hard` as a shortcut; they would destroy local helper files.
 
-After a run completes all steps, open a PR from `feat/agent-plan-steps` to `main` manually. Merge and deployment stay human decisions.
+The original experiment notes below describe the workflow as it existed when those runs were performed. Under the current repository policy, `feat/agent-plan-steps` remains isolated and is not routinely proposed for merge. Normal product changes are made on `development`, and the owner must explicitly approve any integration into `main`.
 
 ## 8. Implementation Lessons
 
@@ -435,3 +435,13 @@ Check 6 is the strongest one: if the file minus the five added lines is byte-ide
 powershell -ExecutionPolicy Bypass -File .\run-plan.ps1 -CheckOnly -WorkBranch feat/agent-plan-v2
 powershell -ExecutionPolicy Bypass -File .\run-plan.ps1 -WorkBranch feat/agent-plan-v2
 ```
+
+
+## 18. Current repository branch policy (2026-11-26)
+
+The historical execution records above are preserved as evidence and may refer to the former PR-to-main workflow. The current repository-wide policy is defined in [Git 分支工作流](git-branching-workflow.md):
+
+- \`development\` is the only routine product-development branch.
+- \`main\` is the stable deployment branch. Integrating \`development\` into \`main\` requires explicit approval from the repository owner for that specific integration.
+- \`feat/agent-plan-steps\` is a separately protected Agent experiment branch. It is not a routine development branch and is not automatically merged or deleted.
+- No additional feature branch is created for ordinary tasks. If a special isolated branch is technically necessary, explain why and obtain approval first.

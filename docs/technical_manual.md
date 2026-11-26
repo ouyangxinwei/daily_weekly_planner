@@ -92,3 +92,18 @@
 
 文档整合不属于应用版本发布，不应为了修改 Markdown 而变更应用版本号。
 
+
+## 7. GitHub 仓库管理模块（V10.68.0）
+
+- 页面入口：`index.html` 中的 `#open-repository-management`；管理界面由 `#repository-management-dialog` 承载。
+- 实现文件：`repository-management.js`、`repository-management.css`；初始 16 条数据由用户本地 JSON 文件导入；私有仓库清单不得提交到公开应用仓库。
+- 云端持久化：`public.repository_cloud_data`，由 `company-api` 的 `/repositories` GET/PUT 路由读写；前端通过 `PlannerCompanyContext` 复用现有 `oooo` 登录。schema 为 `{ type: 'oooo.repository-management', version: 1, repositories: [...] }`；每条记录包含 `id`、`name`、`url`、`defaultBranch`、`category`、`techStack[]`、`status`、`priority`、`tags[]`、`notes`、`createdAt`、`updatedAt`。
+- 此模块不复用计划模块 `MODULE_KEYS`、`CLOUD_PARTITIONS`，不参与计划备份、七模块整体备份或 `planner_cloud_data` 快照。独立表启用 RLS，撤销 `public`/`anon`/`authenticated` 直接访问；RPC 仅授予 `service_role`，且在数据库函数内再次验证现有账号密码。
+- JSON 导入严格校验类型、版本、数组和 GitHub URL，检查导入文件内部重复 ID/URL；先计算新增/更新/跳过预览，只有用户确认后才写入。导入采用合并而非全量替换，文件未包含的云端条目保留。
+- 页面输出用户文本使用 DOM `textContent`，不把仓库备注或标签作为 HTML 注入。删除按钮仅删除云端仓库资料条目，不调用 GitHub 删除 API。
+- Service Worker 缓存名升级至 V10.68，并预缓存模块 JS/CSS；私有仓库清单不作为公开静态资源缓存。
+- 云端首次为空时由用户导入 JSON；写入成功后才更新前端内存。旧版浏览器 LocalStorage 记录不自动迁移。
+- 迁移文件 `supabase/migrations/20261126100000_repository_management_cloud.sql` 创建独立表和认证 RPC。当前 migration 和 company-api 源码仅在 development，未应用/部署。
+- 初始 16 条记录只确认仓库名称、GitHub URL 和默认分支；用途分类为暂定整理标签，技术栈不猜测，状态统一为「待整理」，并标记「待核实」。
+
+详细 schema 和操作边界见 [仓库管理说明](repository-management.md)。
