@@ -35,7 +35,7 @@
 - **开发日记：** 独立记录已经发生的活动，支持日/周浏览、空白日回顾、历史补记、编辑、删除、标题/详情/标签搜索（最多 50 条）和固定分类筛选；复用现有账号认证，日记数据独立于计划 JSON 备份和云端快照。详细设计与生产迁移记录见 [开发日记 V1](docs/development-diary.md)。
 - **仓库管理（V10.70.0）：** 独立维护 GitHub 仓库清单，支持手动 CRUD、分类/状态/优先级/特殊标记/备注、筛选统计、JSON 预览合并导入/导出、一键清空云端清单（二次确认，不删除 GitHub 仓库或原始备份），以及 GitHub 全量提取提示词。数据保存在 Supabase 独立私有表；本次复用既有 API，无新增 migration 或 Edge Function 部署。详见 [仓库管理说明](docs/repository-management.md)。
 - **首页天气看板：** 东京与横滨天气信息，细节见 [天气看板说明](docs/home-weather-dashboard.md)。
-- **学习会议（V10.71.0）：** 顶部「学习会议」按钮，记录想参加的学习会议、讲座和展会；支持手动录入、AI 解析助手（复制提示词给 AI，粘贴返回的 JSON 批量导入）和导出 `.ics`（加入 Google 日历等，时间按日本时间）。**当前为本地手动维护：** 数据保存在当前浏览器（localStorage），通过「导出 JSON 备份」「导入 JSON 文件」在设备间迁移，不经过 company-api、不进入计划备份或云端快照。云端方案（Supabase 表 `learning_meetings_data` + company-api `/learning-meetings`）保留在仓库中暂不使用。 详见 [学习会议说明](docs/learning-meetings.md)（含部署步骤和待测试清单）。
+- **学习会议（V10.71.0）：** 顶部「学习会议」按钮，记录想参加的学习会议、讲座和展会；支持手动录入、AI 解析助手（选择月份并粘贴活动信息 → 复制提示词给 AI → 粘贴返回的 JSON，只导入所选月份内的活动）、按形式/费用/地域筛选和导出 `.ics`（加入 Google 日历等，时间按日本时间）。**当前为本地手动维护：** 数据保存在当前浏览器（localStorage），通过「导出 JSON 备份」「导入 JSON 文件」在设备间迁移，不经过 company-api、不进入计划备份或云端快照。云端方案（Supabase 表 `learning_meetings_data` + company-api `/learning-meetings`）保留在仓库中暂不使用。 详见 [学习会议说明](docs/learning-meetings.md)（含部署步骤和待测试清单）。
 - **启动入口分流（V10.72.0）：** 启动时选择「个人入口」或「管理员入口」。个人入口沿用现有账号登录；管理员入口无需登录，提供只读后台监控入口。它不是权限系统，不改变账号、API 或数据库权限。详见 [入口分流说明](docs/user-role-mode.md)。
 - **测试画面：** 主界面顶部「测试画面」按钮打开测试画面列表（`test-screens.html`），选择要打开的测试项目；当前只有 `testNisa`（演练区，见 [testNisa 演练区说明](docs/testnisa-lab-preview.md)）。后续新增测试画面直接往 `test-screens.html` 的 `TEST_SCREENS` 列表配置里追加即可。
 - **运行日志与健康检查：** 在当前设备查看诊断信息；日志不作为业务数据上传云端。

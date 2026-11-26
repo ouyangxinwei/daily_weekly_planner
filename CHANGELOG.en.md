@@ -1,5 +1,7 @@
 # V10.72.0 Entry Routing and Learning Meetings Integration — 2026-11-26
 
+- The AI helper now works per **selected month**: a month picker plus a separate "Event information" box; the copied prompt contains the month and the event text, and the old "do not output vague dates" sentence is removed. Preview ignores events outside the month and shows how many. All times are Japan time.
+- List filters: format (online / in person), fee (free / paid) and area (Tokyo / Yokohama), combined with AND and display-only. New field `feeType` (free / paid / unknown), detected from the cost text when not given and selectable in the form.
 - Preserves the latest learning-meetings implementation from main: browser-local storage with JSON backup import/export. The Supabase migration and company-api routes remain in the repository but are not called by the frontend for now.
 - Integrates the startup entry chooser: personal entry uses the existing sign-in flow; the administrator entry opens a public, read-only monitoring view and is not an authorization boundary.
 - Merges localized entry strings, learning-meetings UI references, scripts and service-worker cache entries. Aligns VERSION, package.json and runtime version to 10.72.0.

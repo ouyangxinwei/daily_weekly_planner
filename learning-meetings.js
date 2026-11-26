@@ -26,8 +26,15 @@
       r_tokyo: '东京', r_yokohama: '横滨', r_online: '线上', r_other: '其他地区',
       f_offline: '线下', f_live: '线上直播', f_recorded: '录播', f_hybrid: '线上线下',
       allDay: '全天', untilPrefix: '至 ',
-      aiTitle: 'AI 解析助手', aiStep1: '① 复制下面的提示词，连同活动信息（网页文字、邮件等）一起发给 Claude 等 AI。',
-      aiStep2: '② 把 AI 返回的 JSON 粘贴到下面，点「预览」确认后导入。', copy: '复制提示词', copied: '已复制。',
+      aiTitle: 'AI 解析助手', aiStep1: '① 选择要整理的月份，把活动信息（网页文字、邮件等）粘贴到下面的输入框。时间均按日本时间（Asia/Tokyo）。',
+      aiStep2: '② 点「复制提示词」（已包含月份和活动信息），发给 Claude 等 AI。',
+      aiStep3: '③ 把 AI 返回的 JSON 粘贴到下面，点「预览」确认后导入。不在所选月份内的活动会被忽略。', copy: '复制提示词', copied: '已复制。',
+      fMonth: '📅 筛选月份', sourceLabel: '📝 活动信息', sourcePlaceholder: '请在此处粘贴活动文本（网页文字、邮件等），然后点「复制提示词」', showPrompt: '查看完整提示词',
+      errSource: '请先在「活动信息」里粘贴活动文本。', errMonth: '请先选择月份。',
+      previewInfoMonth: '可导入 {ok} 条；{outside} 条不在所选月份已忽略；跳过 {skip} 条（缺少名称/开始日期，或已存在同名同日的会议）。',
+      filterFormat: '形式', filterFee: '费用', filterRegion: '地域', fAll: '全部', fmtOnline: '线上', fmtOffline: '线下',
+      fFee: '费用类型', fee_unknown: '未注明（按费用自动判断）', fee_free: '无料', fee_paid: '有料',
+      filterCount: '显示 {n} / {total} 条', noMatch: '没有符合筛选条件的会议。',
       pastePlaceholder: '在这里粘贴 AI 返回的 JSON 数组', preview: '预览', importConfirm: '导入 {n} 条', back: '返回列表',
       previewInfo: '可导入 {ok} 条；跳过 {skip} 条（缺少名称/开始日期，或已存在同名同日的会议）。',
       imported: '已导入 {n} 条会议。', saved: '已保存。', deleted: '已删除。',
@@ -51,8 +58,15 @@
       r_tokyo: 'Tokyo', r_yokohama: 'Yokohama', r_online: 'Online', r_other: 'Other area',
       f_offline: 'In person', f_live: 'Live online', f_recorded: 'Recorded', f_hybrid: 'Hybrid',
       allDay: 'All day', untilPrefix: 'until ',
-      aiTitle: 'AI parsing helper', aiStep1: '1. Copy the prompt below and send it to Claude or another AI together with the event information (web page text, e-mail, etc.).',
-      aiStep2: '2. Paste the JSON returned by the AI below, preview it, then import.', copy: 'Copy prompt', copied: 'Copied.',
+      aiTitle: 'AI parsing helper', aiStep1: '1. Choose the month to process and paste the event information (web page text, e-mail, etc.) into the box below. All times are Japan time (Asia/Tokyo).',
+      aiStep2: '2. Click "Copy prompt" (it already contains the month and the event text) and send it to Claude or another AI.',
+      aiStep3: '3. Paste the JSON returned by the AI below, preview it, then import. Events outside the selected month are ignored.', copy: 'Copy prompt', copied: 'Copied.',
+      fMonth: '📅 Month', sourceLabel: '📝 Event information', sourcePlaceholder: 'Paste the event text (web page, e-mail, etc.) here, then click "Copy prompt"', showPrompt: 'Show full prompt',
+      errSource: 'Paste the event text into "Event information" first.', errMonth: 'Choose a month first.',
+      previewInfoMonth: '{ok} can be imported; {outside} outside the selected month ignored; {skip} skipped (missing title / start date, or same title and date already exists).',
+      filterFormat: 'Format', filterFee: 'Fee', filterRegion: 'Area', fAll: 'All', fmtOnline: 'Online', fmtOffline: 'In person',
+      fFee: 'Fee type', fee_unknown: 'Not stated (auto from cost)', fee_free: 'Free', fee_paid: 'Paid',
+      filterCount: 'Showing {n} / {total}', noMatch: 'No meetings match the filters.',
       pastePlaceholder: 'Paste the JSON array returned by the AI here', preview: 'Preview', importConfirm: 'Import {n}', back: 'Back to list',
       previewInfo: '{ok} can be imported; {skip} skipped (missing title/start date, or a meeting with the same title and date already exists).',
       imported: 'Imported {n} meetings.', saved: 'Saved.', deleted: 'Deleted.',
@@ -76,8 +90,15 @@
       r_tokyo: '東京', r_yokohama: '横浜', r_online: 'オンライン', r_other: 'その他の地域',
       f_offline: '会場', f_live: 'ライブ配信', f_recorded: '録画配信', f_hybrid: 'ハイブリッド',
       allDay: '終日', untilPrefix: '〜',
-      aiTitle: 'AI 解析アシスタント', aiStep1: '① 下のプロンプトをコピーし、イベント情報（Web ページの文章、メールなど）と一緒に Claude などの AI に送ります。',
-      aiStep2: '② AI が返した JSON を下に貼り付け、「プレビュー」で確認してから取り込みます。', copy: 'プロンプトをコピー', copied: 'コピーしました。',
+      aiTitle: 'AI 解析アシスタント', aiStep1: '① 対象の月を選び、イベント情報（Web ページの文章、メールなど）を下の入力欄に貼り付けます。時刻はすべて日本時間（Asia/Tokyo）です。',
+      aiStep2: '② 「プロンプトをコピー」（月とイベント情報を含みます）を押し、Claude などの AI に送ります。',
+      aiStep3: '③ AI が返した JSON を下に貼り付け、「プレビュー」で確認してから取り込みます。選択した月以外のイベントは無視されます。', copy: 'プロンプトをコピー', copied: 'コピーしました。',
+      fMonth: '📅 対象月', sourceLabel: '📝 イベント情報', sourcePlaceholder: 'ここにイベントの文章（Web ページ、メールなど）を貼り付け、「プロンプトをコピー」を押してください', showPrompt: 'プロンプト全文を表示',
+      errSource: '先に「イベント情報」に文章を貼り付けてください。', errMonth: '先に月を選んでください。',
+      previewInfoMonth: '取り込み可能 {ok} 件；選択した月以外 {outside} 件は無視；スキップ {skip} 件（名称・開始日なし、または同名・同日が既に存在）。',
+      filterFormat: '形式', filterFee: '費用', filterRegion: '地域', fAll: 'すべて', fmtOnline: 'オンライン', fmtOffline: '会場',
+      fFee: '費用区分', fee_unknown: '未記載（費用から自動判定）', fee_free: '無料', fee_paid: '有料',
+      filterCount: '{n} / {total} 件を表示', noMatch: '条件に合うイベントはありません。',
       pastePlaceholder: 'AI が返した JSON 配列をここに貼り付け', preview: 'プレビュー', importConfirm: '{n} 件取り込む', back: '一覧に戻る',
       previewInfo: '取り込み可能 {ok} 件、スキップ {skip} 件（名称・開始日がない、または同名・同日のイベントが既にある）。',
       imported: '{n} 件取り込みました。', saved: '保存しました。', deleted: '削除しました。',
@@ -103,6 +124,9 @@
   let view = 'list'; // list | form | ai
   let editingId = null;
   let pendingImport = null;
+  let aiMonth = '';   // YYYY-MM selected in the AI helper
+  let aiSource = '';  // raw event text pasted by the user
+  const filters = { format: 'all', fee: 'all', region: 'all' };
   let message = '', messageDanger = false;
 
   // ---------- helpers ----------
@@ -142,6 +166,13 @@
   const FORMAT_ALIASES = { '线下': 'offline', '線下': 'offline', '会場': 'offline', '线上直播': 'live', '直播': 'live', 'ライブ配信': 'live', '录播': 'recorded', '録画': 'recorded', '混合': 'hybrid', 'ハイブリッド': 'hybrid' };
 
   // Normalize one record (from the form, the cloud, or AI JSON in snake_case or camelCase).
+  const FEE_TYPES = ['unknown', 'free', 'paid'];
+  function feeFromCost(cost) {
+    const c = String(cost || '');
+    if (/無料|免费|免費|free|無償|(^|[^\d,])0\s*円/i.test(c)) return 'free';
+    if (/有料|円|¥|￥|yen|元|\$|\d/i.test(c)) return 'paid';
+    return 'unknown';
+  }
   function normalize(input, existing) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
     const pick = (...keys) => { for (const k of keys) if (input[k] !== undefined && input[k] !== null) return input[k]; return ''; };
@@ -161,12 +192,15 @@
     try { if (url && !/^https?:$/.test(new URL(url).protocol)) url = ''; } catch (e) { url = ''; }
     const reminderRaw = Number(pick('reminderMinutes', 'reminder_minutes'));
     const reminderMinutes = Number.isInteger(reminderRaw) && reminderRaw >= 0 && reminderRaw <= 10080 ? reminderRaw : 15;
+    const cost = String(pick('cost')).trim().slice(0, 200);
+    const feeRaw = String(pick('feeType', 'fee_type')).trim().toLowerCase();
+    const feeType = feeRaw === 'free' || feeRaw === 'paid' ? feeRaw : feeFromCost(cost);
     const stamp = nowIso();
     return {
       id: existing ? existing.id : (typeof input.id === 'string' && input.id.startsWith('lm-') ? input.id : uid()),
       title, startDate, startTime, endDate, endTime,
       location: String(pick('location')).trim().slice(0, 500),
-      cost: String(pick('cost')).trim().slice(0, 200),
+      cost, feeType,
       description: String(pick('description')).trim().slice(0, 5000),
       url, region, format, reminderMinutes,
       createdAt: existing ? existing.createdAt : (typeof input.createdAt === 'string' && !Number.isNaN(Date.parse(input.createdAt)) ? input.createdAt : stamp),
@@ -293,42 +327,55 @@
   const safeName = s => s.replace(/[\\/:*?"<>|\s]+/g, '-').slice(0, 40);
 
   // ---------- AI prompt ----------
-  function aiPrompt() {
-    const year = todayJst().slice(0, 4);
+  function monthRange(month) {
+    if (!/^\d{4}-\d{2}$/.test(month || '')) return null;
+    const [y, mo] = month.split('-').map(Number);
+    const last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+    return { year: y, month: mo, start: month + '-01', end: month + '-' + String(last).padStart(2, '0') };
+  }
+  function aiPrompt(month, source) {
+    const r = monthRange(month) || monthRange(todayJst().slice(0, 7));
     return [
-      '你是活动信息整理助手。请从我提供的文字（网页、邮件、活动列表等）中提取所有学习会议、讲座、研讨会和展会，只输出一个 JSON 数组，不要输出任何解释或 Markdown 代码块标记。',
+      '你是活动信息整理助手。请从我提供的文字（网页、邮件、活动列表等）中提取学习会议、讲座、研讨会和展会，只输出一个 JSON 数组，不要输出任何解释或 Markdown 代码块标记。',
+      '只提取在 ' + r.year + ' 年 ' + r.month + ' 月（' + r.start + ' ～ ' + r.end + '）期间举行的活动；跨月的多日活动只要有日期落在该月也要输出。',
       '每个元素包含以下字段：',
       '- title：活动名称（必填）',
-      '- start_date：开始日期 YYYY-MM-DD（必填；只写了月日时，年份按 ' + year + ' 年推断，若该日期已过则用下一年）',
+      '- start_date：开始日期 YYYY-MM-DD（必填；只写了月日时，年份按 ' + r.year + ' 年）',
       '- start_time：开始时间 HH:MM（24 小时制，日本时间）；全天活动或不确定时写 null',
       '- end_date：结束日期 YYYY-MM-DD；当天结束或不确定写 null',
       '- end_time：结束时间 HH:MM；不确定写 null',
-      '- location：地点（线上活动写平台名或 "オンライン"）；不确定写 ""',
-      '- cost：费用（如 "免费"、"3000円"）；不确定写 ""',
+      '- location：会场名称和地址（线上活动写平台名或 "オンライン"）；不确定写 ""',
+      '- cost：费用金额（如 "無料"、"1,000円"）；不确定写 ""',
+      '- fee_type：只能是 "free"（无料）、"paid"（有料）、"unknown"（未注明）之一',
       '- description：一两句话的内容简介',
       '- url：活动网址；没有写 ""',
-      '- region：只能是 "tokyo"、"yokohama"、"online"、"other" 之一',
+      '- region：只能是 "tokyo"、"yokohama"、"online"、"other" 之一（按会场地址判断）',
       '- format：只能是 "offline"（线下）、"live"（线上直播）、"recorded"（录播/随时观看）、"hybrid"（线上线下同时）之一',
-      '只写了「12月中旬」等模糊日期、无法确定具体日期的活动不要输出。所有时间按日本时间（Asia/Tokyo）。',
+      '所有时间按日本时间（Asia/Tokyo）。',
       '',
-      '以下是要整理的内容：',
-      '（在这里粘贴活动信息）'
+      '以下是要整理的活动信息：',
+      '"""',
+      String(source || '').trim() || '（在这里粘贴活动信息）',
+      '"""'
     ].join('\n');
   }
-  function parseImport(text) {
+  // month: 'YYYY-MM' to keep only events overlapping that month, or null for no month filter.
+  function parseImport(text, month) {
     const cleaned = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
     let data;
     try { data = JSON.parse(cleaned); } catch (e) { throw new Error(T('errJson', { m: e.message })); }
     if (!Array.isArray(data)) throw new Error(T('errArray'));
+    const range = month ? monthRange(month) : null;
     const existing = new Set(meetings.map(m => m.title + '|' + m.startDate));
-    const ok = []; let skip = 0;
+    const ok = []; let skip = 0; let outside = 0;
     for (const raw of data) {
       const m = normalize(raw);
+      if (m && range && (m.startDate > range.end || (m.endDate || m.startDate) < range.start)) { outside++; continue; }
       const key = m && m.title + '|' + m.startDate;
       if (!m || existing.has(key)) { skip++; continue; }
       existing.add(key); ok.push(m);
     }
-    return { ok, skip };
+    return { ok, skip, outside, month: range ? month : null };
   }
 
   // ---------- rendering ----------
@@ -342,7 +389,7 @@
     return h('article', { className: 'lm-item' + (isPast(m) ? ' is-past' : ''), 'data-meeting-id': m.id }, [
       h('div', { className: 'lm-item-head' }, [
         h('strong', { text: m.title }),
-        h('span', { className: 'lm-badges' }, [badge(T('r_' + m.region)), badge(T('f_' + m.format), 'lm-format')])
+        h('span', { className: 'lm-badges' }, [badge(T('r_' + m.region)), badge(T('f_' + m.format), 'lm-format'), m.feeType !== 'unknown' ? badge(T('fee_' + m.feeType), 'lm-fee') : null])
       ]),
       h('div', { className: 'lm-when', text: whenText(m) }),
       m.location ? h('div', { className: 'lm-meta', text: '📍 ' + m.location }) : null,
@@ -356,8 +403,30 @@
       ])
     ]);
   }
+  const ONLINE_FORMATS = ['live', 'recorded', 'hybrid'];
+  const OFFLINE_FORMATS = ['offline', 'hybrid'];
+  function matchesFilters(m) {
+    if (filters.format === 'online' && !ONLINE_FORMATS.includes(m.format)) return false;
+    if (filters.format === 'offline' && !OFFLINE_FORMATS.includes(m.format)) return false;
+    if (filters.fee !== 'all' && m.feeType !== filters.fee) return false;
+    if (filters.region !== 'all' && m.region !== filters.region) return false;
+    return true;
+  }
+  function filterBar(shown, total) {
+    const sel = (key, label, options) => {
+      const s = h('select', { 'aria-label': label, onchange: e => { filters[key] = e.target.value; render(); } });
+      options.forEach(([val, text]) => s.append(h('option', { value: val, text, selected: filters[key] === val })));
+      return h('label', { className: 'lm-filter' }, [h('span', { text: label }), s]);
+    };
+    return h('div', { className: 'lm-filters' }, [
+      sel('format', T('filterFormat'), [['all', T('fAll')], ['online', T('fmtOnline')], ['offline', T('fmtOffline')]]),
+      sel('fee', T('filterFee'), [['all', T('fAll')], ['free', T('fee_free')], ['paid', T('fee_paid')]]),
+      sel('region', T('filterRegion'), [['all', T('fAll')], ['tokyo', T('r_tokyo')], ['yokohama', T('r_yokohama')]]),
+      h('span', { className: 'lm-filter-count', text: T('filterCount', { n: shown, total }) })
+    ]);
+  }
   function listView() {
-    const sorted = meetings.slice().sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+    const sorted = meetings.filter(matchesFilters).sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
     const upcoming = sorted.filter(m => !isPast(m));
     const past = sorted.filter(isPast).reverse();
     const toolbar = h('div', { className: 'lm-toolbar' }, [
@@ -369,8 +438,10 @@
     ]);
     const localNote = h('p', { className: 'lm-note', text: T('localNote') });
     if (!meetings.length) return [toolbar, localNote, h('p', { className: 'lm-empty', text: T('empty') })];
+    const bar = filterBar(sorted.length, meetings.length);
+    if (!sorted.length) return [toolbar, localNote, bar, h('p', { className: 'lm-empty', text: T('noMatch') })];
     const section = (label, list) => list.length ? h('section', { className: 'lm-section' }, [h('h3', { text: label + '（' + list.length + '）' }), ...list.map(itemView)]) : null;
-    return [toolbar, localNote, h('p', { className: 'lm-note', text: T('reminderNote') }), section(T('upcoming'), upcoming), section(T('past'), past)];
+    return [toolbar, localNote, bar, h('p', { className: 'lm-note', text: T('reminderNote') }), section(T('upcoming'), upcoming), section(T('past'), past)];
   }
   function field(label, input) { return h('label', { className: 'lm-field' }, [h('span', { text: label }), input]); }
   function formView() {
@@ -397,6 +468,7 @@
       field(T('fLocation'), input('location', 'text', { maxlength: 500 })),
       h('div', { className: 'lm-grid' }, [
         field(T('fCost'), input('cost', 'text', { maxlength: 200 })),
+        field(T('fFee'), select('feeType', FEE_TYPES, 'fee_')),
         field(T('fReminder'), input('reminderMinutes', 'number', { min: 0, max: 10080, step: 1 }))
       ]),
       field(T('fUrl'), input('url', 'url', { maxlength: 2000 })),
@@ -410,28 +482,50 @@
     return [form];
   }
   function aiView() {
-    const promptBox = h('textarea', { className: 'lm-prompt', rows: 8, readonly: true, text: aiPrompt() });
+    if (!aiMonth) aiMonth = todayJst().slice(0, 7);
+    const monthInput = h('input', { type: 'month', id: 'meeting-filter-month', value: aiMonth, oninput: e => { aiMonth = e.target.value; } });
+    const source = h('textarea', { className: 'lm-source', id: 'meeting-input-text', rows: 8, placeholder: T('sourcePlaceholder'), oninput: e => { aiSource = e.target.value; } });
+    source.value = aiSource;
+    const promptBox = h('textarea', { className: 'lm-prompt', rows: 8, readonly: true });
+    const details = h('details', { className: 'lm-prompt-details', ontoggle: () => { promptBox.value = aiPrompt(aiMonth, aiSource); } }, [h('summary', { text: T('showPrompt') }), promptBox]);
     const paste = h('textarea', { className: 'lm-paste', rows: 8, placeholder: T('pastePlaceholder') });
     const children = [
       h('h3', { text: T('aiTitle') }),
-      h('p', { className: 'lm-note', text: T('aiStep1') }),
-      promptBox,
-      h('div', { className: 'lm-toolbar' }, [h('button', { type: 'button', className: 'secondary', text: T('copy'), onclick: async () => {
-        try { await navigator.clipboard.writeText(aiPrompt()); } catch (e) { promptBox.select(); document.execCommand('copy'); }
-        setMessage(T('copied'));
-      } })]),
-      h('p', { className: 'lm-note', text: T('aiStep2') }),
-      paste
+      h('div', { className: 'lm-import-box' }, [
+        h('p', { className: 'lm-note', text: T('aiStep1') }),
+        field(T('fMonth'), monthInput),
+        field(T('sourceLabel'), source)
+      ]),
+      h('div', { className: 'lm-import-box' }, [
+        h('p', { className: 'lm-note', text: T('aiStep2') }),
+        h('div', { className: 'lm-toolbar' }, [h('button', { type: 'button', className: 'secondary', text: T('copy'), onclick: async () => {
+          if (!monthRange(aiMonth)) { setMessage(T('errMonth'), true); return; }
+          if (!aiSource.trim()) { setMessage(T('errSource'), true); return; }
+          const text = aiPrompt(aiMonth, aiSource);
+          try { await navigator.clipboard.writeText(text); }
+          catch (e) { details.open = true; promptBox.value = text; promptBox.select(); document.execCommand('copy'); }
+          setMessage(T('copied'));
+        } })]),
+        details
+      ]),
+      h('div', { className: 'lm-import-box' }, [
+        h('p', { className: 'lm-note', text: T('aiStep3') }),
+        paste
+      ])
     ];
     if (pendingImport) {
       paste.value = pendingImport.text;
-      children.push(h('p', { className: 'lm-note', text: T('previewInfo', { ok: pendingImport.ok.length, skip: pendingImport.skip }) }));
+      const info = pendingImport.month
+        ? T('previewInfoMonth', { ok: pendingImport.ok.length, outside: pendingImport.outside, skip: pendingImport.skip })
+        : T('previewInfo', { ok: pendingImport.ok.length, skip: pendingImport.skip });
+      children.push(h('p', { className: 'lm-note', text: info }));
       children.push(h('div', { className: 'lm-preview' }, pendingImport.ok.map(m => h('div', { text: whenText(m) + ' · ' + m.title }))));
     }
     children.push(h('div', { className: 'dialog-actions' }, [
       h('button', { type: 'button', className: 'secondary', text: T('back'), onclick: () => { pendingImport = null; view = 'list'; render(); } }),
       h('button', { type: 'button', className: 'secondary', text: T('preview'), onclick: () => {
-        try { pendingImport = Object.assign({ text: paste.value }, parseImport(paste.value)); message = ''; render(); }
+        if (!monthRange(aiMonth)) { setMessage(T('errMonth'), true); return; }
+        try { pendingImport = Object.assign({ text: paste.value }, parseImport(paste.value, aiMonth)); message = ''; render(); }
         catch (e) { pendingImport = null; setMessage(e.message, true); }
       } }),
       pendingImport && pendingImport.ok.length ? h('button', { type: 'button', className: 'primary', text: T('importConfirm', { n: pendingImport.ok.length }), onclick: importPending }) : null
@@ -469,7 +563,7 @@
   async function importPending() {
     if (!pendingImport || !pendingImport.ok.length) { setMessage(T('errNothing'), true); return; }
     const n = pendingImport.ok.length;
-    if (await persist(meetings.concat(pendingImport.ok), T('imported', { n }))) { pendingImport = null; view = 'list'; render(); }
+    if (await persist(meetings.concat(pendingImport.ok), T('imported', { n }))) { pendingImport = null; aiSource = ''; view = 'list'; render(); }
   }
 
   async function openDialog() {
