@@ -1,3 +1,10 @@
+# V10.71 修订：学习会议改为本地手动维护（2026-11-27，main）
+
+- 现象：执行 migration 并部署 company-api 后，打开「学习会议」仍显示 `NOT_FOUND`。
+- 分析：company-api 先验证账号再匹配路由，NOT_FOUND 只会出现在路由未匹配时，说明线上运行的函数仍不含 /learning-meetings（可能部署到了其他函数名/项目，或部署的不是 main 最新代码）。**原因待查。**
+- 处理：按用户要求绕过 company-api，前端改为 localStorage 保存，并增加 JSON 导出/导入。云端代码保留不删。详见 [docs/learning-meetings.md](learning-meetings.md)。
+- 验证：语法检查；浏览器测试未执行。
+
 # V10.71 学习会议（2026-11-27，main）
 
 - 需求：学习会议实施方案（手动录入 + AI 提示词辅助、Supabase 独立表、独立模块、导出 .ics、Asia/Tokyo）。按评审调整：沿用 V10.68 仓库管理的账号校验与快照模式（不使用 Supabase Auth），只做 GET/PUT 两个接口，地区/形式改为英文代码，状态按日期计算，修正 .ics 全天结束日、时间格式、时区、DTSTAMP、UID 和折行。

@@ -1,3 +1,9 @@
+# V10.71 修订：学习会议改为本地手动维护 — 2026-11-27（直接提交 main，测试待完成）
+
+- 部署后 company-api 仍返回 NOT_FOUND，原因待查。学习会议暂时绕过 company-api，改为保存在当前浏览器（localStorage `planner:learning_meetings`），不需要云端即可使用。
+- 新增「导出 JSON 备份」「导入 JSON 文件」，用于换设备或备份；导入走与 AI 解析助手相同的预览，同名同日跳过。
+- 云端方案（migration、company-api 的 /learning-meetings 路由）保留在仓库中但前端不再调用，恢复方法见 docs/learning-meetings.md。
+
 # V10.71 学习会议 — 2026-11-27（直接提交 main；migration / company-api 待部署，测试待完成）
 
 - 新增「学习会议」：记录学习会议、讲座、研讨会和展会，按即将举行 / 已结束分组，支持新增、编辑、删除。

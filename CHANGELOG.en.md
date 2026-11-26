@@ -1,3 +1,9 @@
+# V10.71 amendment: learning meetings maintained locally — 2026-11-27 (committed directly to main; testing pending)
+
+- company-api still returned NOT_FOUND after deployment (cause under investigation). Learning meetings now bypass company-api and are stored in this browser (localStorage `planner:learning_meetings`), so no cloud is needed.
+- Adds "Export JSON backup" and "Import JSON file" for backups and moving between devices; imports use the same preview as the AI helper and skip same title + date.
+- The cloud design (migration and the company-api /learning-meetings routes) stays in the repo but is no longer called by the front end; see docs/learning-meetings.md to restore it.
+
 # V10.71 Learning meetings — 2026-11-27 (committed directly to main; migration / company-api deployment and testing pending)
 
 - Adds "Learning Meetings" to track study sessions, talks, seminars and expos, grouped into upcoming and past, with add, edit and delete.

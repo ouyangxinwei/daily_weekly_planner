@@ -1,11 +1,11 @@
 // Learning meetings module — V10.71.
-// Independent module: stored as one JSON snapshot per account via company-api
-// (GET/PUT /learning-meetings), never mixed with planner data or backups.
+// Independent module, maintained manually: data is kept in this browser's localStorage
+// and moved between devices with JSON export / import. The cloud backend
+// (learning_meetings_data + company-api /learning-meetings) is kept in the repo but unused.
 // Dates and times are Asia/Tokyo local values; .ics export converts timed events to UTC.
 (function () {
   'use strict';
-  const API = '/learning-meetings';
-  const PROJECT_URL = 'https://kopvznygsqsheibsjjvv.supabase.co';
+  const STORAGE_KEY = 'planner:learning_meetings';
   const REGIONS = ['tokyo', 'yokohama', 'online', 'other'];
   const FORMATS = ['offline', 'live', 'recorded', 'hybrid'];
   const $ = id => document.getElementById(id);
@@ -35,8 +35,9 @@
       reminderNote: '提示：Google 日历导入 .ics 时会忽略提醒设置，请在 Google 日历中自行设置通知；Apple 日历等会保留提醒。',
       errTitle: '请填写名称。', errStart: '请填写开始日期。', errEnd: '结束日期不能早于开始日期。', errEndTime: '填写结束时间前请先填写开始时间。',
       errJson: 'JSON 格式错误：{m}', errArray: 'JSON 必须是数组。', errNothing: '没有可导入的会议。', exportNone: '没有可导出的会议。',
-      needLogin: '请先登录账号后再使用学习会议。', loading: '正在读取云端数据…',
-      errLoad: '云端读取失败：{m}（如果刚上线，可能是数据库或 company-api 尚未部署）', errSave: '保存失败：{m}'
+      errLoad: '读取本地数据失败：{m}', errSave: '保存失败：{m}',
+      exportJson: '导出 JSON 备份', importJson: '导入 JSON 文件',
+      localNote: '数据只保存在当前浏览器（不同步到云端）。换设备或清除浏览器数据前，请先「导出 JSON 备份」；在新设备用「导入 JSON 文件」恢复（同名同日的会议会跳过）。'
     },
     en: {
       title: 'Learning Meetings', subtitle: 'Track study sessions, talks and expos you want to attend, and export .ics files for Google Calendar and others. All times are Japan time.',
@@ -59,8 +60,9 @@
       reminderNote: 'Note: Google Calendar ignores reminders when importing .ics files, so set notifications in Google Calendar; Apple Calendar and others keep them.',
       errTitle: 'Enter a title.', errStart: 'Enter a start date.', errEnd: 'The end date cannot be before the start date.', errEndTime: 'Enter a start time before the end time.',
       errJson: 'Invalid JSON: {m}', errArray: 'The JSON must be an array.', errNothing: 'Nothing to import.', exportNone: 'No meetings to export.',
-      needLogin: 'Sign in first to use learning meetings.', loading: 'Loading cloud data…',
-      errLoad: 'Could not load cloud data: {m} (if this was just released, the database or company-api may not be deployed yet)', errSave: 'Could not save: {m}'
+      errLoad: 'Could not read local data: {m}', errSave: 'Could not save: {m}',
+      exportJson: 'Export JSON backup', importJson: 'Import JSON file',
+      localNote: 'Data is stored only in this browser (not synced to the cloud). Export a JSON backup before switching devices or clearing browser data, then use Import JSON file on the new device (meetings with the same title and date are skipped).'
     },
     ja: {
       title: '学習イベント', subtitle: '参加したい勉強会・講座・展示会を記録し、.ics で Google カレンダーなどに追加できます。時刻はすべて日本時間です。',
@@ -83,8 +85,9 @@
       reminderNote: '注意：Google カレンダーは .ics 取り込み時にリマインダーを無視するため、通知は Google カレンダー側で設定してください。Apple カレンダーなどでは保持されます。',
       errTitle: '名称を入力してください。', errStart: '開始日を入力してください。', errEnd: '終了日は開始日より前にできません。', errEndTime: '終了時刻の前に開始時刻を入力してください。',
       errJson: 'JSON の形式が正しくありません：{m}', errArray: 'JSON は配列である必要があります。', errNothing: '取り込めるイベントがありません。', exportNone: '出力するイベントがありません。',
-      needLogin: '先にログインしてください。', loading: 'クラウドから読み込み中…',
-      errLoad: 'クラウドの読み込みに失敗しました：{m}（公開直後の場合、データベースまたは company-api が未デプロイの可能性があります）', errSave: '保存に失敗しました：{m}'
+      errLoad: 'ローカルデータの読み込みに失敗しました：{m}', errSave: '保存に失敗しました：{m}',
+      exportJson: 'JSON バックアップを書き出す', importJson: 'JSON ファイルを読み込む',
+      localNote: 'データはこのブラウザだけに保存されます（クラウド同期なし）。端末を変える前やブラウザのデータを消す前に「JSON バックアップを書き出す」を行い、新しい端末で「JSON ファイルを読み込む」で復元してください（同名・同日のイベントはスキップ）。'
     }
   };
   function lang() { const l = window.PlannerI18n && window.PlannerI18n.getLanguage ? window.PlannerI18n.getLanguage() : 'zh'; return dictionaries[l] ? l : 'zh'; }
@@ -173,42 +176,26 @@
   const sortKey = m => m.startDate + 'T' + (m.startTime || '00:00');
   const isPast = m => (m.endDate || m.startDate) < todayJst();
 
-  // ---------- cloud ----------
-  function auth() { return window.PlannerCompanyContext && window.PlannerCompanyContext.getAuth ? window.PlannerCompanyContext.getAuth() : null; }
-  function basicToken(user, pass) { const bytes = new TextEncoder().encode(user + ':' + pass); let bin = ''; bytes.forEach(b => { bin += String.fromCharCode(b); }); return btoa(bin); }
-  async function cloudRequest(method, body) {
-    const a = auth();
-    if (!a) throw new Error(T('needLogin'));
-    if (!a.url || a.url.replace(/\/+$/, '') !== PROJECT_URL) throw new Error('Supabase project mismatch');
-    const headers = { apikey: a.key, Authorization: 'Basic ' + basicToken(a.username, a.password) };
-    const options = { method, headers, cache: 'no-store' };
-    if (body !== undefined) { headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(body); }
-    const response = await fetch(a.url.replace(/\/+$/, '') + '/functions/v1/company-api' + API, options);
-    let payload = {};
-    try { payload = await response.json(); } catch (e) { /* ignore */ }
-    if (!response.ok) throw new Error(payload.error || String(response.status));
-    return payload.data;
-  }
-  async function load() {
+  // ---------- local storage (manual maintenance) ----------
+  function load() {
     if (loaded) return;
-    setMessage(T('loading'));
     try {
-      const data = await cloudRequest('GET');
-      const list = data && Array.isArray(data.meetings) ? data.meetings : [];
-      meetings = list.map(m => {
+      let list = [];
+      try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) list = JSON.parse(raw); } catch (e) { if (!(e instanceof SyntaxError)) throw e; }
+      meetings = (Array.isArray(list) ? list : []).map(m => {
         const n = normalize(m, m && m.id ? m : null);
         if (n && typeof m.updatedAt === 'string') n.updatedAt = m.updatedAt; // keep stored timestamp on load
         return n;
       }).filter(Boolean);
       loaded = true;
-      setMessage('');
     } catch (e) {
-      setMessage(auth() ? T('errLoad', { m: e.message }) : T('needLogin'), true);
+      meetings = []; loaded = true;
+      setMessage(T('errLoad', { m: e.message }), true);
     }
   }
   async function persist(next, okMessage) {
     try {
-      await cloudRequest('PUT', { meetings: next });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       meetings = next;
       setMessage(okMessage);
       return true;
@@ -216,6 +203,29 @@
       setMessage(T('errSave', { m: e.message }), true);
       return false;
     }
+  }
+  function saveFile(text, name, type) {
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportJson() {
+    if (!meetings.length) { setMessage(T('exportNone'), true); return; }
+    saveFile(JSON.stringify(meetings, null, 2), 'learning-meetings-' + todayJst() + '.json', 'application/json;charset=utf-8');
+  }
+  function importJsonFile() {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json,application/json';
+    input.onchange = async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const text = await file.text();
+      view = 'ai';
+      try { pendingImport = Object.assign({ text }, parseImport(text)); message = ''; render(); }
+      catch (e) { pendingImport = null; setMessage(e.message, true); }
+    };
+    input.click();
   }
   function setMessage(text, danger) { message = text || ''; messageDanger = Boolean(danger); render(); }
 
@@ -353,11 +363,14 @@
     const toolbar = h('div', { className: 'lm-toolbar' }, [
       h('button', { type: 'button', className: 'primary', text: T('add'), onclick: () => { editingId = null; view = 'form'; render(); } }),
       h('button', { type: 'button', className: 'secondary', text: T('aiOpen'), onclick: () => { pendingImport = null; view = 'ai'; render(); } }),
-      h('button', { type: 'button', className: 'secondary', text: T('exportAll'), onclick: () => download(upcoming.length ? upcoming : sorted, 'learning-meetings-' + todayJst() + '.ics') })
+      h('button', { type: 'button', className: 'secondary', text: T('exportAll'), onclick: () => download(upcoming.length ? upcoming : sorted, 'learning-meetings-' + todayJst() + '.ics') }),
+      h('button', { type: 'button', className: 'secondary', text: T('exportJson'), onclick: exportJson }),
+      h('button', { type: 'button', className: 'secondary', text: T('importJson'), onclick: importJsonFile })
     ]);
-    if (!meetings.length) return [toolbar, h('p', { className: 'lm-empty', text: T('empty') })];
+    const localNote = h('p', { className: 'lm-note', text: T('localNote') });
+    if (!meetings.length) return [toolbar, localNote, h('p', { className: 'lm-empty', text: T('empty') })];
     const section = (label, list) => list.length ? h('section', { className: 'lm-section' }, [h('h3', { text: label + '（' + list.length + '）' }), ...list.map(itemView)]) : null;
-    return [toolbar, h('p', { className: 'lm-note', text: T('reminderNote') }), section(T('upcoming'), upcoming), section(T('past'), past)];
+    return [toolbar, localNote, h('p', { className: 'lm-note', text: T('reminderNote') }), section(T('upcoming'), upcoming), section(T('past'), past)];
   }
   function field(label, input) { return h('label', { className: 'lm-field' }, [h('span', { text: label }), input]); }
   function formView() {
@@ -462,14 +475,13 @@
   async function openDialog() {
     view = 'list'; editingId = null; pendingImport = null;
     if (!dialog.open) dialog.showModal();
-    render();
-    await load();
+    load();
     render();
   }
 
   $('open-learning-meetings')?.addEventListener('click', openDialog);
   $('learning-meetings-close')?.addEventListener('click', () => dialog.close());
-  window.addEventListener('planner-auth-change', () => { loaded = false; meetings = []; message = ''; if (dialog.open) dialog.close(); });
+  window.addEventListener('planner-auth-change', () => { message = ''; if (dialog.open) dialog.close(); });
   window.addEventListener('planner-language-change', () => { if (dialog.open) render(); });
 
   window.PlannerLearningMeetings = Object.freeze({ toIcs, normalize, parseImport, aiPrompt });
