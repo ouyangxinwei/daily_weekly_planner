@@ -41,6 +41,17 @@ test('repository management remains available from the company workspace', async
   await expect(page.locator('#company-workspace-root')).toBeVisible();
 
   const repositoryButton = page.locator('#open-repository-management');
+  console.log('repository button diagnostics', await repositoryButton.evaluate(el => ({
+    workspace: document.documentElement.dataset.workspace,
+    display: getComputedStyle(el).display,
+    visibility: getComputedStyle(el).visibility,
+    hidden: el.hidden,
+    parentDisplay: getComputedStyle(el.parentElement).display,
+    matchingHideRules: [...document.querySelectorAll('style')].flatMap(style => {
+      try { return [...style.sheet.cssRules].filter(rule => rule.selectorText && el.matches(rule.selectorText) && rule.style?.display === 'none').map(rule => rule.selectorText); }
+      catch { return []; }
+    })
+  })));
   await expect(repositoryButton).toBeVisible();
   await repositoryButton.click();
 
