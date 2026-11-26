@@ -46,9 +46,11 @@ test('repository management remains available from the company workspace', async
     display: getComputedStyle(el).display,
     visibility: getComputedStyle(el).visibility,
     hidden: el.hidden,
+    inlineStyle: el.getAttribute('style'),
+    parentStyle: el.parentElement.getAttribute('style'),
     parentDisplay: getComputedStyle(el.parentElement).display,
-    matchingHideRules: [...document.querySelectorAll('style')].flatMap(style => {
-      try { return [...style.sheet.cssRules].filter(rule => rule.selectorText && el.matches(rule.selectorText) && rule.style?.display === 'none').map(rule => rule.selectorText); }
+    matchingHideRules: [...document.styleSheets].flatMap(sheet => {
+      try { return [...sheet.cssRules].filter(rule => rule.selectorText && el.matches(rule.selectorText) && rule.style?.display === 'none').map(rule => rule.selectorText); }
       catch { return []; }
     })
   })));
