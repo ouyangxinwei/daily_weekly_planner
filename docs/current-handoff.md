@@ -2,6 +2,16 @@
 
 更新日期：2026-11-26
 
+## 最新开发交接：V10.70 仓库清单批量清空与 GitHub 全量提取（development）
+
+- 开发分支：`feat/repository-bulk-clear-github-export`，基于 development 当前提交 `27a2817588b7723ea65db35ea759cd21fb7ccb39`。
+- 清空仅调用现有 `PUT /repositories` 写入 `{repositories: []}`；确认框显示记录数与影响范围，取消不写入；失败保留原内存列表。
+- 不删除 GitHub 仓库、不删除原始 JSON、不删除 Supabase 表行、不修改 planner 或 company records。
+- GitHub 提取通过用户已授权的 AI/GitHub 连接器读取，严格分页并输出现有导入 envelope；不在前端存储 GitHub Token。
+- 无数据库 migration / company-api 部署变更。
+- 新增 Playwright mock API E2E，覆盖确认取消与确认清空；新增 V10.70 静态契约验证；CI 待运行。
+- 当前状态：功能已写入本分支，待验证、合并到 development、再按授权流程合并 main 与 Pages 部署。不得把 CI / 部署或真实浏览器验收写成已完成。
+
 ## 仓库与分支
 
 - 仓库：ouyangxinwei/daily_weekly_planner
