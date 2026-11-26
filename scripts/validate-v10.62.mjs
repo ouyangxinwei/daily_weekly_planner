@@ -31,7 +31,7 @@ assert.match(ui, /activityStatusChanged/);
 assert.match(ui, /activityDeleted/);
 assert.match(ui, /activityHistoryNote/);
 assert.match(ui, /events\.forEach\(event =>/);
-assert.match(pkg.version, /^10\.(?:62|63|64|65|66|68|69|70|71)\.0$/);
+assert.match(pkg.version, /^10\.(?:62|63|64|65|66|68|69|70|71|72)\.0$/);
 assert.ok(pkg.scripts['test:validate:company-activity-history']);
 assert.match(html, /V10\.62_business_activity_history|63_business_decision_center|64_customer_project_contributions|65_customer_relationship_health|66_project_delivery_analysis|68_repository_cloud|69_ui_role_mode|70_repository_bulk_clear|71_learning_meetings|72_entry_and_learning_meetings/);
 assert.match(sw, /v10-62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear|71-learning-meetings|72-entry-learning-meetings/);
