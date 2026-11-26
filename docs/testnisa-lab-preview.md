@@ -26,7 +26,9 @@
 - EXP-010：IndexedDB schema 迁移
 - WIKI：NISA Wiki 原型（含 WIKI-002 备注）
 
-入口：`testnisa-lab/index.html`
+入口：主界面顶部「测试画面」按钮 → 测试画面列表（`test-screens.html`）→ 选择「testNisa」→ `testnisa-lab/index.html`。
+
+测试画面列表写在 `test-screens.html` 的 `TEST_SCREENS` 数组里，后续新增测试画面直接往这个数组里追加一行即可（`id`、`name`、`description`、`url`）。
 
 ## 迁移规则
 1. 在 testNisa 中完成原型开发后，再按需同步页面及其相对依赖。

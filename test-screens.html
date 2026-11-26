@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试画面 · 慢慢计划</title>
+  <style>
+    :root{color-scheme:light dark;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+    body{margin:0;padding:32px 16px;background:Canvas;color:CanvasText}
+    main{max-width:640px;margin:0 auto}
+    h1{font-size:22px;margin:0 0 6px}
+    p{margin:0 0 20px;opacity:.7;font-size:13px}
+    ul{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:10px}
+    a.item{display:block;padding:14px 16px;border:1px solid #8884;border-radius:12px;color:inherit;text-decoration:none}
+    a.item:hover{border-color:#6658d3}
+    a.item strong{display:block;font-size:15px}
+    a.item small{opacity:.7}
+    a.back{color:#6658d3}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>测试画面</h1>
+    <p>选择要打开的测试项目。</p>
+    <ul id="test-screen-list"></ul>
+    <a class="back" href="./index.html">← 返回主界面</a>
+  </main>
+  <script>
+    // Test screen list. To add a new test screen, append one entry here.
+    const TEST_SCREENS = [
+      { id: 'testNisa', name: 'testNisa', description: 'testNisa 演练区（独立技术实验页面）', url: './testnisa-lab/index.html' }
+    ];
+    const list = document.getElementById('test-screen-list');
+    for (const s of TEST_SCREENS) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'item';
+      a.href = s.url;
+      a.dataset.testScreen = s.id;
+      const name = document.createElement('strong');
+      name.textContent = s.name;
+      const desc = document.createElement('small');
+      desc.textContent = s.description;
+      a.append(name, desc);
+      li.append(a);
+      list.append(li);
+    }
+  </script>
+</body>
+</html>
