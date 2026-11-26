@@ -6,7 +6,7 @@
 
 ## 2. 当前状态
 
-- 版本：V10.70.0（development，待 CI / PR / 正式部署）。
+- 版本：V10.70.0（PR #103 已合并 development；Actions run `45740957853` 成功；main 合并和 Pages 部署待完成）。
 - 开发分支：development。
 - V10.67 本地管理 UI 已有；V10.68 已增加私有云端数据层、认证 API 和前端接入代码。
 - **Supabase migration、company-api v10 和 GitHub Pages V10.68 均已部署；GitHub Actions 验证通过，真实浏览器验收尚未完成。**
