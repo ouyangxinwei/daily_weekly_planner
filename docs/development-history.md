@@ -1,3 +1,9 @@
+# V10.71 学习会议（2026-11-27，main）
+
+- 需求：学习会议实施方案（手动录入 + AI 提示词辅助、Supabase 独立表、独立模块、导出 .ics、Asia/Tokyo）。按评审调整：沿用 V10.68 仓库管理的账号校验与快照模式（不使用 Supabase Auth），只做 GET/PUT 两个接口，地区/形式改为英文代码，状态按日期计算，修正 .ics 全天结束日、时间格式、时区、DTSTAMP、UID 和折行。
+- 实现、部署步骤与待测试清单：[docs/learning-meetings.md](learning-meetings.md)。
+- 验证：语法检查与 CI 静态校验通过；.ics 输出人工核对一次。浏览器测试、migration 执行与 company-api 部署由其他人负责。
+
 # V10.70 仓库清单批量清空与 GitHub 全量提取 — 2026-11-26（development，待验证）
 
 - 仓库管理工具栏增加「清空清单」按钮。弹出包含当前记录数量、清除范围和不可撤销提醒的确认框；取消不发送请求，确认后通过现有 PUT /repositories 写入空数组。

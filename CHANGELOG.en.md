@@ -1,3 +1,11 @@
+# V10.71 Learning meetings — 2026-11-27 (committed directly to main; migration / company-api deployment and testing pending)
+
+- Adds "Learning Meetings" to track study sessions, talks, seminars and expos, grouped into upcoming and past, with add, edit and delete.
+- AI parsing helper: copy the provided prompt to an AI, paste the returned JSON back, preview and import in bulk; entries missing required fields or duplicating an existing title and date are skipped.
+- .ics export (single or all): timed events are converted to UTC, all-day end dates follow the exclusive-end rule, and files include DTSTAMP, stable UIDs and 75-octet line folding. Google Calendar ignores reminders on import.
+- Data is stored in the private learning_meetings_data table via company-api GET/PUT /learning-meetings with existing credential checks, separate from planner backups and snapshots.
+- Requires applying migration 20261127090000_learning_meetings_cloud.sql and redeploying company-api. Deployment steps and the test checklist are in docs/learning-meetings.md.
+
 # V10.70 Bulk clear repository list and GitHub full export — 2026-11-26 (merged to main; Actions and Pages deployment succeeded; local manual acceptance pending)
 
 - Added a “Clear list” action with a confirmation dialog showing the number of records. Cancel makes no cloud write; confirm replaces only the current account's repository array with an empty array.

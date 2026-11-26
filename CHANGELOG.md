@@ -1,3 +1,11 @@
+# V10.71 学习会议 — 2026-11-27（直接提交 main；migration / company-api 待部署，测试待完成）
+
+- 新增「学习会议」：记录学习会议、讲座、研讨会和展会，按即将举行 / 已结束分组，支持新增、编辑、删除。
+- AI 解析助手：页面提供提示词，复制给 AI 后把返回的 JSON 粘贴回来，预览后批量导入；自动跳过缺少必填项或同名同日的条目。
+- 导出 .ics（单条或全部）：有时间的活动换算为 UTC，全天活动的结束日按规范加一天，包含 DTSTAMP、稳定 UID 和 75 字节折行。Google 日历导入时会忽略提醒。
+- 数据保存在独立私有表 learning_meetings_data，通过 company-api 的 GET/PUT /learning-meetings 访问，再次校验现有账号；不进入计划备份或云端快照。
+- 需要执行 migration 20261127090000_learning_meetings_cloud.sql 并重新部署 company-api。部署步骤和待测试清单见 docs/learning-meetings.md。
+
 # V10.70 仓库清单批量清空与 GitHub 全量提取 — 2026-11-26（已合并 main，Actions 与 Pages 部署成功；本地手动验收待完成）
 
 - 仓库管理新增「清空清单」按钮；弹出确认框并显示记录数量，取消不产生云端写入，确认后仅清空当前账号的仓库管理数组。

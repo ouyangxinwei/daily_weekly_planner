@@ -12,6 +12,7 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const MAX_BODY_BYTES = 32 * 1024;
 const MAX_REPOSITORY_BODY_BYTES = 1024 * 1024;
+const MAX_LEARNING_MEETINGS_BODY_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT = 30;
 const RATE_WINDOW_SECONDS = 60;
 const RECORD_TYPES = new Set([
@@ -265,6 +266,57 @@ async function readRepositoryBody(req: Request): Promise<JsonObject> {
   try { parsed = JSON.parse(raw); } catch { throw new ApiError(400, "INVALID_JSON"); }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new ApiError(400, "VALIDATION_ERROR");
   return parsed as JsonObject;
+}
+
+async function readLearningMeetingsBody(req: Request): Promise<JsonObject> {
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_LEARNING_MEETINGS_BODY_BYTES) throw new ApiError(413, "REQUEST_TOO_LARGE");
+  if (!(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) throw new ApiError(415, "UNSUPPORTED_MEDIA_TYPE");
+  const raw = await req.text();
+  if (new TextEncoder().encode(raw).byteLength > MAX_LEARNING_MEETINGS_BODY_BYTES) throw new ApiError(413, "REQUEST_TOO_LARGE");
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); } catch { throw new ApiError(400, "INVALID_JSON"); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new ApiError(400, "VALIDATION_ERROR");
+  return parsed as JsonObject;
+}
+
+// V10.71 learning meetings: whole-list snapshot, dates/times are Asia/Tokyo local values.
+function validateLearningMeetingsSnapshot(body: JsonObject): unknown[] {
+  assertAllowedKeys(body, ["meetings"]);
+  if (!Array.isArray(body.meetings) || body.meetings.length > 1000) throw new ApiError(400, "VALIDATION_ERROR");
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/, timeRe = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const ids = new Set<string>();
+  const str = (v: unknown, max: number) => typeof v === "string" && v.length <= max;
+  for (const raw of body.meetings) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new ApiError(400, "VALIDATION_ERROR");
+    const m = raw as JsonObject;
+    assertAllowedKeys(m, ["id", "title", "startDate", "startTime", "endDate", "endTime", "location", "cost", "description", "url",
+      "region", "format", "reminderMinutes", "createdAt", "updatedAt"]);
+    if (!str(m.id, 200) || !(m.id as string).trim() || ids.has(m.id as string) ||
+        !str(m.title, 300) || !(m.title as string).trim() ||
+        typeof m.startDate !== "string" || !dateRe.test(m.startDate) ||
+        !str(m.startTime, 5) || (m.startTime !== "" && !timeRe.test(m.startTime as string)) ||
+        !str(m.endDate, 10) || (m.endDate !== "" && !dateRe.test(m.endDate as string)) ||
+        !str(m.endTime, 5) || (m.endTime !== "" && !timeRe.test(m.endTime as string)) ||
+        (m.endTime !== "" && m.startTime === "") ||
+        (m.endDate !== "" && (m.endDate as string) < m.startDate) ||
+        !str(m.location, 500) || !str(m.cost, 200) || !str(m.description, 5000) || !str(m.url, 2000) ||
+        !["tokyo", "yokohama", "online", "other"].includes(String(m.region)) ||
+        !["offline", "live", "recorded", "hybrid"].includes(String(m.format)) ||
+        !Number.isInteger(m.reminderMinutes) || (m.reminderMinutes as number) < 0 || (m.reminderMinutes as number) > 10080) {
+      throw new ApiError(400, "VALIDATION_ERROR");
+    }
+    if (m.url !== "") {
+      let u: URL;
+      try { u = new URL(m.url as string); } catch { throw new ApiError(400, "VALIDATION_ERROR"); }
+      if (u.protocol !== "https:" && u.protocol !== "http:") throw new ApiError(400, "VALIDATION_ERROR");
+    }
+    for (const key of ["createdAt", "updatedAt"]) {
+      if (typeof m[key] !== "string" || Number.isNaN(Date.parse(m[key] as string))) throw new ApiError(400, "VALIDATION_ERROR");
+    }
+    ids.add(m.id as string);
+  }
+  return body.meetings;
 }
 
 function validateRepositorySnapshot(body: JsonObject): unknown[] {
@@ -842,6 +894,16 @@ Deno.serve(async (req: Request) => {
     if (route === "/repositories" && req.method === "PUT") {
       const repositories = validateRepositorySnapshot(await readRepositoryBody(req));
       const result = await rpc("repository_put_data", { ...auth, p_repositories: repositories }, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+
+    if (route === "/learning-meetings" && req.method === "GET") {
+      const result = await rpc("learning_meetings_get_data", { ...auth }, requestId);
+      return jsonResponse({ data: result, request_id: requestId }, 200, origin);
+    }
+    if (route === "/learning-meetings" && req.method === "PUT") {
+      const meetings = validateLearningMeetingsSnapshot(await readLearningMeetingsBody(req));
+      const result = await rpc("learning_meetings_put_data", { ...auth, p_meetings: meetings }, requestId);
       return jsonResponse({ data: result, request_id: requestId }, 200, origin);
     }
 
