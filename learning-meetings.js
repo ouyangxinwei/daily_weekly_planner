@@ -234,6 +234,7 @@
         return n;
       }).filter(Boolean);
       loaded = true;
+      messageDanger = false;
     } catch (e) {
       // Fail closed: do not mark the store as loaded or allow an empty-list save.
       // Keeping the original localStorage value intact gives the user a chance to recover it.
@@ -246,6 +247,8 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       meetings = next;
+      loaded = true;
+      messageDanger = false;
       setMessage(okMessage);
       return true;
     } catch (e) {
@@ -562,7 +565,14 @@
     const closeBtn = $('learning-meetings-close'); if (closeBtn) closeBtn.setAttribute('aria-label', T('close'));
     const parts = [];
     if (message) parts.push(h('p', { className: 'lm-message' + (messageDanger ? ' lm-danger-text' : ''), role: 'status', text: message }));
-    if (loaded) parts.push(...(view === 'form' ? formView() : view === 'ai' ? aiView() : listView()));
+    if (loaded) {
+      parts.push(...(view === 'form' ? formView() : view === 'ai' ? aiView() : listView()));
+    } else if (messageDanger && view === 'ai') {
+      // Recovery import is the only write path available while stored data is invalid.
+      parts.push(...aiView());
+    } else if (messageDanger) {
+      parts.push(h('button', { type: 'button', className: 'secondary', text: T('importJson'), onclick: importJsonFile }));
+    }
     root.replaceChildren(...parts.filter(Boolean));
   }
 
@@ -595,7 +605,7 @@
   }
 
   async function openDialog() {
-    view = 'list'; editingId = null; pendingImport = null; importError = ''; message = '';
+    view = 'list'; editingId = null; pendingImport = null; importError = ''; message = ''; messageDanger = false;
     if (!dialog.open) dialog.showModal();
     load();
     render();
