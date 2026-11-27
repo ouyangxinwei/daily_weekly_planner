@@ -52,7 +52,7 @@ STABILITY_DURATION_MINUTES=2 npm run test:stability
 
 - The Nightly Playwright workflow was previously **disabled manually in GitHub Actions**. The workflow now includes a daily 02:00 JST schedule; it will run only after the workflow is re-enabled in GitHub Actions.
 - This is a repository Actions setting, not a change to the workflow YAML. The workflow file and Playwright tests remain in the repository.
-- The scheduled run executes the complete Playwright E2E suite, including all module smoke/user-journey checks and the stability soak test (10 minutes). Push and pull-request runs retain the shorter 1-minute stability duration.
+- The scheduled run executes the complete Playwright E2E suite, including all module smoke/user-journey checks and the stability soak test (10 minutes). This workflow is schedule-only (plus manual dispatch), so enabling it will not add full browser runs to every push or pull request. Existing lightweight validation workflows remain unchanged.
 - The workflow's enabled/disabled state is a GitHub Actions setting, not a Git commit. If it remains disabled, the schedule will not execute. Code Validation and other independent workflows continue to run normally.
 - Disabling a workflow does **not** reliably cancel a run that is already in progress. Open that run and use **Cancel workflow** separately if it should stop.
 - Do not treat the disabled state as evidence that browser tests passed. Report browser validation as not run unless a specific run has completed successfully.
@@ -70,7 +70,7 @@ STABILITY_DURATION_MINUTES=2 npm run test:stability
 1. Open **Actions** in the repository.
 2. Select **Nightly Playwright E2E and Stability**.
 3. Open the workflow's `...` menu and select **Enable workflow**.
-4. After enabling, pushes and pull requests targeting `main` can trigger it again according to the workflow YAML.
+4. After enabling, the daily schedule becomes active. Ordinary pushes and pull requests continue to use the repository's existing validation workflows and do not start this full nightly suite.
 
 ### Run manually when needed
 
@@ -79,7 +79,7 @@ STABILITY_DURATION_MINUTES=2 npm run test:stability
 3. Select the branch and stability duration, then start the run.
 4. Inspect the focused company navigation step and the full browser regression step separately in the run summary.
 
-The workflow runs daily at 02:00 Japan Standard Time using `0 17 * * *` (UTC). GitHub scheduled workflows can be delayed during periods of high load, so this is a target start time rather than a guaranteed exact start. The YAML also defines push and pull-request triggers for `main`, plus `workflow_dispatch`. GitHub's disabled/enabled state is managed in the Actions UI and is not represented by a Git commit.
+The workflow runs daily at 02:00 Japan Standard Time using `0 17 * * *` (UTC). GitHub scheduled workflows can be delayed during periods of high load, so this is a target start time rather than a guaranteed exact start. The YAML also defines `workflow_dispatch` for manual runs; it does not run on ordinary pushes or pull requests. GitHub's disabled/enabled state is managed in the Actions UI and is not represented by a Git commit.
 
 ## Interpreting results
 
