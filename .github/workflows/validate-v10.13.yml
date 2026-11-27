@@ -2,7 +2,7 @@ name: Validate JavaScript, Memo migration, and Module Star Statistics
 
 on:
   push:
-    branches: [main, feat/v10.27-move-plan-to-results-future]
+    branches: [main, development, feat/v10.27-move-plan-to-results-future]
   pull_request:
 
 jobs:
