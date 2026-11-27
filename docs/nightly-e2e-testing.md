@@ -82,3 +82,23 @@ The workflow has no daily schedule. The YAML currently defines push and pull-req
 ## Interpreting results
 
 A green workflow means the browser scenarios and the configured soak duration completed without detected failures. It is not a proof that every possible application state is defect-free. A failed run should be inspected through the HTML report and any attached screenshot/trace.
+
+
+## Unified MVP testing principles
+
+Use these principles as the default for new feature development and module coverage:
+
+1. Reuse one shared mocked-auth Playwright Fixture.
+2. For each new module, begin with the most basic user-operation test.
+3. Prioritize create, edit, complete, reload, and data-retention behavior where those operations apply.
+4. Avoid large numbers of repetitive tests for simple features; reuse existing helpers and smoke coverage.
+5. Isolate cloud requests by default. Tests must not access or modify production data.
+6. Add dedicated tests only when a feature has complex business rules or a relevant history of defects.
+
+### Authentication and cloud boundary
+
+The shared Fixture simulates a successful frontend login for browser-flow testing. It is not a verification of real Supabase authentication, authorization, or RLS policies. The login RPC is mocked and other Supabase REST requests are blocked. Real backend authentication and cloud-permission checks, when needed, must be handled separately in a dedicated non-production test environment.
+
+### Default development workflow
+
+For a routine module or feature change, add the smallest useful Playwright scenario using the shared Fixture, run the relevant validation workflow, and report exactly which checks ran. Expand coverage only when risk or observed failures justify it.
