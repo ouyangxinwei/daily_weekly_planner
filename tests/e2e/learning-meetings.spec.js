@@ -30,7 +30,9 @@ test('learning meetings preserve malformed local data and block writes until rec
 
   const stored = await page.evaluate(() => localStorage.getItem('planner:learning_meetings'));
   expect(stored).toBe(corrupted);
-  await expect(page.locator('#learning-meetings-root button')).toHaveCount(0);
+  const recoveryButton = page.locator('#learning-meetings-root button');
+  await expect(recoveryButton).toHaveCount(1);
+  await expect(recoveryButton).toContainText(/导入 JSON 文件|Import JSON file|JSON ファイルを読み込む/);
 });
 
 test('learning meetings reject a non-array storage payload without overwriting it', async ({ page }) => {
