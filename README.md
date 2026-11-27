@@ -19,6 +19,7 @@
 | 技术架构、数据结构和关键实现 | [技术手册](docs/technical_manual.md) |
 | 部署、更新和故障排查 | [部署与故障排查](docs/deployment_and_troubleshooting.md) |
 | AI 协作开发约定 | [AI 协作开发指南](docs/ai_collaboration_guide.md) |
+| 跨仓库统一代码审查标准 | [REVIEW.md](REVIEW.md) |
 | Git 分支与固定开发工作流（本地 development → Actions → main 部署） | [Git 分支与固定开发工作流](docs/git-branching-workflow.md) |
 | 仓库管理模块 | [仓库管理说明](docs/repository-management.md) |
 | 当前开发状态 | [当前开发交接](docs/current-handoff.md) |
