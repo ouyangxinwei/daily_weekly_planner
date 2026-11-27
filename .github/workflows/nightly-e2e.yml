@@ -1,6 +1,9 @@
 name: Nightly Playwright E2E and Stability
 
 on:
+  # 02:00 Japan Standard Time (UTC+9) = 17:00 UTC on the previous day.
+  schedule:
+    - cron: '0 17 * * *'
   push:
     branches: [main]
   pull_request:
@@ -26,7 +29,7 @@ jobs:
     timeout-minutes: 60
     env:
       CI: true
-      STABILITY_DURATION_MINUTES: ${{ github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes || '1' }}
+      STABILITY_DURATION_MINUTES: ${{ (github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes) || (github.event_name == 'schedule' && '10') || '1' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
