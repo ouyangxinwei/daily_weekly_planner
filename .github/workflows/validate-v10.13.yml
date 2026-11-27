@@ -59,6 +59,7 @@ jobs:
           node --check tests/e2e/company-navigation.spec.js
           node --check tests/e2e/fixtures.js
           node --check tests/e2e/plan-user-journey.spec.js
+          node --check tests/e2e/module-workspaces-smoke.spec.js
           node --check tests/e2e/repository-management-navigation.spec.js
           node --check tests/e2e/repository-management-bulk-clear.spec.js
           node --check scripts/validate-v10.70.mjs
@@ -114,4 +115,4 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Test repository navigation and authenticated plan user journey
-        run: npx playwright test tests/e2e/repository-management-*.spec.js tests/e2e/entry-flow.spec.js tests/e2e/learning-meetings.spec.js tests/e2e/plan-user-journey.spec.js
+        run: npx playwright test tests/e2e/repository-management-*.spec.js tests/e2e/entry-flow.spec.js tests/e2e/learning-meetings.spec.js tests/e2e/plan-user-journey.spec.js tests/e2e/module-workspaces-smoke.spec.js
