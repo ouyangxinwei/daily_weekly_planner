@@ -4,10 +4,6 @@ on:
   # 02:00 Japan Standard Time (UTC+9) = 17:00 UTC on the previous day.
   schedule:
     - cron: '0 17 * * *'
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       stability_minutes:
