@@ -1,0 +1,93 @@
+name: OpenCodeReview Manual Pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Open pull request number to review"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ocr-pilot-${{ github.event.inputs.pr_number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Optional AI review (non-blocking pilot)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check model configuration
+        id: preflight
+        shell: bash
+        env:
+          OCR_LLM_URL: ${{ secrets.OCR_LLM_URL }}
+          OCR_LLM_AUTH_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          OCR_LLM_MODEL: ${{ vars.OCR_LLM_MODEL }}
+        run: |
+          missing=()
+          [ -n "$OCR_LLM_URL" ] || missing+=("Actions secret OCR_LLM_URL")
+          [ -n "$OCR_LLM_AUTH_TOKEN" ] || missing+=("Actions secret OCR_LLM_AUTH_TOKEN")
+          [ -n "$OCR_LLM_MODEL" ] || missing+=("Actions variable OCR_LLM_MODEL")
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## OpenCodeReview pilot skipped"
+              echo
+              echo "Configure the following repository Actions secrets/variables to enable a run:"
+              for item in "${missing[@]}"; do echo "- `$item`"; done
+              echo
+              echo "No model request was made and no PR comment was posted."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::OpenCodeReview skipped because model configuration is incomplete."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "OpenCodeReview model configuration is present."
+          fi
+
+      - name: Resolve pull request context
+        id: pr-context
+        if: steps.preflight.outputs.ready == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isSafeInteger(prNumber) || prNumber < 1) {
+              throw new Error('pr_number must be a positive integer');
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            core.setOutput('base_ref', pr.base.ref);
+            core.setOutput('head_sha', pr.head.sha);
+            core.info(`Reviewing PR #${prNumber}: ${pr.base.ref}.. ${pr.head.sha}`);
+
+      - name: Run OpenCodeReview
+        if: steps.preflight.outputs.ready == 'true'
+        uses: alibaba/open-code-review@f6379f71edba1e59dbc056e8f455df1f84396498 # v1.14.3
+        with:
+          pr_number: ${{ inputs.pr_number }}
+          base_ref: ${{ steps.pr-context.outputs.base_ref }}
+          head_sha: ${{ steps.pr-context.outputs.head_sha }}
+          llm_url: ${{ secrets.OCR_LLM_URL }}
+          llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          llm_model: ${{ vars.OCR_LLM_MODEL }}
+          llm_use_anthropic: ${{ vars.OCR_LLM_USE_ANTHROPIC || 'false' }}
+          language: Chinese
+          ocr_version: "1.14.3"
+          effort: medium
+          review_task_timeout: "15"
+          max_tokens_budget: "100000"
+          upload_artifacts: "true"
+          sticky_summary: "true"
+          incremental: "false"
+          resolve_outdated: "false"

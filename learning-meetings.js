@@ -225,23 +225,30 @@
   function load() {
     if (loaded) return;
     try {
-      let list = [];
-      try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) list = JSON.parse(raw); } catch (e) { if (!(e instanceof SyntaxError)) throw e; }
-      meetings = (Array.isArray(list) ? list : []).map(m => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const list = raw === null ? [] : JSON.parse(raw);
+      if (!Array.isArray(list)) throw new TypeError('stored data must be a JSON array');
+      meetings = list.map(m => {
         const n = normalize(m, m && m.id ? m : null);
         if (n && typeof m.updatedAt === 'string') n.updatedAt = m.updatedAt; // keep stored timestamp on load
         return n;
       }).filter(Boolean);
       loaded = true;
+      messageDanger = false;
     } catch (e) {
-      meetings = []; loaded = true;
-      console.warn('[learning-meetings] ' + T('errLoad', { m: e.message }));
+      // Fail closed: do not mark the store as loaded or allow an empty-list save.
+      // Keeping the original localStorage value intact gives the user a chance to recover it.
+      message = T('errLoad', { m: e.message });
+      messageDanger = true;
+      console.warn('[learning-meetings] ' + message);
     }
   }
   async function persist(next, okMessage) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       meetings = next;
+      loaded = true;
+      messageDanger = false;
       setMessage(okMessage);
       return true;
     } catch (e) {
@@ -558,7 +565,14 @@
     const closeBtn = $('learning-meetings-close'); if (closeBtn) closeBtn.setAttribute('aria-label', T('close'));
     const parts = [];
     if (message) parts.push(h('p', { className: 'lm-message' + (messageDanger ? ' lm-danger-text' : ''), role: 'status', text: message }));
-    if (loaded) parts.push(...(view === 'form' ? formView() : view === 'ai' ? aiView() : listView()));
+    if (loaded) {
+      parts.push(...(view === 'form' ? formView() : view === 'ai' ? aiView() : listView()));
+    } else if (messageDanger && view === 'ai') {
+      // Recovery import is the only write path available while stored data is invalid.
+      parts.push(...aiView());
+    } else if (messageDanger) {
+      parts.push(h('button', { type: 'button', className: 'secondary', text: T('importJson'), onclick: importJsonFile }));
+    }
     root.replaceChildren(...parts.filter(Boolean));
   }
 
@@ -591,7 +605,7 @@
   }
 
   async function openDialog() {
-    view = 'list'; editingId = null; pendingImport = null; importError = ''; message = '';
+    view = 'list'; editingId = null; pendingImport = null; importError = ''; message = ''; messageDanger = false;
     if (!dialog.open) dialog.showModal();
     load();
     render();
