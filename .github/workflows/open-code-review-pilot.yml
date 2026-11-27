@@ -50,11 +50,34 @@ jobs:
             echo "OpenCodeReview model configuration is present."
           fi
 
+      - name: Resolve pull request context
+        id: pr-context
+        if: steps.preflight.outputs.ready == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isSafeInteger(prNumber) || prNumber < 1) {
+              throw new Error('pr_number must be a positive integer');
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            core.setOutput('base_ref', pr.base.ref);
+            core.setOutput('head_sha', pr.head.sha);
+            core.info(`Reviewing PR #${prNumber}: ${pr.base.ref}.. ${pr.head.sha}`);
+
       - name: Run OpenCodeReview
         if: steps.preflight.outputs.ready == 'true'
         uses: alibaba/open-code-review@f6379f71edba1e59dbc056e8f455df1f84396498 # v1.14.3
         with:
           pr_number: ${{ inputs.pr_number }}
+          base_ref: ${{ steps.pr-context.outputs.base_ref }}
+          head_sha: ${{ steps.pr-context.outputs.head_sha }}
           llm_url: ${{ secrets.OCR_LLM_URL }}
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
           llm_model: ${{ vars.OCR_LLM_MODEL }}
