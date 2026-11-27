@@ -78,7 +78,14 @@ test('automation testing panel explains the nightly suite and links to its lates
       html_url: 'https://github.com/ouyangxinwei/daily_weekly_planner/actions/runs/12345'
     }] })
   }));
-  await page.locator('#open-automation-tests').click();
+
+  // This panel is admin-only. Re-enter through the public admin dashboard,
+  // rather than the personal login flow used by the shared beforeEach hook.
+  await page.evaluate(() => localStorage.setItem('planner:user_role', 'admin'));
+  await page.reload();
+  await page.locator('#choose-admin').click();
+  await expect(page.locator('#admin-dashboard')).toBeVisible();
+  await page.locator('#admin-open-tests').click();
   await expect(page.locator('#automation-dialog')).toBeVisible();
   await expect(page.locator('#automation-title')).toHaveText('自动化测试');
   await expect(page.locator('#automation-last-text')).toHaveText('测试通过');
