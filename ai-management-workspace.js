@@ -52,8 +52,9 @@ function accountForm(tid,a){const edit=!!a,v=a||{username:'',accountType:'free',
  '<label>'+esc(tr('使用优先级'))+select('priority',[['high','高'],['medium','中'],['low','低']])+'</label><label>'+esc(tr('账号备注'))+'<textarea name="note">'+esc(v.note)+'</textarea></label>'+
  '<div class="aiwm-dialog-actions"><button type="button" data-ai="back-accounts">'+esc(tr('返回账号列表'))+'</button><button class="primary">'+esc(tr('保存'))+'</button></div></form>',tid);}
 root.addEventListener('click',e=>{
- const link=e.target.closest('[data-ai-tool-link]');if(link&&!readOnly){const t=state?.tools.find(x=>x.id===link.dataset.aiToolLink);if(t){t.clickCount=(t.clickCount||0)+1;t.lastClickedAt=now();save();}}
+ const link=e.target.closest('[data-ai-tool-link]');if(link&&!readOnly){const t=state?.tools.find(x=>x.id===link.dataset.aiToolLink);if(t){t.clickCount=(t.clickCount||0)+1;t.lastClickedAt=now();save();const count=link.closest('tr')?.querySelector('.aiwm-number');if(count)count.textContent=String(t.clickCount);}}
  const b=e.target.closest('[data-ai]');if(!b)return;const a=b.dataset.ai,id=b.dataset.id;
+ if(readOnly&&!['close','toggle-hidden'].includes(a))return toast('暂时无法保存。');
  if(a==='add-tool')toolForm(null);else if(a==='edit-tool')toolForm(state.tools.find(t=>t.id===id));else if(a==='accounts')accountList(id);else if(a==='add-account')accountForm(dialog?.dataset.toolId,null);else if(a==='edit-account')accountForm(dialog?.dataset.toolId,state.accounts.find(x=>x.id===id));else if(a==='back-accounts')accountList(dialog?.dataset.toolId);else if(a==='close')close();else if(a==='toggle-hidden'){filter.hidden=!filter.hidden;render();}
  else if(a==='visibility'){const t=state.tools.find(x=>x.id===id);t.visible=t.visible===false;save();render();}
  else if(a==='delete-tool'){const t=state.tools.find(x=>x.id===id);if(aa(id).length)return toast('此工具仍有关联账号，请先删除账号或隐藏工具。');if(confirm(tr('确定删除此 AI 工具吗？'))){state.tools=state.tools.filter(x=>x.id!==id);save();render();toast('工具已删除');}}
