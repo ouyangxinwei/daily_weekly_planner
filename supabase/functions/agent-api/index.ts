@@ -392,6 +392,14 @@ async function transitionRun(runId: string, username: string, action: "pause" | 
   if (action === "pause" && !["queued", "running"].includes(current)) throw new ApiError(409, "INVALID_STATE_TRANSITION");
   if (action === "resume" && current !== "paused") throw new ApiError(409, "INVALID_STATE_TRANSITION");
   const next = action === "pause" ? "paused" : "queued";
+  if (action === "resume") {
+    await db<Json[]>(
+      "agent_run_steps?run_id=eq." + queryValue(runId) + "&status=eq.running",
+      "PATCH",
+      { status: "pending", started_at: null, error_code: null, error_message: null, updated_at: new Date().toISOString() },
+      requestId,
+    );
+  }
   const rows = await db<Json[]>(
     "agent_task_runs?id=eq." + queryValue(runId) + "&select=*",
     "PATCH",
@@ -672,16 +680,27 @@ async function executeNextStep(runId: string, username: string, requestId: strin
       finished_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }, requestId).catch(() => null);
-    await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
-      status: "failed",
+    if (pending.step_key === "summarize") {
+      await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
+        status: "failed",
+        error_code: code,
+        error_message: "The Master summary step failed.",
+        finished_at: new Date().toISOString(),
+      }, requestId).catch(() => null);
+      await db<Json[]>("agent_tasks?id=eq." + queryValue(String(task.id)), "PATCH", {
+        status: "failed", updated_at: new Date().toISOString(),
+      }, requestId).catch(() => null);
+      throw error;
+    }
+    return {
+      run_id: runId,
+      step_id: pending.id,
+      step_key: pending.step_key,
+      step_status: "failed",
+      run_status: "running",
+      next_step_available: true,
       error_code: code,
-      error_message: "A Worker step failed.",
-      finished_at: new Date().toISOString(),
-    }, requestId).catch(() => null);
-    await db<Json[]>("agent_tasks?id=eq." + queryValue(String(task.id)), "PATCH", {
-      status: "failed", updated_at: new Date().toISOString(),
-    }, requestId).catch(() => null);
-    throw error;
+    };
   }
 }
 
