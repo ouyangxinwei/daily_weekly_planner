@@ -349,7 +349,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 - 新增 `POST /agent/runs/{run_id}/execute`，仍由现有 Basic Auth、IP 限流和 Task/Run 所有权校验保护。
 - 每次请求最多领取并执行一个 pending Step；通过 `status=eq.pending` 条件更新领取 Step，避免两个并发请求重复执行同一步骤。
-- Worker 根据 Run 中固定的 `target_commit_sha` 与 `standard_commit_sha` 读取 GitHub Tree，不跟随仓库最新分支漂移。
+- Worker 根据 Run 中固定的 `target_commit_sha` 与 `standard_commit_sha` 先解析 Git Commit 对应的 Tree SHA，再读取 GitHub Tree，不跟随仓库最新分支漂移。
 - documentation / code / api / database 四类检查，第一版只做确定性的文件路径与扩展名盘点，保存两边仓库的匹配数量、最多 20 条路径样本和 Commit SHA。
 - 单个检查失败时将该 Step 标记 failed、保留错误码，然后继续后续步骤；Master 汇总步骤生成 Markdown 报告，明确完成数、失败数和未完成数。
 - 最后一个 Step 完成后将 Run 与 Task 标记 completed；报告类型为 `deterministic_inventory_v1`。
@@ -374,7 +374,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 两条远端记录名称相同，是本次工具调用留下的历史现象；不要手工删除或伪造 migration ledger。后续迁移管理应以这两个版本和仓库文件为基准核对。
 
-**部署：** `agent-api` 已部署到 Supabase，状态 ACTIVE，版本 1，`verify_jwt=false`。这是因为函数内部自行执行现有 Basic Auth 验证、IP 限流和 Task/Run 所有权检查，不代表业务端点匿名开放。函数入口：
+**部署：** `agent-api` 已部署到 Supabase，状态 ACTIVE，版本 2，`verify_jwt=false`。这是因为函数内部自行执行现有 Basic Auth 验证、IP 限流和 Task/Run 所有权检查，不代表业务端点匿名开放。函数入口：
 `https://kopvznygsqsheibsjjvv.supabase.co/functions/v1/agent-api`
 
 **端到端测试准备：** 新增 `scripts/agent-api-smoke-test.ps1`，默认使用公开小仓库 `octocat/Hello-World`，只检查 documentation 与 code 两个 Step；脚本会安全隐藏式提示用户输入现有慢慢计划密码，并执行 Task → Run → 第一个 Step → Pause → Resume → 剩余 Step → 报告与数据库持久化读取验证。密码不会写入脚本或输出。当前尚未取得用户本机凭据，因此尚未实际执行这轮认证端到端测试；不得将其报告为已通过。
