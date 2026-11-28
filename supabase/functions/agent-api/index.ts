@@ -420,22 +420,43 @@ async function transitionRun(runId: string, username: string, action: "pause" | 
 type GitTreeEntry = { path: string; type: string; size?: number };
 
 async function githubTree(repository: string, commitSha: string, requestId: string): Promise<string[]> {
-  const url = "https://api.github.com/repos/" + repository + "/git/trees/" + commitSha + "?recursive=1";
-  let res: Response;
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  let commitResponse: Response;
   try {
-    res = await fetch(url, {
-      headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
-      signal: AbortSignal.timeout(20000),
-    });
+    commitResponse = await fetch(
+      "https://api.github.com/repos/" + repository + "/git/commits/" + commitSha,
+      { headers, signal: AbortSignal.timeout(15000) },
+    );
+  } catch {
+    console.error("agent-api GitHub commit lookup failed", { repository, requestId });
+    throw new ApiError(503, "SOURCE_COMMIT_UNAVAILABLE");
+  }
+  if (!commitResponse.ok) {
+    console.error("agent-api GitHub commit lookup rejected", { repository, status: commitResponse.status, requestId });
+    throw new ApiError(503, "SOURCE_COMMIT_UNAVAILABLE");
+  }
+  const commit = await commitResponse.json() as { tree?: { sha?: string } };
+  const treeSha = commit.tree?.sha ?? "";
+  if (!/^[0-9a-f]{40}$/i.test(treeSha)) throw new ApiError(503, "SOURCE_COMMIT_UNAVAILABLE");
+
+  let treeResponse: Response;
+  try {
+    treeResponse = await fetch(
+      "https://api.github.com/repos/" + repository + "/git/trees/" + treeSha + "?recursive=1",
+      { headers, signal: AbortSignal.timeout(20000) },
+    );
   } catch {
     console.error("agent-api GitHub tree network failure", { repository, requestId });
     throw new ApiError(503, "SOURCE_TREE_UNAVAILABLE");
   }
-  if (!res.ok) {
-    console.error("agent-api GitHub tree rejected", { repository, status: res.status, requestId });
+  if (!treeResponse.ok) {
+    console.error("agent-api GitHub tree rejected", { repository, status: treeResponse.status, requestId });
     throw new ApiError(503, "SOURCE_TREE_UNAVAILABLE");
   }
-  const data = await res.json() as { tree?: GitTreeEntry[]; truncated?: boolean };
+  const data = await treeResponse.json() as { tree?: GitTreeEntry[]; truncated?: boolean };
   if (!Array.isArray(data.tree) || data.truncated === true) {
     throw new ApiError(503, "SOURCE_TREE_INCOMPLETE");
   }
