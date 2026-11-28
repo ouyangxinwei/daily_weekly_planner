@@ -315,7 +315,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 ## 9. 当前实施状态与阻塞项
 
-本次已完成最小数据模型、状态转换、SQL 结构基线和 API 契约定义；尚未创建正式 migration、部署 `agent-api` 或修改托管数据库。
+本次已完成最小数据模型、状态转换、SQL 结构基线和 API 契约定义，并已在 development 加入独立 `agent-api` Edge Function 初版代码及配置；尚未创建正式 migration、部署 `agent-api` 或修改托管数据库。
 
 在正式生成/应用 Agent migration 前，对此前发现的学习会议 migration 差异进行了只读核对：
 - Git 仓库包含 `supabase/migrations/20261127090000_learning_meetings_cloud.sql`。
@@ -326,13 +326,29 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 **当前确认的问题是 migration ledger 缺少记录，而不是远程表结构缺少迁移定义。** 这说明该迁移很可能已在数据库执行，但没有在当前 migration ledger 登记；目前不直接修改 ledger，也不重复执行原 migration，避免重放已有 DDL 或伪造迁移历史。后续应通过 Supabase CLI 的 migration repair 流程将已核实执行过的版本登记为 applied，并再次核对 migration list。当前环境没有可用的本地 Supabase CLI 执行入口，因此本次只完成只读核验，未改动托管数据库。
 
+### 9.1 Agent API 初版代码（development）
+
+已新增：
+- `supabase/functions/agent-api/index.ts`：Task / Run / Step 最小 API。
+- `supabase/config.toml`：增加 `agent-api` 配置，`verify_jwt = false`，因为当前应用的既有账号验证由 Edge Function 内部通过 `company_verify_credentials` RPC 完成，而不是 Supabase Auth JWT。API 每个请求仍必须通过 Basic Authorization 验证；该配置不代表匿名开放业务接口。
+- 创建 Task、分页读取 Task、读取 Task 详情、创建 Run/Steps、读取 Run 详情、暂停和恢复 Run。
+- 创建 Run 时读取共同规范仓库与目标仓库的最新公开 GitHub Commit SHA 并保存到 Run；任一来源无法读取时，不创建 Run。
+- 所有数据访问均由 Edge Function 使用服务端密钥执行；读取 Task / Run 前按已验证用户名检查所有权。浏览器不直接访问 Agent 表。
+
+当前限制：
+- Worker 的实际执行器尚未实现；Run 创建后保持 queued，Step 由后续 Worker 阶段执行。
+- 数据表尚未创建，因此 API 代码不能部署后投入使用。
+- 本次没有对线上 Supabase 部署 Edge Function，也没有修改线上数据库。
+- 当前代码沿用 company-api 的 Basic 凭据认证模式，后续应对登录失败限流与凭据轮换进行统一治理。
+
 ## 10. 后续实施顺序
 
-1. 核对 Supabase 迁移历史与远程实际 schema 的差异，先解决已有 migration drift。
-2. 通过 Supabase CLI 正式生成 Agent migration；在隔离/本地环境验证 SQL、RLS 和索引。
-3. 迁移审查通过后再应用到目标数据库，并用查询验证三张表与约束。
-4. 创建独立 `agent-api`，实现上表列出的最小端点与认证/所有权校验。
+1. 在具备 Supabase CLI 的本地项目中使用 `supabase migration new` 生成 Agent migration 文件；不再把此前的 migration ledger 差异作为 Agent 代码开发的前置阻塞。
+2. 对 Agent migration 做代码审查；确认 RLS、索引、唯一约束和 service_role 权限。
+3. 在用户选择的目标环境应用 migration，并验证三张表与约束。
+4. 部署独立 `agent-api`，完成接口连通验证。
 5. 用少量 API 集成测试验证创建 Task、创建 Run/Steps、读取状态、暂停和恢复。
-6. 核心流程稳定后，再增加定时调度和可选 AI 能力。
+6. 实现串行 Worker 执行器，完成 Step 结果保存、断点恢复和报告生成。
+7. 核心流程稳定后，再增加定时调度和可选 AI 能力。
 
 **本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
