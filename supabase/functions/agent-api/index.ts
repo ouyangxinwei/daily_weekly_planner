@@ -408,6 +408,283 @@ async function transitionRun(runId: string, username: string, action: "pause" | 
   return Array.isArray(rows) ? rows[0] : { id: runId, status: next };
 }
 
+
+type GitTreeEntry = { path: string; type: string; size?: number };
+
+async function githubTree(repository: string, commitSha: string, requestId: string): Promise<string[]> {
+  const url = "https://api.github.com/repos/" + repository + "/git/trees/" + commitSha + "?recursive=1";
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+      signal: AbortSignal.timeout(20000),
+    });
+  } catch {
+    console.error("agent-api GitHub tree network failure", { repository, requestId });
+    throw new ApiError(503, "SOURCE_TREE_UNAVAILABLE");
+  }
+  if (!res.ok) {
+    console.error("agent-api GitHub tree rejected", { repository, status: res.status, requestId });
+    throw new ApiError(503, "SOURCE_TREE_UNAVAILABLE");
+  }
+  const data = await res.json() as { tree?: GitTreeEntry[]; truncated?: boolean };
+  if (!Array.isArray(data.tree) || data.truncated === true) {
+    throw new ApiError(503, "SOURCE_TREE_INCOMPLETE");
+  }
+  return data.tree.filter((entry) => entry.type === "blob" && typeof entry.path === "string")
+    .map((entry) => entry.path);
+}
+
+const SOURCE_EXTENSIONS = /\.(?:ts|tsx|js|jsx|mjs|cjs|py|go|rs|java|cs|php|rb|swift|kt|kts|vue|svelte)$/i;
+
+function pathsForCheck(paths: string[], check: string): string[] {
+  switch (check) {
+    case "documentation":
+      return paths.filter((path) =>
+        /(^|\/)readme(?:\.[^/]*)?$/i.test(path) ||
+        /(^|\/)docs?\//i.test(path) ||
+        /\.mdx?$/i.test(path)
+      );
+    case "code":
+      return paths.filter((path) => SOURCE_EXTENSIONS.test(path));
+    case "api":
+      return paths.filter((path) =>
+        /(^|\/)(api|apis|routes|controllers|openapi|swagger)(\/|\.|$)/i.test(path) ||
+        /(^|\/)(openapi|swagger)\.[^/]+$/i.test(path)
+      );
+    case "database":
+      return paths.filter((path) =>
+        /(^|\/)(migrations?|schema|prisma|drizzle)(\/|\.|$)/i.test(path) ||
+        /\.(sql|prisma)$/i.test(path)
+      );
+    default:
+      return [];
+  }
+}
+
+async function executeInventoryStep(step: Json, task: Json, run: Json, requestId: string) {
+  const check = String(step.step_key).replace(/^inspect_/, "");
+  const targetRepository = String(task.target_repository);
+  const scope = task.scope && typeof task.scope === "object" && !Array.isArray(task.scope)
+    ? task.scope as Json : {};
+  const standardRepository = typeof scope.standard_repository === "string"
+    ? scope.standard_repository : "ouyangxinwei/oooo_Dev_Standard";
+  const [targetPaths, standardPaths] = await Promise.all([
+    githubTree(targetRepository, String(run.target_commit_sha), requestId),
+    githubTree(standardRepository, String(run.standard_commit_sha), requestId),
+  ]);
+  const targetMatches = pathsForCheck(targetPaths, check);
+  const standardMatches = pathsForCheck(standardPaths, check);
+  const targetSample = targetMatches.slice(0, 20);
+  const standardSample = standardMatches.slice(0, 20);
+  return {
+    result: {
+      check,
+      assessment_type: "repository_file_inventory",
+      conclusion: "inventory_only",
+      target_repository: {
+        name: targetRepository,
+        commit_sha: String(run.target_commit_sha),
+        matching_file_count: targetMatches.length,
+        sample_paths: targetSample,
+      },
+      standard_repository: {
+        name: standardRepository,
+        commit_sha: String(run.standard_commit_sha),
+        matching_file_count: standardMatches.length,
+        sample_paths: standardSample,
+      },
+      limitations: [
+        "本步骤只检查固定 Commit 的文件路径和文件类型，不代表已审查文件内容。",
+        "文件存在不等于功能已实现；文件缺失也不能单独证明功能未实现。",
+        "语义符合性、运行行为和实际部署状态仍需后续专项检查。",
+      ],
+    },
+    evidence: [
+      {
+        type: "github_tree_inventory",
+        repository: targetRepository,
+        commit_sha: String(run.target_commit_sha),
+        matched_count: targetMatches.length,
+        sample_paths: targetSample,
+      },
+      {
+        type: "github_tree_inventory",
+        repository: standardRepository,
+        commit_sha: String(run.standard_commit_sha),
+        matched_count: standardMatches.length,
+        sample_paths: standardSample,
+      },
+    ],
+  };
+}
+
+function makeReport(steps: Json[], task: Json, run: Json) {
+  const checks = steps.filter((step) => String(step.step_key).startsWith("inspect_"));
+  const completed = checks.filter((step) => step.status === "completed").length;
+  const failed = checks.filter((step) => step.status === "failed").length;
+  const pending = checks.filter((step) => step.status === "pending" || step.status === "running").length;
+  const lines = [
+    "# Agent 仓库检查报告",
+    "",
+    "- 任务：" + String(task.title ?? ""),
+    "- 目标仓库：" + String(task.target_repository ?? ""),
+    "- 目标 Commit：" + String(run.target_commit_sha ?? ""),
+    "- 规范仓库 Commit：" + String(run.standard_commit_sha ?? ""),
+    "- 检查步骤：" + completed + " 完成 / " + failed + " 失败 / " + pending + " 未完成",
+    "",
+    "> 本报告第一版仅包含确定性的仓库文件清单检查，不等同于代码语义审查或功能验证。",
+    "",
+    "## 检查结果",
+  ];
+  for (const step of checks) {
+    const result = step.result && typeof step.result === "object" ? step.result as Json : {};
+    const target = result.target_repository && typeof result.target_repository === "object"
+      ? result.target_repository as Json : {};
+    const standard = result.standard_repository && typeof result.standard_repository === "object"
+      ? result.standard_repository as Json : {};
+    lines.push(
+      "",
+      "### " + String(step.title ?? step.step_key),
+      "- 状态：" + String(step.status),
+      "- 目标仓库匹配文件：" + Number(target.matching_file_count ?? 0),
+      "- 规范仓库匹配文件：" + Number(standard.matching_file_count ?? 0),
+      "- 结论：仅完成文件清单盘点，尚未判断实现状态。",
+    );
+    if (step.error_message) lines.push("- 错误：" + String(step.error_message));
+  }
+  lines.push(
+    "",
+    "## 覆盖范围说明",
+    "- 已检查：上述状态为 completed 的文件清单步骤。",
+    "- 未检查或失败：必须按步骤状态查看，不得解释为未实现。",
+    "- 后续需要补充：文件内容规则检查、API 契约核对、数据库 migration 与运行态验证。",
+  );
+  return {
+    result: {
+      report_markdown: lines.join("\n"),
+      coverage: { total: checks.length, completed, failed, pending },
+      report_type: "deterministic_inventory_v1",
+    },
+    evidence: checks.map((step) => ({
+      step_key: step.step_key,
+      status: step.status,
+      result: step.result ?? {},
+    })),
+  };
+}
+
+async function executeNextStep(runId: string, username: string, requestId: string) {
+  const run = await getOwnedRun(runId, username, requestId);
+  const runStatus = String(run.status);
+  if (runStatus === "paused") throw new ApiError(409, "RUN_PAUSED");
+  if (runStatus === "completed") return { run_id: runId, status: "completed", next_step_available: false };
+  if (runStatus === "failed") throw new ApiError(409, "RUN_FAILED");
+  if (!["queued", "running"].includes(runStatus)) throw new ApiError(409, "INVALID_STATE_TRANSITION");
+
+  const task = await getOwnedTask(String(run.task_id), username, requestId);
+  const allSteps = await db<Json[]>(
+    "agent_run_steps?select=*&run_id=eq." + queryValue(runId) + "&order=step_order.asc",
+    "GET", undefined, requestId,
+  );
+  if (!Array.isArray(allSteps) || !allSteps.length) throw new ApiError(409, "RUN_HAS_NO_STEPS");
+
+  const pending = allSteps.find((item) => item.status === "pending");
+  if (!pending) {
+    const summary = allSteps.find((item) => item.step_key === "summarize");
+    if (summary?.status === "completed") {
+      await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
+        status: "completed", finished_at: new Date().toISOString(),
+      }, requestId);
+      await db<Json[]>("agent_tasks?id=eq." + queryValue(String(task.id)), "PATCH", {
+        status: "completed", updated_at: new Date().toISOString(),
+      }, requestId);
+      return { run_id: runId, status: "completed", next_step_available: false };
+    }
+    throw new ApiError(409, "NO_PENDING_STEP");
+  }
+
+  const claimed = await db<Json[]>(
+    "agent_run_steps?id=eq." + queryValue(String(pending.id)) + "&status=eq.pending&select=*",
+    "PATCH",
+    { status: "running", started_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    requestId,
+  );
+  if (!Array.isArray(claimed) || !claimed[0]) throw new ApiError(409, "STEP_ALREADY_CLAIMED");
+
+  await db<Json[]>(
+    "agent_task_runs?id=eq." + queryValue(runId) + "&status=in.(queued,running)",
+    "PATCH",
+    { status: "running", started_at: run.started_at ?? new Date().toISOString() },
+    requestId,
+  );
+
+  try {
+    let output: { result: Json; evidence: unknown[] };
+    if (pending.step_key === "summarize") {
+      const refreshed = await db<Json[]>(
+        "agent_run_steps?select=*&run_id=eq." + queryValue(runId) + "&order=step_order.asc",
+        "GET", undefined, requestId,
+      );
+      output = makeReport(Array.isArray(refreshed) ? refreshed : [], task, run);
+    } else {
+      output = await executeInventoryStep(pending, task, run, requestId);
+    }
+
+    await db<Json[]>("agent_run_steps?id=eq." + queryValue(String(pending.id)), "PATCH", {
+      status: "completed",
+      result: output.result,
+      evidence: output.evidence,
+      finished_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      error_code: null,
+      error_message: null,
+    }, requestId);
+
+    const remaining = await db<Json[]>(
+      "agent_run_steps?select=id,status&run_id=eq." + queryValue(runId) + "&status=eq.pending",
+      "GET", undefined, requestId,
+    );
+    const nextAvailable = Array.isArray(remaining) && remaining.length > 0;
+    if (!nextAvailable) {
+      await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
+        status: "completed", finished_at: new Date().toISOString(),
+      }, requestId);
+      await db<Json[]>("agent_tasks?id=eq." + queryValue(String(task.id)), "PATCH", {
+        status: "completed", updated_at: new Date().toISOString(),
+      }, requestId);
+    }
+    return {
+      run_id: runId,
+      step_id: pending.id,
+      step_key: pending.step_key,
+      step_status: "completed",
+      run_status: nextAvailable ? "running" : "completed",
+      next_step_available: nextAvailable,
+      result: output.result,
+    };
+  } catch (error) {
+    const code = error instanceof ApiError ? error.code : "WORKER_STEP_FAILED";
+    await db<Json[]>("agent_run_steps?id=eq." + queryValue(String(pending.id)), "PATCH", {
+      status: "failed",
+      error_code: code,
+      error_message: "Worker could not complete this step. Review the request logs before retrying.",
+      finished_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }, requestId).catch(() => null);
+    await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
+      status: "failed",
+      error_code: code,
+      error_message: "A Worker step failed.",
+      finished_at: new Date().toISOString(),
+    }, requestId).catch(() => null);
+    await db<Json[]>("agent_tasks?id=eq." + queryValue(String(task.id)), "PATCH", {
+      status: "failed", updated_at: new Date().toISOString(),
+    }, requestId).catch(() => null);
+    throw error;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const requestId = crypto.randomUUID();
   const origin = req.headers.get("origin");
@@ -447,6 +724,13 @@ Deno.serve(async (req: Request) => {
     match = route.match(/^\/agent\/runs\/([^/]+)$/);
     if (match && req.method === "GET") {
       return response({ data: await runDetail(match[1], credentials.username, requestId), request_id: requestId }, 200, origin, requestId);
+    }
+    match = route.match(/^\/agent\/runs\/([^/]+)\/execute$/);
+    if (match && req.method === "POST") {
+      const body = await readJson(req);
+      assertKeys(body, []);
+      const result = await executeNextStep(match[1], credentials.username, requestId);
+      return response({ data: result, request_id: requestId }, 200, origin, requestId);
     }
     match = route.match(/^\/agent\/runs\/([^/]+)\/(pause|resume)$/);
     if (match && req.method === "POST") {
