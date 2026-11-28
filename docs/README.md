@@ -25,7 +25,7 @@
 - [Agent 工作流实施指南](agent-workflow.md)：PowerShell 与 Claude Code 的当前单 Agent 自动化实践，以及 Master Agent / Worker Agent 多 Agent 架构规划。
 - [AI Agent 系统设计](ai-agent-system.md)：慢慢计划独立 Agent 执行器、02:00 JST 调度、无 AI 文档审查、断点续查、报告、AI 账号与预算管理的架构基线。
 - [AI 工作管理模块设计](ai-work-management.md)：AI 工具/账号资料库、桌面端列表、官网点击统计、人工工作调度、使用记录及本地/云端手动同步规范。
-- [Git 分支工作流](git-branching-workflow.md)：development 日常开发、main 合并许可和 Agent 分支保护规则。
+- [Git 分支与日常开发规则](git-branching-workflow.md)：main 唯一日常开发分支、按需验证和正式部署确认规则。
 - [夜间 E2E 测试说明](nightly-e2e-testing.md)：现有自动化测试运行说明。
 
 ## 数据库脚本
