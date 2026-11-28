@@ -1,3 +1,13 @@
+# V10.73.0 Admin Tool Organization and AI Work Management Phase 1 — 2026-11-28
+
+- Grouped test screens, repository management, account and sync, category management, Trash, Archived, planner JSON import/export, and system diagnostics in the administrator interface; these management entries are hidden in the personal interface.
+- Added an AI Work Management workspace entry. Moved module navigation to the second row and placed Development Diary after Memo.
+- Preserved the existing Agent automation workspace and renamed its entry to “Agent Workflow” to distinguish it from the AI tool library.
+- AI Work Management Phase 1 adds ten initial AI tools, an isolated local library, tool create/edit/hide/delete, multiple account management, rate-limit recovery reminders, search/filtering, and website click counts.
+- AI data uses a dedicated LocalStorage key and is excluded from planner JSON backups and other module sync. Passwords, tokens, and API keys are not stored.
+- Work scheduling, usage logs, manual cloud sync, and JSON migration remain for later phases. No cloud table or API was created.
+- Updated Chinese, English, and Japanese text, Service Worker cache, and version declarations. Browser acceptance and Pages deployment remain to be confirmed.
+
 # V10.72.1 Fail-Closed Local Data Protection — 2026-11-28
 
 - Planner: invalid local JSON, plan records, recycle-bin records, or completion metadata now preserve the original localStorage value and lock writes for the affected module. The lock is cleared only by a validated backup import or an explicitly confirmed valid cloud restore.
