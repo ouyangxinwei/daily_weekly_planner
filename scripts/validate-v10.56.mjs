@@ -131,6 +131,6 @@ assert.match(html, /APP_VERSION='V10.(?:58_company_complete_reads|59_company_ent
 const sw = fs.readFileSync('sw.js', 'utf8');
 assert.match(sw, /daily-weekly-planner-v10-(?:58-|59-|60-|61-company-status-history|62-business-activity-history|63-business-decision-center|64-customer-project-contributions|65-customer-relationship-health|66-project-delivery-analysis|68-repository-cloud|69-ui-role-mode|70-repository-bulk-clear|71-learning-meetings|72-entry-learning-meetings)/);
 assert.ok(sw.includes("'./company-records-rules.js'") && sw.includes("'./company-records-workspace.js'"));
-assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0', '10.65.0', '10.66.0', '10.68.0', '10.69.0', '10.70.0', '10.71.0', '10.72.0'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
+assert.ok(['10.58.0', '10.59.0', '10.60.0', '10.61.0', '10.62.0', '10.63.0', '10.64.0', '10.65.0', '10.66.0', '10.68.0', '10.69.0', '10.70.0', '10.71.0', '10.72.0', '10.72.1'].includes(fs.readFileSync('VERSION', 'utf8').trim()));
 
 console.log('V10.56 company transactions, documents and attachments validation passed.');

@@ -1,3 +1,10 @@
+# V10.72.1 Fail-Closed Local Data Protection — 2026-11-28
+
+- Planner: invalid local JSON, plan records, recycle-bin records, or completion metadata now preserve the original localStorage value and lock writes for the affected module. The lock is cleared only by a validated backup import or an explicitly confirmed valid cloud restore.
+- Learning meetings: corrupted JSON, non-array payloads, or any malformed record put the whole dataset into recovery mode instead of silently filtering records. Invalid import rows stop preview; recovery requires preview and explicit confirmation.
+- Adds Playwright regression coverage for corrupted data, mixed-validity arrays, blocked writes, and explicit recovery; included in GitHub Actions.
+- Bumps VERSION and package.json to 10.72.1; retains the V10.72 runtime feature identifier and existing Service Worker cache family.
+
 # V10.72.0 Entry Routing and Learning Meetings Integration — 2026-11-26
 
 - Learning meetings: JSON format errors are shown only below the paste box in the AI helper (with a hint to check quotes, commas and brackets) and are cleared when leaving it; they no longer appear on the list or form. Local data read failures are only logged to the console.
