@@ -317,12 +317,14 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 本次已完成最小数据模型、状态转换、SQL 结构基线和 API 契约定义；尚未创建正式 migration、部署 `agent-api` 或修改托管数据库。
 
-在正式生成/应用 migration 前发现一项需要先处理的现状差异：
+在正式生成/应用 Agent migration 前，对此前发现的学习会议 migration 差异进行了只读核对：
 - Git 仓库包含 `supabase/migrations/20261127090000_learning_meetings_cloud.sql`。
-- 当前 Supabase 迁移历史列表最新记录为 `20261126004847`，没有列出上述 2026-11-27 migration。
-- 但数据库当前已经存在 `public.learning_meetings_data` 表。
+- Supabase migration ledger 最新记录为 `20261126004847`，且没有 `20261127090000` 记录。
+- 远程数据库已存在 `public.learning_meetings_data`，并且实际 DDL 已包含迁移文件定义的主键、外键、数组类型检查和最多 1000 条的数量检查约束。
+- 两个 `learning_meetings_get_data / learning_meetings_put_data` 函数均存在，函数体与迁移文件的核心逻辑一致。
+- 表已启用 RLS；`anon` 与 `authenticated` 无表 SELECT 权限，也无 GET RPC 执行权限；`service_role` 有对应权限。
 
-这表示仓库 migration 文件、远程 migration ledger 与实际 schema 不能直接假定完全一致。为避免迁移冲突，本阶段不向生产数据库追加 Agent 表；下一步先核对 migration 状态和真实 DDL，再生成正式 migration。此项不影响本阶段 API 契约和数据模型定稿。
+**当前确认的问题是 migration ledger 缺少记录，而不是远程表结构缺少迁移定义。** 这说明该迁移很可能已在数据库执行，但没有在当前 migration ledger 登记；目前不直接修改 ledger，也不重复执行原 migration，避免重放已有 DDL 或伪造迁移历史。后续应通过 Supabase CLI 的 migration repair 流程将已核实执行过的版本登记为 applied，并再次核对 migration list。当前环境没有可用的本地 Supabase CLI 执行入口，因此本次只完成只读核验，未改动托管数据库。
 
 ## 10. 后续实施顺序
 
