@@ -1,7 +1,7 @@
 {
   "name": "daily-weekly-planner",
   "private": true,
-  "version": "10.73.2",
+  "version": "10.73.3",
   "type": "module",
   "scripts": {
     "test:e2e": "playwright test",
