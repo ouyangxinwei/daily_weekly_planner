@@ -84,6 +84,25 @@ async function authenticate(req: Request, requestId: string) {
   return credentials;
 }
 
+async function sha256Hmac(value: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function applyRateLimit(req: Request, requestId: string) {
+  const { key } = config();
+  const ip = (req.headers.get("cf-connecting-ip") ?? "unknown").slice(0, 128);
+  const ipHash = await sha256Hmac(ip || "unknown", key);
+  const result = await rpc<{ allowed: boolean }>("company_consume_ip_rate_limit", {
+    p_ip_hash: ipHash, p_max_requests: 30, p_window_seconds: 60,
+  }, requestId);
+  if (!result || result.allowed !== true) throw new ApiError(429, "RATE_LIMITED");
+}
+
 async function rpc<T>(name: string, args: Json, requestId: string): Promise<T> {
   const { url, key } = config();
   const headers: Record<string, string> = {
@@ -402,6 +421,7 @@ Deno.serve(async (req: Request) => {
     const functionIndex = segments.indexOf("agent-api");
     if (functionIndex >= 0) segments.splice(0, functionIndex + 1);
     const route = "/" + segments.join("/");
+    await applyRateLimit(req, requestId);
     const credentials = await authenticate(req, requestId);
 
     if (route === "/agent/tasks" && req.method === "POST") {
