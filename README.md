@@ -24,6 +24,7 @@
 | 仓库管理模块 | [仓库管理说明](docs/repository-management.md) |
 | 当前开发状态 | [当前开发交接](docs/current-handoff.md) |
 | Agent 自动化工作流（PLAN.md + run-plan.ps1） | [Agent 工作流实施指南](docs/agent-workflow.md) |
+| AI Agent 管理、独立调度与文档审查系统设计 | [AI Agent 系统设计](docs/ai-agent-system.md) |
 | 个人公司网站的设计、数据库、API 和阶段记录 | [公司网站开发文档](docs/company-website/README.md) |
 
 ## 当前功能概览
