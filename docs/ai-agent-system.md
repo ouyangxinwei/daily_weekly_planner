@@ -353,7 +353,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 - documentation / code / api / database 四类检查，第一版只做确定性的文件路径与扩展名盘点，保存两边仓库的匹配数量、最多 20 条路径样本和 Commit SHA。
 - 单个检查失败时将该 Step 标记 failed、保留错误码，然后继续后续步骤；Master 汇总步骤生成 Markdown 报告，明确完成数、失败数和未完成数。
 - 最后一个 Step 完成后将 Run 与 Task 标记 completed；报告类型为 `deterministic_inventory_v1`。
-- 如果执行请求中断并留下 running Step，可通过 pause → resume 恢复；resume 会把遗留 running Step 重置为 pending，已完成 Step 不会重跑。
+- 如果执行请求中断并留下 running Step，可通过 pause → resume 恢复；resume 会把遗留 running Step 重置为 pending，已完成 Step 不会重跑。执行中的 Step 不会被强制中断，暂停请求在当前 Step 保存后生效。
 - 没有新增表、队列、并行 Worker、AI API 或代码写入能力。
 
 **第一版能力边界：** 当前结果是仓库文件清单盘点，不是规范语义审查、代码质量审查、API 行为测试、数据库实际结构验证或部署验证。文件存在不代表功能已实现，文件缺失也不单独证明功能未实现。GitHub Tree 返回截断或不可用时，步骤记录为失败，不将不完整数据当成“未找到”。
