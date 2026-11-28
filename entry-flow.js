@@ -14,6 +14,15 @@
 
   function enterWorkspace(role) {
     if (!window.PlannerRole?.setRole(role)) return;
+    if (role === 'admin') {
+      // Admin mode always opens the management toolbar, regardless of the last personal workspace.
+      delete document.documentElement.dataset.workspace;
+      const tagline = $('brand-tagline');
+      if (tagline) tagline.textContent = '系统管理与维护工具';
+    } else {
+      const tagline = $('brand-tagline');
+      if (tagline) tagline.textContent = '把想做的事，一件件完成';
+    }
     gate.hidden = true;
     app.hidden = false;
     window.dispatchEvent(new CustomEvent('planner-workspace-entry', { detail: { role } }));
