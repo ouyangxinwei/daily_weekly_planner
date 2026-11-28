@@ -1,3 +1,10 @@
+# V10.73.7 Cloud Sync Button Binding Fix — 2026-11-29
+
+- Moved current-module and seven-module upload/download click bindings earlier, before the remaining rendering and data initialization, so a later initialization error cannot leave visible sync buttons inert.
+- Explicitly set the seven-module upload/download buttons to `type="button"` to prevent accidental form submission if the surrounding markup changes.
+- Static code checks are complete; real-browser login, upload, download, and data-integrity acceptance remains pending.
+- Updated runtime version, VERSION, package.json, Service Worker cache, and all three changelogs.
+
 # V10.73.6 Page Return Navigation Fix — 2026-11-29
 
 - Fixed the administrator Test Screens route: it now opens in the current tab, and “Return to Admin” no longer sends users to the personal/admin entry chooser.
