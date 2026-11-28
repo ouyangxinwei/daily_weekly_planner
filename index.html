@@ -266,13 +266,25 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <script>
   (()=>{
     'use strict';
-    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',RESULTS_KEY='personal-results:v1',FUTURE_KEY='personal-future:v1',MEMO_KEY='personal-memo:v1',MEMO_MIGRATION_KEY='personal-planner:memo-migration:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',THEME_KEY='personal-planner:theme:v1',SYNC_META_KEY='personal-planner:sync-meta:v1',APP_VERSION='V10.73.7_cloud_sync_button_binding_fix',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
+    const KEY='personal-planner:v1',WORK_KEY='personal-work:v1',LANGUAGE_KEY='personal-language:v1',ORGANIZE_KEY='personal-organizer:v1',RESULTS_KEY='personal-results:v1',FUTURE_KEY='personal-future:v1',MEMO_KEY='personal-memo:v1',MEMO_MIGRATION_KEY='personal-planner:memo-migration:v1',ACTIVE_MODULE_KEY='personal-planner:active-module:v1',THEME_KEY='personal-planner:theme:v1',SYNC_META_KEY='personal-planner:sync-meta:v1',APP_VERSION='V10.73.8_cloud_sync_event_delegation_fix',MAX_BACKUP_BYTES=2*1024*1024,SORT_KEY='personal-planner:sort-mode:v1',CONFIG_KEY='personal-planner:supabase-config:v1',SESSION_KEY='personal-planner:supabase-session:v1';
     const PERIODS={daily:{label:'每日',progress:'今日进度'},daily_random:{label:'每日随机',progress:'今日临时安排'},weekly:{label:'每周',progress:'本周进度'},weekly_random:{label:'每周随机',progress:'本周临时安排'},monthly:{label:'每月',progress:'本月进度'},monthly_random:{label:'每月随机',progress:'本月临时安排'},yearly:{label:'每年',progress:'今年进度'}};
     const RANDOM_BASE={daily_random:'daily',weekly_random:'weekly',monthly_random:'monthly'};
     const GLOBAL_SEARCH_PERIODS=['daily','daily_random','weekly','weekly_random','monthly','monthly_random','yearly'];
     const VALID_PERIODS=Object.keys(PERIODS);
     const PLAN_DEFAULT_CATEGORIES=['学习','生活','健康','财务','兴趣','未分类'],WORK_DEFAULT_CATEGORIES=['待处理','进行中','已完成','工作记录','会议','其他'],LANGUAGE_DEFAULT_CATEGORIES=['英语','德语','俄语','日语','其他'],ORGANIZE_DEFAULT_CATEGORIES=['书籍','电子产品','软件/APP','网站','其他'],RESULTS_DEFAULT_CATEGORIES=['考试成绩','资格证书','学习成果','其他'],FUTURE_DEFAULT_CATEGORIES=['短期目标','中期目标','长期目标','人生愿望','其他'],MEMO_DEFAULT_CATEGORIES=['待整理','工作','外语学习','整理','成绩','未来','计划','其他'];const MODULE_KEYS={plan:KEY,work:WORK_KEY,language:LANGUAGE_KEY,organize:ORGANIZE_KEY,results:RESULTS_KEY,future:FUTURE_KEY,memo:MEMO_KEY},CLOUD_PARTITIONS={plan:null,work:'work',language:'language',organize:'organizer',results:'results',future:'future',memo:'memo'},MODULE_CATEGORIES={plan:PLAN_DEFAULT_CATEGORIES,work:WORK_DEFAULT_CATEGORIES,language:LANGUAGE_DEFAULT_CATEGORIES,organize:ORGANIZE_DEFAULT_CATEGORIES,results:RESULTS_DEFAULT_CATEGORIES,future:FUTURE_DEFAULT_CATEGORIES,memo:MEMO_DEFAULT_CATEGORIES};let DEFAULT_CATEGORIES=PLAN_DEFAULT_CATEGORIES.slice(),activeModule='plan',moduleCache={plan:null,work:null,language:null,organize:null,results:null,future:null,memo:null};
     const $=id=>document.getElementById(id);
+    // Use document-level delegation so the overall sync actions still work if their panel is re-rendered.
+    document.addEventListener('click',event=>{
+      const button=event.target instanceof Element?event.target.closest('#sync-all-upload, #sync-all-download'):null;
+      if(!button)return;
+      event.preventDefault();
+      if(button.dataset.syncRunning==='true')return;
+      button.dataset.syncRunning='true';
+      const action=button.id==='sync-all-upload'?'upload':'download';
+      allCloudMessage(action==='upload'?'已收到整体上传点击，正在启动…':'已收到整体下载点击，正在启动…');
+      const task=action==='upload'?uploadAllCloudState():downloadAllCloudState();
+      Promise.resolve(task).catch(error=>allCloudMessage(error?.message||'整体同步启动失败。')).finally(()=>{delete button.dataset.syncRunning});
+    });
     function updateThemeButtonLabel(){const label=document.documentElement.dataset.theme==='dark'?'切换到白色主题':'切换到黑色主题';const translated=window.PlannerI18n?.t?window.PlannerI18n.t(label):label;$('theme-toggle').textContent=translated;$('theme-toggle').setAttribute('aria-label',translated)}
     function applyTheme(next){const selected=next==='light'?'light':'dark';document.documentElement.dataset.theme=selected;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=selected==='dark'?'#11161e':'#f7f8fc';updateThemeButtonLabel()}
     function initTheme(){let selected='dark';try{const saved=localStorage.getItem(THEME_KEY);if(saved==='light'||saved==='dark')selected=saved}catch(e){}applyTheme(selected);$('theme-toggle').addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme(next);try{localStorage.setItem(THEME_KEY,next)}catch(e){}});window.addEventListener('planner-language-change',updateThemeButtonLabel)}const moduleStorageKey=()=>MODULE_KEYS[activeModule]||KEY;const moduleNoun=()=>({plan:'计划',work:'工作',language:'学习记录',organize:'整理项目',results:'成绩记录',future:'未来目标',memo:'备忘'}[activeModule]||'计划');const moduleRecordLabel=()=>{const noun=moduleNoun();return noun.endsWith('记录')?noun:noun+'记录'};const moduleText=value=>activeModule==='plan'?String(value):String(value).replace(/整理内容|整理项目|整理/g,moduleNoun()).replace(/计划/g,moduleNoun());const askConfirm=message=>window.confirm(moduleText(message));const emptyModuleState=module=>({schemaVersion:1,categories:(MODULE_CATEGORIES[module]||PLAN_DEFAULT_CATEGORIES).slice(),plans:[],completions:{},trash:[]});
@@ -324,8 +336,6 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
     // Bind cloud sync actions before the remaining page initialization. A later UI/render error must not leave visible sync buttons inert.
     $('sync-upload')?.addEventListener('click',uploadCloudState);
     $('sync-download')?.addEventListener('click',downloadCloudState);
-    $('sync-all-upload')?.addEventListener('click',uploadAllCloudState);
-    $('sync-all-download')?.addEventListener('click',downloadAllCloudState);
     function validPriority(value){return Number.isInteger(value)&&value>=1&&value<=5?value:1}
     const SORT_MODES=['priority-desc','default','title','created-desc','created-asc'];
     function loadSortMode(){try{const saved=localStorage.getItem(SORT_KEY);return SORT_MODES.includes(saved)?saved:'priority-desc'}catch(error){return 'priority-desc'}}
