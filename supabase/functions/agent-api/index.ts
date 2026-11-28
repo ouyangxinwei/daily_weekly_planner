@@ -286,8 +286,38 @@ async function taskDetail(taskId: string, username: string, requestId: string) {
   return { ...task, runs: Array.isArray(runs) ? runs : [] };
 }
 
+async function latestCommitSha(repository: string, requestId: string): Promise<string> {
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw new ApiError(400, "INVALID_REPOSITORY");
+  let res: Response;
+  try {
+    res = await fetch("https://api.github.com/repos/" + repository + "/commits?per_page=1", {
+      headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    console.error("agent-api GitHub revision lookup failed", { repository, requestId });
+    throw new ApiError(503, "SOURCE_REVISION_UNAVAILABLE");
+  }
+  if (!res.ok) {
+    console.error("agent-api GitHub revision lookup rejected", { repository, status: res.status, requestId });
+    throw new ApiError(503, "SOURCE_REVISION_UNAVAILABLE");
+  }
+  const data = await res.json();
+  const sha = Array.isArray(data) && data[0] && typeof data[0].sha === "string" ? data[0].sha : "";
+  if (!/^[0-9a-f]{40}$/i.test(sha)) throw new ApiError(503, "SOURCE_REVISION_UNAVAILABLE");
+  return sha;
+}
+
 async function createRun(taskId: string, username: string, requestId: string) {
   const task = await getOwnedTask(taskId, username, requestId);
+  const scope = task.scope && typeof task.scope === "object" && !Array.isArray(task.scope)
+    ? task.scope as Json : {};
+  const standardRepository = typeof scope.standard_repository === "string"
+    ? scope.standard_repository : "ouyangxinwei/oooo_Dev_Standard";
+  const [standardCommitSha, targetCommitSha] = await Promise.all([
+    latestCommitSha(standardRepository, requestId),
+    latestCommitSha(String(task.target_repository), requestId),
+  ]);
   const latest = await db<Json[]>(
     "agent_task_runs?select=run_number,status&task_id=eq." + queryValue(taskId) +
       "&order=run_number.desc&limit=1",
@@ -301,6 +331,8 @@ async function createRun(taskId: string, username: string, requestId: string) {
     task_id: taskId,
     run_number: previous + 1,
     status: "queued",
+    standard_commit_sha: standardCommitSha,
+    target_commit_sha: targetCommitSha,
   }, requestId);
   if (!Array.isArray(runRows) || !runRows[0]) throw new ApiError(500, "DATABASE_ERROR");
   const run = runRows[0];
@@ -317,7 +349,11 @@ async function createRun(taskId: string, username: string, requestId: string) {
     }, requestId).catch(() => null);
     throw error;
   }
-  return { ...run, steps: makeSteps(task) };
+  const savedSteps = await db<Json[]>(
+    "agent_run_steps?select=*&run_id=eq." + queryValue(String(run.id)) + "&order=step_order.asc",
+    "GET", undefined, requestId,
+  );
+  return { ...run, steps: Array.isArray(savedSteps) ? savedSteps : [] };
 }
 
 async function runDetail(runId: string, username: string, requestId: string) {
