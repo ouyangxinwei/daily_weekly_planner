@@ -228,11 +228,12 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       const list = raw === null ? [] : JSON.parse(raw);
       if (!Array.isArray(list)) throw new TypeError('stored data must be a JSON array');
-      meetings = list.map(m => {
+      meetings = list.map((m, index) => {
         const n = normalize(m, m && m.id ? m : null);
+        if (!n) throw new TypeError('invalid meeting record at index ' + index);
         if (n && typeof m.updatedAt === 'string') n.updatedAt = m.updatedAt; // keep stored timestamp on load
         return n;
-      }).filter(Boolean);
+      });
       loaded = true;
       messageDanger = false;
     } catch (e) {
@@ -243,7 +244,11 @@
       console.warn('[learning-meetings] ' + message);
     }
   }
-  async function persist(next, okMessage) {
+  async function persist(next, okMessage, options = {}) {
+    if (!loaded && options.recovery !== true) {
+      setMessage(T('errLoad', { m: '请先通过有效 JSON 导入恢复原始数据' }), true);
+      return false;
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       meetings = next;
@@ -388,9 +393,10 @@
     const ok = []; let skip = 0; let outside = 0;
     for (const raw of data) {
       const m = normalize(raw);
-      if (m && range && (m.startDate > range.end || (m.endDate || m.startDate) < range.start)) { outside++; continue; }
-      const key = m && m.title + '|' + m.startDate;
-      if (!m || existing.has(key)) { skip++; continue; }
+      if (!m) throw new TypeError('导入数据第 ' + (ok.length + skip + outside + 1) + ' 条记录格式无效；为避免静默丢失，未生成导入预览。');
+      if (range && (m.startDate > range.end || (m.endDate || m.startDate) < range.start)) { outside++; continue; }
+      const key = m.title + '|' + m.startDate;
+      if (existing.has(key)) { skip++; continue; }
       existing.add(key); ok.push(m);
     }
     return { ok, skip, outside, month: range ? month : null };
@@ -601,7 +607,7 @@
   async function importPending() {
     if (!pendingImport || !pendingImport.ok.length) { setMessage(T('errNothing'), true); return; }
     const n = pendingImport.ok.length;
-    if (await persist(meetings.concat(pendingImport.ok), T('imported', { n }))) { pendingImport = null; aiSource = ''; view = 'list'; render(); }
+    if (await persist(meetings.concat(pendingImport.ok), T('imported', { n }), { recovery: !loaded })) { pendingImport = null; aiSource = ''; view = 'list'; render(); }
   }
 
   async function openDialog() {

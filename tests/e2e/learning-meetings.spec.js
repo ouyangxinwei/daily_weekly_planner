@@ -48,3 +48,45 @@ test('learning meetings reject a non-array storage payload without overwriting i
   const stored = await page.evaluate(() => localStorage.getItem('planner:learning_meetings'));
   expect(stored).toBe(invalidShape);
 });
+
+
+test('learning meetings fail closed when one record in an otherwise valid array is malformed', async ({ page }) => {
+  const mixed = JSON.stringify([
+    { id: 'lm-valid', title: 'Valid meeting', startDate: '2099-05-18' },
+    { id: 'lm-invalid', title: '', startDate: 'not-a-date' }
+  ]);
+  await page.addInitScript(value => localStorage.setItem('planner:learning_meetings', value), mixed);
+
+  await openLocalTestApp(page);
+  await page.locator('#open-learning-meetings').click();
+  await expect(page.locator('#learning-meetings-root')).toContainText(/读取本地数据失败|Could not read local data|ローカルデータの読み込みに失敗/);
+  expect(await page.evaluate(() => localStorage.getItem('planner:learning_meetings'))).toBe(mixed);
+  await expect(page.locator('#learning-meetings-root button')).toHaveCount(1);
+});
+
+test('learning meetings recover a locked store only after preview and explicit import confirmation', async ({ page }) => {
+  const corrupted = '[{"title":';
+  await page.addInitScript(value => localStorage.setItem('planner:learning_meetings', value), corrupted);
+
+  await openLocalTestApp(page);
+  await page.locator('#open-learning-meetings').click();
+  await expect(page.locator('#learning-meetings-root')).toContainText(/读取本地数据失败|Could not read local data|ローカルデータの読み込みに失敗/);
+
+  const chooserPromise = page.waitForEvent('filechooser');
+  await page.locator('#learning-meetings-root button').click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: 'meetings-recovery.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify([{ title: 'Recovered meeting', startDate: '2099-05-18' }]))
+  });
+
+  await expect(page.locator('#learning-meetings-root')).toContainText('Recovered meeting');
+  const confirmButton = page.locator('#learning-meetings-root button').filter({ hasText: /导入 1 条|Import 1|1 件をインポート/ });
+  await expect(confirmButton).toBeVisible();
+  await confirmButton.click();
+
+  await expect(page.locator('#learning-meetings-root')).toContainText('Recovered meeting');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('planner:learning_meetings')));
+  expect(stored.some(item => item.title === 'Recovered meeting')).toBe(true);
+});
