@@ -3,7 +3,7 @@
 - Planner: invalid local JSON, plan records, recycle-bin records, or completion metadata now preserve the original localStorage value and lock writes for the affected module. The lock is cleared only by a validated backup import or an explicitly confirmed valid cloud restore.
 - Learning meetings: corrupted JSON, non-array payloads, or any malformed record put the whole dataset into recovery mode instead of silently filtering records. Invalid import rows stop preview; recovery requires preview and explicit confirmation.
 - Adds Playwright regression coverage for corrupted data, mixed-validity arrays, blocked writes, and explicit recovery; included in GitHub Actions.
-- Aligns VERSION, package.json, runtime version, and Service Worker cache version at 10.72.1.
+- Bumps VERSION and package.json to 10.72.1; retains the V10.72 runtime feature identifier and existing Service Worker cache family.
 
 # V10.72.0 Entry Routing and Learning Meetings Integration — 2026-11-26
 
