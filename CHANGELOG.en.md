@@ -1,3 +1,9 @@
+# V10.73.3 Plan Workspace Interaction Fix — 2026-11-29
+
+- Removed the event binding for the deleted PDF export control, which previously threw during initialization and prevented later planner controls from being wired.
+- Fixed cloud configuration code that still accessed fields from the removed startup login form.
+- Planner creation, editing, search, and JSON backup handlers can now finish initialization; JSON backup visibility still follows the existing role-based UI rules.
+
 # V10.73.2 Personal UI Interaction Fix — 2026-11-29
 
 - Bind theme and planner module navigation handlers before local data loading/rendering so a data-loading or rendering error cannot leave core controls uninitialized.
