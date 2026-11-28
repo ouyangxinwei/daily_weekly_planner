@@ -1,9 +1,9 @@
 name: Validate JavaScript, Memo migration, and Module Star Statistics
 
+# Automatic push and pull-request validation disabled to conserve Actions minutes.
+# Keep manual execution available when validation is explicitly requested.
 on:
-  push:
-    branches: [main, development, feat/v10.27-move-plan-to-results-future]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -100,7 +100,7 @@ jobs:
           node scripts/validate-v10.70.mjs
           node scripts/validate-v10.59.mjs
           node scripts/validate-v10.58.mjs
-          node scripts/test-one-star-memo-migration.mjs
+          node tests/test-one-star-memo-migration.mjs
 
   repository-navigation-e2e:
     runs-on: ubuntu-24.04
