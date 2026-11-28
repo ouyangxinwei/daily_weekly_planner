@@ -223,6 +223,7 @@ grant select, insert, update, delete on public.agent_run_steps to service_role;
 | GET | `/agent/runs/{run_id}` | 读取 Run 与有序 Steps | 200 |
 | POST | `/agent/runs/{run_id}/pause` | 请求暂停并保存进度 | 200 |
 | POST | `/agent/runs/{run_id}/resume` | 从已保存进度恢复 | 202 |
+| POST | `/agent/runs/{run_id}/execute` | 串行执行一个 Step 并保存结果 | 200 |
 
 Worker 执行 Step、写入 Step 结果和汇总 Task 状态属于后端内部操作，不开放给浏览器直接调用。第一版没有公开的任意 Step 修改、删除 Task 或代码写入 API。
 
@@ -284,9 +285,9 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 1. **创建任务**：用户选择目标仓库、任务类型和检查范围。
 2. **创建 Run**：Master 固定规范仓库与目标仓库 Commit SHA，并生成有序 Steps。
-3. **执行步骤**：Master 按顺序把当前 Step 交给 Worker。
+3. **执行步骤**：Master 调用 `/agent/runs/{run_id}/execute`，Worker 每次只执行一个 Step；完成后返回是否还有下一步。
 4. **保存进度**：每个 Step 完成后立即保存状态、结果和必要证据。
-5. **处理中断**：失败或运行时间到达安全上限时，保存当前进度并暂停；下次从第一个未完成 Step 继续。
+5. **处理中断**：每次调用只执行一个 Step，执行后立即保存；若请求意外中断，可先暂停再恢复，恢复时将遗留的 running Step 重置为 pending。检查失败会保留失败证据并继续后续步骤，最终报告明确显示失败和未完成项。
 6. **汇总报告**：所有必要步骤完成后，Master 汇总结果，生成 Markdown 报告并关联 Run。
 
 报告状态必须区分「已找到 / 已实现」「部分实现」「未实现」「不一致」「待验证」「未检查」「检查失败」。没有完成检查或证据不足时，不得判定为未实现。每次 Run 记录规范库与目标仓库的 Commit SHA，确保结果可追溯。
@@ -353,3 +354,23 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 7. 核心流程稳定后，再增加定时调度和可选 AI 能力。
 
 **本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
+
+
+### 9.2 Worker 核心执行能力（Phase 5）
+
+已在 development 实现第一版串行 Worker，代码位于 `supabase/functions/agent-api/index.ts`：
+
+- 新增 `POST /agent/runs/{run_id}/execute`，仍由现有 Basic Auth、IP 限流和 Task/Run 所有权校验保护。
+- 每次请求最多领取并执行一个 pending Step；通过 `status=eq.pending` 条件更新领取 Step，避免两个并发请求重复执行同一步骤。
+- Worker 根据 Run 中固定的 `target_commit_sha` 与 `standard_commit_sha` 读取 GitHub Tree，不跟随仓库最新分支漂移。
+- documentation / code / api / database 四类检查，第一版只做确定性的文件路径与扩展名盘点，保存两边仓库的匹配数量、最多 20 条路径样本和 Commit SHA。
+- 单个检查失败时将该 Step 标记 failed、保留错误码，然后继续后续步骤；Master 汇总步骤生成 Markdown 报告，明确完成数、失败数和未完成数。
+- 最后一个 Step 完成后将 Run 与 Task 标记 completed；报告类型为 `deterministic_inventory_v1`。
+- 如果执行请求中断并留下 running Step，可通过 pause → resume 恢复；resume 会把遗留 running Step 重置为 pending，已完成 Step 不会重跑。
+- 没有新增表、队列、并行 Worker、AI API 或代码写入能力。
+
+**第一版能力边界：** 当前结果是仓库文件清单盘点，不是规范语义审查、代码质量审查、API 行为测试、数据库实际结构验证或部署验证。文件存在不代表功能已实现，文件缺失也不单独证明功能未实现。GitHub Tree 返回截断或不可用时，步骤记录为失败，不将不完整数据当成“未找到”。
+
+**运行方式：** 创建 Run 后，调用 execute 一次执行一个 Step；当响应 `next_step_available=true` 时继续调用，直到 Run completed。可由未来管理界面循环调用，也可暂时手动调用。当前没有自动调度器，也没有部署线上函数。
+
+**验证状态：** 已完成代码静态核对和 API 路由/状态逻辑检查；当前环境没有 Deno 与 Supabase CLI，未完成 Deno 类型检查、Edge Function 本地运行、数据库集成测试或线上部署。Agent 三张表尚未创建，因此这份 Worker 代码暂不能连接真实运行数据。
