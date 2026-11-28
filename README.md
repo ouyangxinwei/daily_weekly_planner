@@ -2,7 +2,7 @@
 
 个人计划与工作管理 PWA，持续演进为包含学习、资料整理和个人公司业务管理的综合工作区。
 
-- **当前仓库版本：** `10.72.0`（以根目录 `VERSION` 为准）
+- **当前仓库版本：** `10.72.1`（以根目录 `VERSION` 为准）
 - **在线入口：** https://ouyangxinwei.github.io/daily_weekly_planner/
 - **主要技术形态：** 静态 HTML / CSS / JavaScript，部署到 GitHub Pages，支持 PWA。
 - **日常开发分支：** `development`；**稳定部署分支：** `main`。
