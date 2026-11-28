@@ -16,7 +16,7 @@ for (const name of ['uploadCloudState', 'downloadCloudState', 'uploadAllCloudSta
 }
 assert.match(html, /assertCloudUnchanged\(/, 'cloud snapshot is rechecked after confirmation');
 assert.match(html, /_syncMeta/, 'cloud module timestamps are carried in snapshot metadata');
-assert.match(html, /function save\(nextState=state\)[\s\S]*?writeLocalSyncMeta/, 'local saves update independent sync metadata');
+assert.match(html, /function save\(nextState=state(?:,options=\{\})?\)[\s\S]*?writeLocalSyncMeta/, 'local saves update independent sync metadata and support guarded recovery writes');
 assert.match(i18n, /Pre-sync data check/);
 assert.match(i18n, /同期前のデータ確認/);
 assert.match(sw, /daily-weekly-planner-v10-/);
