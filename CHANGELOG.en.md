@@ -1,3 +1,11 @@
+# V10.73.6 Page Return Navigation Fix — 2026-11-29
+
+- Fixed the administrator Test Screens route: it now opens in the current tab, and “Return to Admin” no longer sends users to the personal/admin entry chooser.
+- Added an `?entry=admin` return route so Test Screens restores the administrator workspace without logging out.
+- The Technical Research Lab home now returns to the Test Screens directory. IndexedDB and Wiki subpages now return to the Lab home instead of the project entry.
+- Audited app dialogs: ordinary close actions preserve the underlying page; closing a runtime-log detail keeps the log window open; internal back/close flows in Learning Meetings, AI Management, and Company Business retain their parent view.
+- Updated runtime version, VERSION, package.json, Service Worker cache, and all three changelogs. Static navigation checks are complete; real-browser click acceptance remains pending.
+
 # V10.73.5 Agent Admin Entry and Admin Logout — 2026-11-29
 
 - Moved the Agent workflow entry from personal module navigation into the administrator management toolbar.
