@@ -2,6 +2,8 @@
 
 - 文档状态：架构设计基线（2026-11-28）
 - 设计基线分支：`main`
+- 代码审查基线：`main` `04270435bd839041577e5ec361fc79611b461da0`；当时 `development` 为 `2b46bc1b31d4767ced697767f8cb460750dd35e1`
+- Supabase 检查基线：项目 `kopvznygsqsheibsjjvv`，PostgreSQL 17.11.0.003；数据库迁移最新记录 `20261126004847`（repository_management_cloud）
 - 应用版本基线：`10.72.1`（本次仅维护 Markdown，不修改应用版本）
 - 规范来源仓库：`ouyangxinwei/oooo_Dev_Standard`
 - 审查目标仓库：`ouyangxinwei/daily_weekly_planner`
