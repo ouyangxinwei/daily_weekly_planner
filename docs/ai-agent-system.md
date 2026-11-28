@@ -362,6 +362,23 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 **验证状态：** 已完成代码静态核对和 API 路由/状态逻辑检查；当前环境没有 Deno 与 Supabase CLI，未完成 Deno 类型检查、Edge Function 本地运行、数据库集成测试或线上部署。Agent 三张表尚未创建，因此这份 Worker 代码暂不能连接真实运行数据。
 
+
+
+### 9.3 Phase 5 数据库接通与部署状态（2026-11-28）
+
+**数据库：** Supabase 项目 `kopvznygsqsheibsjjvv` 中已确认存在 `agent_tasks`、`agent_task_runs`、`agent_run_steps` 三张表，字段、主外键、状态约束、JSONB 检查、索引与 Phase 4 结构基线一致。三张表 RLS 均启用；没有 anon/authenticated 直接访问权限或 RLS policy；service_role 具有后端所需 CRUD 权限。应用前确认三张表当前均为 0 行，没有清理或覆盖任何数据。
+
+**Migration 历史说明：** 本次第一次提交 DDL 时，数据库返回 `42P07 relation already exists`，说明表在本次 DDL 前已存在；该调用仍在 migration ledger 留下版本 `20261128112330`。随后使用幂等 DDL 成功登记版本 `20261128112419`，补齐并确认了 Step 顺序索引及完整权限设置。仓库保留与两个远端版本对应的 migration 文件：
+- `supabase/migrations/20261128112330_agent_core_tables.sql`
+- `supabase/migrations/20261128112419_agent_core_tables.sql`
+
+两条远端记录名称相同，是本次工具调用留下的历史现象；不要手工删除或伪造 migration ledger。后续迁移管理应以这两个版本和仓库文件为基准核对。
+
+**部署：** `agent-api` 已部署到 Supabase，状态 ACTIVE，版本 1，`verify_jwt=false`。这是因为函数内部自行执行现有 Basic Auth 验证、IP 限流和 Task/Run 所有权检查，不代表业务端点匿名开放。函数入口：
+`https://kopvznygsqsheibsjjvv.supabase.co/functions/v1/agent-api`
+
+**端到端测试准备：** 新增 `scripts/agent-api-smoke-test.ps1`，默认使用公开小仓库 `octocat/Hello-World`，只检查 documentation 与 code 两个 Step；脚本会安全隐藏式提示用户输入现有慢慢计划密码，并执行 Task → Run → 第一个 Step → Pause → Resume → 剩余 Step → 报告与数据库持久化读取验证。密码不会写入脚本或输出。当前尚未取得用户本机凭据，因此尚未实际执行这轮认证端到端测试；不得将其报告为已通过。
+
 ## 10. 后续实施顺序
 
 1. 在具备 Supabase CLI 的本地项目中使用 `supabase migration new` 生成 Agent migration 文件；不再把此前的 migration ledger 差异作为 Agent 代码开发的前置阻塞。
