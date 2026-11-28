@@ -1,3 +1,10 @@
+# V10.73.5 Agent Admin Entry and Admin Logout — 2026-11-29
+
+- Moved the Agent workflow entry from personal module navigation into the administrator management toolbar.
+- Added an administrator “Log out / Return to Entry” action that reuses the existing logout flow, clears the cloud session, and returns to the personal/admin entry chooser.
+- Added the Agent workflow JavaScript and CSS to the Service Worker precache list.
+- Updated runtime version, VERSION, package.json, Service Worker cache, and all three changelogs. Static wiring checks pass; real-browser click acceptance remains pending.
+
 # V10.73.4 Admin UI Separation and Button Wiring Audit — 2026-11-29
 
 - The administrator entry now hides personal workspace switching, module navigation, and personal planner content, while keeping shared theme and language settings.
