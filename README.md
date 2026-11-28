@@ -5,7 +5,8 @@
 - **当前仓库版本：** `10.72.1`（以根目录 `VERSION` 为准）
 - **在线入口：** https://ouyangxinwei.github.io/daily_weekly_planner/
 - **主要技术形态：** 静态 HTML / CSS / JavaScript，部署到 GitHub Pages，支持 PWA。
-- **日常开发分支：** `development`；**稳定部署分支：** `main`。
+- **日常开发分支：** `main`（唯一日常维护分支）。
+- **`development`：** 暂停维护、暂时保留；不再用于日常开发、测试或同步流程。
 
 > 在线入口可用于访问应用；某个提交是否已部署，以 GitHub Actions 中 GitHub Pages 的实际部署结果为准。
 
@@ -20,7 +21,7 @@
 | 部署、更新和故障排查 | [部署与故障排查](docs/deployment_and_troubleshooting.md) |
 | AI 协作开发约定 | [AI 协作开发指南](docs/ai_collaboration_guide.md) |
 | 跨仓库统一代码审查标准 | [REVIEW.md](REVIEW.md) |
-| Git 分支与固定开发工作流（本地 development → Actions → main 部署） | [Git 分支与固定开发工作流](docs/git-branching-workflow.md) |
+| 日常开发规则（只使用 main） | [Git 分支与日常开发规则](docs/git-branching-workflow.md) |
 | 仓库管理模块 | [仓库管理说明](docs/repository-management.md) |
 | 当前开发状态 | [当前开发交接](docs/current-handoff.md) |
 | Agent 自动化工作流（PLAN.md + run-plan.ps1） | [Agent 工作流实施指南](docs/agent-workflow.md) |
@@ -58,9 +59,9 @@
 
 ## 开发协作
 
-固定开发流程为：**在 development 开发 → 本地页面测试 → GitHub Actions 自动化验证 → 获得明确许可后合并 main → 确认 GitHub Pages 正式部署成功**。GitHub Pages 只从 `main` 正式发布，不用同一个正式网址测试 development。本地页面默认使用 `http://127.0.0.1:4173/`；本地联调可能连接正式 Supabase，写操作会影响正式云端数据，测试时必须注意数据安全。完整步骤和命令见 [Git 分支与固定开发工作流](docs/git-branching-workflow.md)。
+**日常开发统一直接在 `main` 分支进行。** 不要求为日常工作创建开发分支或 PR；`development` 暂停维护、暂时保留，不作为开发、测试、合并或同步前置条件。修改后优先在真实页面验证；本地测试按实际需要进行，GitHub Actions 不作为每次开发的前置条件。GitHub Pages 仍以 `main` 为正式发布来源；只有确认目标提交对应的实际部署成功后，才能报告已部署。版本号、VERSION、CHANGELOG、Release 和 Service Worker 缓存等继续遵守现有版本管理规范。具体约定见 [Git 分支与日常开发规则](docs/git-branching-workflow.md)。
 
-**使用 Claude Code 开发时的约定（2026-11-26 起）：** 以开发为优先，尽量省略测试（不新增自动化用例、不在本地跑 E2E）；需要测试的内容写进对应功能文档的「待测试清单」。合并、部署以及部署后的验证由其他人负责。V10.69.0 按用户要求直接提交到 `main`（与 `development` 保持一致）。
+**开发验证原则：** 优先完成用户需要的功能，并在真实页面验证；根据风险和实际情况决定是否运行本地测试或 Actions。未执行的验证必须如实标记。部署状态仍须依据 GitHub Pages 的实际结果确认。
 
 > [!WARNING]
 > **Agent 测试分支 `feat/agent-plan-steps` 必须保留。**
