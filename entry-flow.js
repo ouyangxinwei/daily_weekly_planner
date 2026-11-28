@@ -36,6 +36,8 @@
   $('choose-personal')?.addEventListener('click', () => enterWorkspace('personal'));
   $('choose-admin')?.addEventListener('click', () => enterWorkspace('admin'));
   $('personal-logout')?.addEventListener('click', () => openExisting('sync-logout'));
+  // Admin logout uses the same existing logout path, clearing the cloud session and returning to the entry chooser.
+  $('admin-return-entry')?.addEventListener('click', () => openExisting('sync-logout'));
 
   // The existing logout action returns to the mode chooser; it does not open another login page.
   window.addEventListener('planner-auth-change', () => {
