@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./diary.css">
   <link rel="stylesheet" href="./repository-management.css">
   <link rel="stylesheet" href="./learning-meetings.css">
+  <link rel="stylesheet" href="./agent-workspace.css">
   <link rel="stylesheet" href="./entry-flow.css">
   <title>慢慢计划</title>
   <style>
@@ -161,7 +162,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       <div class="top-actions"><div class="language-switch language-control-home"><select id="language-select-home" data-language-select aria-label="语言"><option value="zh">中文</option><option value="en">English</option><option value="ja">日本語</option></select></div><button class="secondary" id="theme-toggle" type="button" aria-label="切换到白色主题">切换到白色主题</button>
         <a class="secondary" id="open-test-screens" href="./test-screens.html" target="_blank" rel="noopener noreferrer">测试画面</a>
         <div class="workspace-switch" role="group" aria-label="工作区"><button class="secondary" id="workspace-plan" type="button" aria-pressed="true">计划工作区</button><button class="secondary" id="workspace-language" type="button" aria-pressed="false">外语学习工作区</button><button class="secondary" id="workspace-company" type="button" aria-pressed="false">个人公司网站</button></div>
-        <button class="secondary" id="module-plan" aria-pressed="true">计划</button><button class="secondary" id="module-work" aria-pressed="false">工作</button><button class="secondary" id="module-diary" aria-pressed="false">开发日记</button><button class="secondary" id="module-language" aria-pressed="false">外语任务</button><button class="secondary" id="module-organize" aria-pressed="false">整理</button><button class="secondary" id="module-results" aria-pressed="false">成绩</button><button class="secondary" id="module-future" aria-pressed="false">未来</button><button class="secondary" id="module-memo" aria-pressed="false">备忘</button><button class="secondary" id="open-repository-management" type="button" aria-haspopup="dialog">仓库管理</button><button class="secondary" id="open-learning-meetings" type="button" aria-haspopup="dialog">学习会议</button><button class="secondary" id="open-release" data-admin-only="version" aria-haspopup="dialog">版本与更新记录</button><button class="secondary" id="open-runtime-logs" data-admin-only="logs" aria-haspopup="dialog">运行日志</button><button class="secondary" id="open-health-check" data-admin-only="health" aria-haspopup="dialog">系统健康检查</button><button class="secondary" id="open-automation-tests" data-admin-only="tests" aria-haspopup="dialog">自动化测试</button>
+        <button class="secondary" id="module-plan" aria-pressed="true">计划</button><button class="secondary" id="module-work" aria-pressed="false">工作</button><button class="secondary" id="module-diary" aria-pressed="false">开发日记</button><button class="secondary" id="module-language" aria-pressed="false">外语任务</button><button class="secondary" id="module-organize" aria-pressed="false">整理</button><button class="secondary" id="module-results" aria-pressed="false">成绩</button><button class="secondary" id="module-future" aria-pressed="false">未来</button><button class="secondary" id="module-memo" aria-pressed="false">备忘</button><button class="secondary" id="open-repository-management" type="button" aria-haspopup="dialog">仓库管理</button><button class="secondary" id="open-learning-meetings" type="button" aria-haspopup="dialog">学习会议</button><button class="secondary" id="open-agent-workspace" type="button" aria-haspopup="dialog">AI 工作管理</button><button class="secondary" id="open-release" data-admin-only="version" aria-haspopup="dialog">版本与更新记录</button><button class="secondary" id="open-runtime-logs" data-admin-only="logs" aria-haspopup="dialog">运行日志</button><button class="secondary" id="open-health-check" data-admin-only="health" aria-haspopup="dialog">系统健康检查</button><button class="secondary" id="open-automation-tests" data-admin-only="tests" aria-haspopup="dialog">自动化测试</button>
         <button class="secondary" id="cloud-account">账号与同步</button>
         <button class="secondary" id="manage-categories" aria-haspopup="dialog">分类管理</button>
         <button class="secondary" id="open-trash" aria-haspopup="dialog">回收站 <span id="trash-count" aria-label="回收站项目数量">0</span></button>
@@ -401,6 +402,50 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
       const html=`<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(({plan:'慢慢计划',work:'工作',language:'外语任务',organize:'慢慢整理',results:'成绩',future:'未来',memo:'备忘'})[activeModule])}_${escapeHtml(periodLabel)}_${localDate()}</title><style>
         :root{color-scheme:light;font-family:Arial,"Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#20243a}*{box-sizing:border-box}body{margin:0;background:#fff;font-size:10pt;line-height:1.5;overflow-wrap:anywhere}.document{max-width:190mm;margin:0 auto}.document-header{padding:0 0 5mm;border-bottom:1.2pt solid #6658d3;margin-bottom:5mm}.document-header h1{font-size:20pt;margin:0 0 2mm}.metadata{display:flex;flex-wrap:wrap;gap:1.5mm 6mm;color:#555b70;font-size:8.5pt}.plan-record{border:0.6pt solid #dfe2ec;border-radius:2mm;padding:3.5mm 4mm;margin:0 0 3mm;break-inside:avoid;page-break-inside:avoid;overflow-wrap:anywhere}.record-heading{display:flex;align-items:flex-start;gap:2mm}.record-heading h2{font-size:12pt;line-height:1.4;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}.record-number{font-weight:bold;color:#6658d3;flex:none}.status{font-size:8pt;border:0.5pt solid #d8dbe6;border-radius:10mm;padding:.5mm 2mm;white-space:nowrap;flex:none}.record-meta{display:flex;flex-wrap:wrap;gap:1mm 5mm;color:#646a7e;font-size:8.5pt;margin-top:2mm}.record-due,.record-reference{margin:2mm 0 0;font-size:9pt}.record-reference .url{font-size:8pt;color:#555;word-break:break-all}.record-note{margin-top:2mm;font-size:9pt;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.is-done h2{text-decoration:line-through;color:#85899e}.empty{padding:20mm;text-align:center;color:#777}@page{size:A4;margin:13mm 13mm 15mm;@bottom-right{content:"${locale==="en"?"Page ":locale==="ja"?"": "第 "}" counter(page) "${locale==="ja"?" ページ":locale==="en"?"":" 页"}";font-size:8pt;color:#666}}@media screen{body{background:#f4f5f9;padding:10mm}.document{background:white;padding:12mm;box-shadow:0 3px 20px #0001}.print-tip{max-width:190mm;margin:0 auto 6mm;background:#fff7df;border:1px solid #f0d58b;padding:3mm 4mm;border-radius:2mm;font-size:9pt}.print-actions{display:flex;justify-content:flex-end;gap:8px;max-width:190mm;margin:0 auto 8mm}.print-actions button{padding:8px 12px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer}}@media print{.print-tip,.print-actions{display:none!important}body{padding:0}.document{max-width:none;margin:0}.plan-record{box-shadow:none}}
       </style></head><body><div class="print-tip">${t("请在打印窗口中选择“另存为 PDF”。导出仅包含当前页面可见计划，并按整条记录分页；特别长的单条记录若超过整页可打印高度，浏览器仍可能被迫拆页。")}</div><div class="print-actions"><button onclick="window.close()">${t("关闭预览")}</button><button onclick="window.print()">${t("打印 / 保存为 PDF")}</button></div><main class="document"><header class="document-header"><h1>${escapeHtml(({plan:'慢慢计划',work:'工作',language:'外语任务',organize:'慢慢整理',results:'成绩',future:'未来',memo:'备忘'})[activeModule])} · ${escapeHtml(periodLabel)}</h1><div class="metadata">${metadata.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div></header>${records}</main><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script>  
+
+<dialog id="agent-workspace-dialog" class="agent-dialog" aria-labelledby="agent-workspace-title">
+  <div class="agent-shell">
+    <header class="agent-header">
+      <div><h2 id="agent-workspace-title">AI 工作管理</h2><p class="agent-muted">Task / Run / Step · 手动执行 · 断点恢复</p></div>
+      <button class="close-btn" id="agent-close" type="button" aria-label="关闭">×</button>
+    </header>
+    <p id="agent-status" role="status" aria-live="polite">请输入慢慢计划账号凭据以连接 Agent API。</p>
+    <section id="agent-login-panel" class="agent-panel">
+      <div class="agent-form-grid">
+        <div class="agent-field"><label for="agent-username">账号</label><input id="agent-username" autocomplete="username" value="oooo"></div>
+        <div class="agent-field"><label for="agent-password">密码</label><input id="agent-password" type="password" autocomplete="current-password"></div>
+      </div>
+      <button class="primary" id="agent-connect" type="button">连接 Agent</button>
+      <p class="agent-muted">密码只保留在当前页面内存中；关闭窗口后清除，不写入 localStorage。</p>
+    </section>
+    <section id="agent-main-panel" hidden>
+      <section class="agent-panel">
+        <div class="agent-row"><strong>创建仓库检查任务</strong><button class="secondary" id="agent-refresh" type="button">刷新任务</button></div>
+        <form id="agent-create-task">
+          <div class="agent-form-grid">
+            <div class="agent-field"><label for="agent-task-title">任务名称</label><input id="agent-task-title" maxlength="200" required placeholder="例如：检查规范仓库结构"></div>
+            <div class="agent-field"><label for="agent-target-repository">目标仓库（owner/repo）</label><input id="agent-target-repository" required pattern="[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" placeholder="owner/repository"></div>
+            <div class="agent-field agent-wide"><label for="agent-standard-repository">规范仓库</label><input id="agent-standard-repository" value="ouyangxinwei/oooo_Dev_Standard" required></div>
+            <div class="agent-field agent-wide"><label for="agent-task-description">任务说明</label><textarea id="agent-task-description" maxlength="5000"></textarea></div>
+          </div>
+          <button class="primary" type="submit">创建 Task</button>
+        </form>
+      </section>
+      <section class="agent-panel"><strong>任务列表</strong><div id="agent-task-list" class="agent-task-list"><p class="agent-empty">正在加载…</p></div></section>
+      <section id="agent-run-panel" class="agent-panel" hidden>
+        <strong id="agent-run-title">Run 详情</strong>
+        <ol id="agent-run-steps" class="agent-step-list"></ol>
+        <div class="agent-run-actions">
+          <button class="primary" id="agent-execute" type="button">执行下一批（最多 5 步）</button>
+          <button class="secondary" id="agent-pause" type="button">暂停</button>
+          <button class="secondary" id="agent-resume" type="button">恢复</button>
+        </div>
+        <h3>最终报告</h3><pre id="agent-report" class="agent-report">报告尚未生成。</pre>
+      </section>
+    </section>
+  </div>
+</dialog>
+
 </body></html>`;
       popup.document.open();popup.document.write(html);popup.document.close();
     }
@@ -626,6 +671,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <script src="./role-control.js"></script>
   <script src="./entry-flow.js"></script>
   <script src="./learning-meetings.js"></script>
+  <script src="./agent-workspace.js" defer></script>
   <script type="module" src="./language-workspace.js?v=2.1.0"></script>
   <script type="module" src="./company-website.js"></script>
   <script type="module" src="./company-business.js"></script>
