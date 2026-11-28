@@ -44,5 +44,7 @@
     if (app.hidden && !gate.hidden) showEntry();
   });
 
-  showEntry();
+  // Test pages can explicitly return to the administrator workspace without showing the entry chooser.
+  if (new URLSearchParams(window.location.search).get('entry') === 'admin') enterWorkspace('admin');
+  else showEntry();
 })();
