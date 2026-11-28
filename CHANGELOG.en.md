@@ -1,3 +1,11 @@
+# V10.73.1 Entry Flow Fix — 2026-11-29
+
+- Fixed personal/admin entry routing: selecting a mode now opens the existing Manman Planner workspace directly instead of navigating to a separate login page.
+- Removed the standalone startup login form. Cloud account sign-in is now optional after entering the workspace, in the Account & Cloud Sync dialog.
+- Both modes use the existing workspace and only change which interface tools are visible; backend authorization and database rules are unchanged.
+- Added a cloud sign-in entry to the personal workspace sync panel; administrators can continue opening Account & Sync from management tools.
+- Updated runtime version, Service Worker cache, and version declarations.
+
 # V10.73.0 Admin Tool Organization and AI Work Management Phase 1 — 2026-11-28
 
 - Grouped test screens, repository management, account and sync, category management, Trash, Archived, planner JSON import/export, and system diagnostics in the administrator interface; these management entries are hidden in the personal interface.
