@@ -9,7 +9,7 @@ const pkg = JSON.parse(read('../package.json'));
 const version = read('../VERSION').trim();
 const sw = read('../sw.js');
 const workflow = read('../.github/workflows/validate-v10.13.yml');
-assert.ok(['10.70.0', '10.71.0', '10.72.0'].includes(version));
+assert.ok(['10.70.0', '10.71.0', '10.72.0', '10.72.1'].includes(version));
 assert.equal(pkg.version, version);
 assert.ok(pkg.scripts['test:validate:repositories-bulk-clear']);
 assert.match(js, /async function clearRecords\(\)/);
