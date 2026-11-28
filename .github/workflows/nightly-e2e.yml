@@ -1,9 +1,8 @@
 name: Nightly Playwright E2E and Stability
 
+# Automatic schedule disabled to conserve Actions minutes.
+# Run manually only when a browser regression check is specifically needed.
 on:
-  # 02:00 Japan Standard Time (UTC+9) = 17:00 UTC on the previous day.
-  schedule:
-    - cron: '0 17 * * *'
   workflow_dispatch:
     inputs:
       stability_minutes:
@@ -25,7 +24,7 @@ jobs:
     timeout-minutes: 60
     env:
       CI: true
-      STABILITY_DURATION_MINUTES: ${{ (github.event_name == 'workflow_dispatch' && inputs.stability_minutes != '' && inputs.stability_minutes) || (github.event_name == 'schedule' && '10') || '1' }}
+      STABILITY_DURATION_MINUTES: ${{ inputs.stability_minutes || '1' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
