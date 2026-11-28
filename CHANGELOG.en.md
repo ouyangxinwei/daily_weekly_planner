@@ -1,3 +1,10 @@
+# V10.73.4 Admin UI Separation and Button Wiring Audit — 2026-11-29
+
+- The administrator entry now hides personal workspace switching, module navigation, and personal planner content, while keeping shared theme and language settings.
+- Entering admin mode clears the current page's stale personal workspace state so a previously selected AI, language, or company workspace cannot hide the management toolbar.
+- Audited administrator tools: Test Screens, Repository Management, Account & Sync, Category Management, Trash, Archived, planner JSON import/export, Release History, Runtime Logs, System Health Check, and Automation Tests all have matching DOM elements and event handlers or valid page links.
+- This is a code/static wiring audit; real browser click-through acceptance is still pending. Updated runtime version, VERSION, package.json, Service Worker cache, and multilingual changelogs.
+
 # V10.73.3 Plan Workspace Interaction Fix — 2026-11-29
 
 - Removed the event binding for the deleted PDF export control, which previously threw during initialization and prevented later planner controls from being wired.
