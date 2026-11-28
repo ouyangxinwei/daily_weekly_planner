@@ -122,6 +122,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
     html[data-workspace="language"] #export-pdf,html[data-workspace="language"] #export-backup,html[data-workspace="language"] #export-full-backup,
     html[data-workspace="language"] #import-backup,html[data-workspace="language"] #new-plan{display:none!important}
     html[data-role="personal"] [data-admin-only]{display:none!important}
+    html[data-role="admin"] [data-personal-only]{display:none!important}
     .role-dialog{width:min(100% - 24px,620px)}.role-dialog .dialog-inner{display:grid;gap:14px}.role-intro{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
     .role-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}.role-card{display:grid;gap:6px;text-align:left;padding:16px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
     .role-card:hover,.role-card:focus-visible{border-color:var(--brand)}.role-card[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft)}.role-card-icon{font-size:24px}.role-card strong{font-size:15px}.role-card small{color:var(--muted);font-size:12px;line-height:1.6}
@@ -133,38 +134,23 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
   <section class="access-gate" id="access-gate" aria-label="入口选择">
     <div class="access-card entry-screen" id="entry-screen">
       <div class="language-switch language-control-gate"><select id="language-select-gate" data-language-select aria-label="语言"><option value="zh">中文</option><option value="en">English</option><option value="ja">日本語</option></select></div>
-      <h1>慢慢计划</h1><p>请选择进入方式。个人入口需要账号登录；管理员入口可直接查看后台运行情况。</p>
+      <h1>慢慢计划</h1><p>请选择进入方式。个人入口进入简洁界面；管理员入口进入完整管理界面。两个入口都需要使用现有账号登录。</p>
       <div class="entry-options">
         <button class="entry-choice" id="choose-personal" type="button"><span class="entry-choice-icon" aria-hidden="true">👤</span><strong>个人入口</strong><small>登录后进入个人计划、工作、学习和事务管理。</small><span class="entry-choice-action">进入个人工作区 →</span></button>
-        <button class="entry-choice admin-entry-choice" id="choose-admin" type="button"><span class="entry-choice-icon" aria-hidden="true">📊</span><strong>管理员入口</strong><small>无需登录，查看运行日志、系统健康、版本部署和自动化测试。</small><span class="entry-choice-action">进入后台监控 →</span></button>
-      </div><small class="entry-disclaimer">两个入口仅用于区分个人工作区与后台监控视图，不代表账号权限或安全角色。</small>
+        <button class="entry-choice admin-entry-choice" id="choose-admin" type="button"><span class="entry-choice-icon" aria-hidden="true">📊</span><strong>管理员入口</strong><small>登录后显示管理工具、测试画面、账号同步和系统诊断入口。</small><span class="entry-choice-action">进入管理员工作区 →</span></button>
+      </div><small class="entry-disclaimer">两个入口只切换界面显示，不代表账号权限；所有数据访问仍由现有登录、API 和数据库规则控制。</small>
     </div>
     <form class="access-card" id="access-form" hidden>
-      <h1>个人入口</h1><p>使用现有数据库账号登录，进入个人计划和工作管理。</p>
+      <h1 id="login-entry-title">个人入口</h1><p id="login-entry-description">使用现有数据库账号登录，进入个人计划和工作管理。</p>
       <label for="gate-url">Supabase 项目 URL</label><input id="gate-url" type="url" value="https://kopvznygsqsheibsjjvv.supabase.co" autocomplete="url" required>
       <label for="gate-key">Publishable / anon key</label><input id="gate-key" type="password" autocomplete="off" placeholder="公开客户端 key" required>
       <label for="gate-username">用户名</label><input id="gate-username" type="text" value="oooo" autocomplete="username" required>
       <label for="gate-password">密码</label><input id="gate-password" type="password" autocomplete="current-password" required>
-      <div class="entry-login-actions"><button class="secondary" id="personal-back" type="button">返回入口</button><button class="primary" type="submit">登录并进入个人工作区</button></div>
+      <div class="entry-login-actions"><button class="secondary" id="personal-back" type="button">返回入口</button><button class="primary" id="gate-submit" type="submit">登录并进入个人工作区</button></div>
       <p class="access-error" id="access-error" role="alert" aria-live="polite"></p><small class="field-hint">登录密码由 Supabase 校验。连续输错 5 次会暂停登录 10 分钟。</small>
     </form>
   </section>
-  <main class="admin-dashboard" id="admin-dashboard" hidden aria-label="管理员后台运行情况">
-    <header class="admin-header"><div><h1>慢慢计划 · 管理员后台</h1><p>只读运行监控视图 · 无需登录</p></div><button class="secondary" id="admin-back-to-entry" type="button">返回入口</button></header>
-    <section class="admin-summary">
-      <article class="admin-summary-card"><small>当前应用版本</small><strong id="admin-current-version">读取中…</strong></article>
-      <article class="admin-summary-card"><small>访问方式</small><strong>无需登录</strong></article>
-      <article class="admin-summary-card"><small>视图范围</small><strong>运行状态 · 只读</strong></article>
-    </section>
-    <div class="admin-section-heading"><h2>后台运行情况</h2><p>选择下方项目查看最新状态或本机诊断信息。</p></div>
-    <section class="admin-tools">
-      <article class="admin-tool"><span class="admin-tool-icon" aria-hidden="true">🩺</span><h3>系统健康检查</h3><p>检查本机数据结构、运行日志存储、PWA、云端连接状态和 GitHub Pages 部署情况。未登录时会跳过需要账号验证的数据读取。</p><button class="primary" id="admin-open-health" type="button">打开健康检查</button></article>
-      <article class="admin-tool"><span class="admin-tool-icon" aria-hidden="true">📋</span><h3>运行日志</h3><p>查看当前设备保存的运行日志、警告、错误信息和执行链路。日志不上传云端。</p><button class="primary" id="admin-open-logs" type="button">打开运行日志</button></article>
-      <article class="admin-tool"><span class="admin-tool-icon" aria-hidden="true">🚀</span><h3>版本与部署</h3><p>查看应用版本、GitHub Pages 部署状态和多语言更新履历。</p><button class="primary" id="admin-open-release" type="button">查看版本与部署</button></article>
-      <article class="admin-tool"><span class="admin-tool-icon" aria-hidden="true">🧪</span><h3>自动化测试</h3><p>查看 GitHub Actions 最近一次自动化测试运行及结果。</p><button class="primary" id="admin-open-tests" type="button">查看自动化测试</button></article>
-    </section>
-    <p class="admin-disclaimer">说明：此入口不验证管理员身份，也不提供个人计划、账号资料或业务数据的编辑功能；它只是学习阶段的后台观察页面。</p>
-  </main>
+  
   <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="priority-star" viewBox="0 0 24 24"><path d="M12 2.6 14.9 8.5l6.5.95-4.7 4.58 1.11 6.47L12 17.45l-5.81 3.05 1.11-6.47L2.6 9.45l6.5-.95L12 2.6Z"/></symbol></svg>
   <main class="shell" id="app-shell" hidden>
     <header class="top">
@@ -174,7 +160,7 @@ html[data-theme="dark"] .field-hint,html[data-theme="dark"] .search-empty,html[d
           <button class="secondary" id="workspace-plan" type="button" aria-pressed="true">计划工作区</button><button class="secondary" id="workspace-language" type="button" aria-pressed="false">外语学习工作区</button><button class="secondary" id="workspace-company" type="button" aria-pressed="false">个人公司网站</button><button class="secondary" id="workspace-ai" type="button" aria-pressed="false">AI 工作管理</button>
         </div>
         <div class="module-switch-row" role="group" aria-label="功能模块">
-          <button class="secondary" id="module-plan" aria-pressed="true">计划</button><button class="secondary" id="module-work" aria-pressed="false">工作</button><button class="secondary" id="module-language" aria-pressed="false">外语任务</button><button class="secondary" id="module-organize" aria-pressed="false">整理</button><button class="secondary" id="module-results" aria-pressed="false">成绩</button><button class="secondary" id="module-future" aria-pressed="false">未来</button><button class="secondary" id="module-memo" aria-pressed="false">备忘</button><button class="secondary" id="module-diary" aria-pressed="false">开发日记</button><button class="secondary" id="open-learning-meetings" type="button" aria-haspopup="dialog">学习会议</button><button class="secondary" id="open-agent-workspace" type="button" aria-haspopup="dialog">Agent 工作流</button><button class="primary" id="new-plan">＋ 新建计划</button>
+          <button class="secondary" id="module-plan" aria-pressed="true">计划</button><button class="secondary" id="module-work" aria-pressed="false">工作</button><button class="secondary" id="module-language" aria-pressed="false">外语任务</button><button class="secondary" id="module-organize" aria-pressed="false">整理</button><button class="secondary" id="module-results" aria-pressed="false">成绩</button><button class="secondary" id="module-future" aria-pressed="false">未来</button><button class="secondary" id="module-memo" aria-pressed="false">备忘</button><button class="secondary" id="module-diary" aria-pressed="false">开发日记</button><button class="secondary" id="open-learning-meetings" type="button" aria-haspopup="dialog">学习会议</button><button class="secondary" id="open-agent-workspace" type="button" aria-haspopup="dialog">Agent 工作流</button><button class="primary" id="new-plan">＋ 新建计划</button><button class="secondary" id="personal-logout" data-personal-only type="button">退出登录</button>
         </div>
         <div class="admin-management-tools" data-admin-only="management" role="group" aria-label="管理员管理工具">
           <span class="admin-management-label">管理员管理</span>
