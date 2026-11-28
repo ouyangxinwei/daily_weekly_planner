@@ -596,6 +596,9 @@ async function executeNextStep(runId: string, username: string, requestId: strin
     "GET", undefined, requestId,
   );
   if (!Array.isArray(allSteps) || !allSteps.length) throw new ApiError(409, "RUN_HAS_NO_STEPS");
+  if (allSteps.some((item) => item.status === "running")) {
+    throw new ApiError(409, "STEP_IN_PROGRESS");
+  }
 
   const pending = allSteps.find((item) => item.status === "pending");
   if (!pending) {
@@ -620,12 +623,18 @@ async function executeNextStep(runId: string, username: string, requestId: strin
   );
   if (!Array.isArray(claimed) || !claimed[0]) throw new ApiError(409, "STEP_ALREADY_CLAIMED");
 
-  await db<Json[]>(
-    "agent_task_runs?id=eq." + queryValue(runId) + "&status=in.(queued,running)",
+  const claimedRun = await db<Json[]>(
+    "agent_task_runs?id=eq." + queryValue(runId) + "&status=in.(queued,running)&select=id",
     "PATCH",
     { status: "running", started_at: run.started_at ?? new Date().toISOString() },
     requestId,
   );
+  if (!Array.isArray(claimedRun) || !claimedRun[0]) {
+    await db<Json[]>("agent_run_steps?id=eq." + queryValue(String(pending.id)), "PATCH", {
+      status: "pending", started_at: null, updated_at: new Date().toISOString(),
+    }, requestId).catch(() => null);
+    throw new ApiError(409, "RUN_PAUSED");
+  }
 
   try {
     let output: { result: Json; evidence: unknown[] };
