@@ -663,7 +663,12 @@ async function executeNextStep(runId: string, username: string, requestId: strin
       "GET", undefined, requestId,
     );
     const nextAvailable = Array.isArray(remaining) && remaining.length > 0;
-    if (!nextAvailable) {
+    const latestRunState = await db<Json[]>(
+      "agent_task_runs?select=status&id=eq." + queryValue(runId) + "&limit=1",
+      "GET", undefined, requestId,
+    );
+    const pausedAfterStep = Array.isArray(latestRunState) && latestRunState[0]?.status === "paused";
+    if (!nextAvailable && !pausedAfterStep) {
       await db<Json[]>("agent_task_runs?id=eq." + queryValue(runId), "PATCH", {
         status: "completed", finished_at: new Date().toISOString(),
       }, requestId);
@@ -676,7 +681,7 @@ async function executeNextStep(runId: string, username: string, requestId: strin
       step_id: pending.id,
       step_key: pending.step_key,
       step_status: "completed",
-      run_status: nextAvailable ? "running" : "completed",
+      run_status: pausedAfterStep ? "paused" : (nextAvailable ? "running" : "completed"),
       next_step_available: nextAvailable,
       result: output.result,
     };
