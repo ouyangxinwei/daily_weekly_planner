@@ -343,19 +343,6 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 - 本次没有对线上 Supabase 部署 Edge Function，也没有修改线上数据库。
 - 当前代码沿用 company-api 的 Basic 凭据认证模式，后续应对登录失败限流与凭据轮换进行统一治理。
 
-## 10. 后续实施顺序
-
-1. 在具备 Supabase CLI 的本地项目中使用 `supabase migration new` 生成 Agent migration 文件；不再把此前的 migration ledger 差异作为 Agent 代码开发的前置阻塞。
-2. 对 Agent migration 做代码审查；确认 RLS、索引、唯一约束和 service_role 权限。
-3. 在用户选择的目标环境应用 migration，并验证三张表与约束。
-4. 部署独立 `agent-api`，完成接口连通验证。
-5. 用少量 API 集成测试验证创建 Task、创建 Run/Steps、读取状态、暂停和恢复。
-6. 实现串行 Worker 执行器，完成 Step 结果保存、断点恢复和报告生成。
-7. 核心流程稳定后，再增加定时调度和可选 AI 能力。
-
-**本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
-
-
 ### 9.2 Worker 核心执行能力（Phase 5）
 
 已在 development 实现第一版串行 Worker，代码位于 `supabase/functions/agent-api/index.ts`：
@@ -374,3 +361,15 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 **运行方式：** 创建 Run 后，调用 execute 一次执行一个 Step；当响应 `next_step_available=true` 时继续调用，直到 Run completed。可由未来管理界面循环调用，也可暂时手动调用。当前没有自动调度器，也没有部署线上函数。
 
 **验证状态：** 已完成代码静态核对和 API 路由/状态逻辑检查；当前环境没有 Deno 与 Supabase CLI，未完成 Deno 类型检查、Edge Function 本地运行、数据库集成测试或线上部署。Agent 三张表尚未创建，因此这份 Worker 代码暂不能连接真实运行数据。
+
+## 10. 后续实施顺序
+
+1. 在具备 Supabase CLI 的本地项目中使用 `supabase migration new` 生成 Agent migration 文件；不再把此前的 migration ledger 差异作为 Agent 代码开发的前置阻塞。
+2. 对 Agent migration 做代码审查；确认 RLS、索引、唯一约束和 service_role 权限。
+3. 在用户选择的目标环境应用 migration，并验证三张表与约束。
+4. 部署独立 `agent-api`，完成接口连通验证。
+5. 用少量 API 集成测试验证创建 Task、创建 Run/Steps、读取状态、暂停和恢复。
+6. 已在 development 实现串行 Worker 初版代码；仍待 Deno 类型检查、数据库 migration、API 部署和集成验证。
+7. 核心流程稳定后，再增加定时调度和可选 AI 能力。
+
+**本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
