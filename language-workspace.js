@@ -872,17 +872,18 @@ function onSubmit(e) {
 // ---------- 工作区切换 ----------
 function currentWorkspace() {
   const current = document.documentElement.dataset.workspace;
-  return current === 'language' || current === 'company' ? current : 'plan';
+  return ['language', 'company', 'ai'].includes(current) ? current : 'plan';
 }
 
 function setWorkspace(ws) {
-  const next = ws === 'language' || ws === 'company' ? ws : 'plan';
+  const next = ['language', 'company', 'ai'].includes(ws) ? ws : 'plan';
   if (next === 'plan') delete document.documentElement.dataset.workspace;
   else document.documentElement.dataset.workspace = next;
   try { localStorage.setItem(WORKSPACE_KEY, next); } catch (e) {}
   $('workspace-plan')?.setAttribute('aria-pressed', String(next === 'plan'));
   $('workspace-language')?.setAttribute('aria-pressed', String(next === 'language'));
   $('workspace-company')?.setAttribute('aria-pressed', String(next === 'company'));
+  $('workspace-ai')?.setAttribute('aria-pressed', String(next === 'ai'));
   if (next === 'language') render();
 }
 
@@ -916,6 +917,7 @@ function init() {
   $('workspace-plan')?.addEventListener('click', () => { setWorkspace('plan'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
   $('workspace-language')?.addEventListener('click', () => { setWorkspace('language'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
   $('workspace-company')?.addEventListener('click', () => { setWorkspace('company'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
+  $('workspace-ai')?.addEventListener('click', () => { setWorkspace('ai'); window.dispatchEvent(new CustomEvent('planner-workspace-change')); });
   setWorkspace(currentWorkspace());
 }
 
