@@ -316,7 +316,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 ## 9. 当前实施状态与阻塞项
 
-本次已完成最小数据模型、状态转换、SQL 结构基线和 API 契约定义，并已在 development 加入独立 `agent-api` Edge Function 初版代码及配置；尚未创建正式 migration、部署 `agent-api` 或修改托管数据库。
+本阶段已完成 Task / Run / Step 数据结构、独立 `agent-api`、串行 Worker、数据库接通和 Edge Function 部署。最新实施状态以本节 9.3、9.4 为准。
 
 在正式生成/应用 Agent migration 前，对此前发现的学习会议 migration 差异进行了只读核对：
 - Git 仓库包含 `supabase/migrations/20261127090000_learning_meetings_cloud.sql`。
@@ -339,9 +339,9 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 当前限制：
 - Worker 的实际执行器尚未实现；Run 创建后保持 queued，Step 由后续 Worker 阶段执行。
-- 数据表尚未创建，因此 API 代码不能部署后投入使用。
-- 本次没有对线上 Supabase 部署 Edge Function，也没有修改线上数据库。
-- 当前代码沿用 company-api 的 Basic 凭据认证模式，后续应对登录失败限流与凭据轮换进行统一治理。
+- （历史状态，已被 9.3 数据库接通记录取代。）
+- （历史状态，已被 9.3 数据库接通与部署记录取代。）
+- 当前代码沿用 company-api 的 Basic 凭据认证模式；登录失败限流与凭据轮换仍可在后续安全治理阶段统一加强。
 
 ### 9.2 Worker 核心执行能力（Phase 5）
 
@@ -358,9 +358,9 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 **第一版能力边界：** 当前结果是仓库文件清单盘点，不是规范语义审查、代码质量审查、API 行为测试、数据库实际结构验证或部署验证。文件存在不代表功能已实现，文件缺失也不单独证明功能未实现。GitHub Tree 返回截断或不可用时，步骤记录为失败，不将不完整数据当成“未找到”。
 
-**运行方式：** 创建 Run 后，调用 execute 一次执行一个 Step；当响应 `next_step_available=true` 时继续调用，直到 Run completed。可由未来管理界面循环调用，也可暂时手动调用。当前没有自动调度器，也没有部署线上函数。
+**运行方式：** 创建 Run 后，调用 execute 一次执行一个 Step；当响应 `next_step_available=true` 时继续调用，直到 Run completed。可由未来管理界面循环调用，也可暂时手动调用。当前没有自动调度器；Edge Function 已部署，见 9.3。
 
-**验证状态：** 已完成代码静态核对和 API 路由/状态逻辑检查；当前环境没有 Deno 与 Supabase CLI，未完成 Deno 类型检查、Edge Function 本地运行、数据库集成测试或线上部署。Agent 三张表尚未创建，因此这份 Worker 代码暂不能连接真实运行数据。
+**验证状态：** 已完成代码静态核对和 API 路由/状态逻辑检查；当前环境没有 Deno 与 Supabase CLI，未完成 Deno 类型检查、Edge Function 本地运行、数据库集成测试或线上部署。（历史状态，数据库现已接通；端到端运行验证仍待用户稍后执行。）
 
 
 
@@ -379,14 +379,29 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 
 **端到端测试准备：** 新增 `scripts/agent-api-smoke-test.ps1`，默认使用公开小仓库 `octocat/Hello-World`，只检查 documentation 与 code 两个 Step；脚本会安全隐藏式提示用户输入现有慢慢计划密码，并执行 Task → Run → 第一个 Step → Pause → Resume → 剩余 Step → 报告与数据库持久化读取验证。密码不会写入脚本或输出。当前尚未取得用户本机凭据，因此尚未实际执行这轮认证端到端测试；不得将其报告为已通过。
 
+
+### 9.4 Phase 6 前端最小管理界面（development）
+
+已新增第一版 AI 工作管理入口，暂时作为慢慢计划的独立对话框，不改动现有计划、工作或公司业务模块：
+
+- 顶部新增「AI 工作管理」入口。
+- 账号连接使用现有慢慢计划用户名与密码，通过 HTTPS Basic Auth 调用 agent-api。
+- 密码仅保存在当前页面 JavaScript 内存中；关闭对话框即清除，不写入 localStorage / sessionStorage。
+- 支持创建仓库检查 Task、查看任务列表、创建 Run、读取 Run/Step 状态。
+- 支持手动执行 Worker，每次点击最多连续执行 5 个 Step，避免单次浏览器操作无限运行；可再次点击继续。
+- 支持暂停与恢复 Run，并展示 Step 状态和最终 Markdown 报告。
+- 新增文件：`agent-workspace.js`、`agent-workspace.css`；`index.html` 增加入口、样式、脚本和对话框。
+- CORS 已核对允许当前 GitHub Pages Origin；API 仍由服务端 Basic Auth、IP 限流和资源所有权检查保护。
+
+**当前限制：** 该界面尚未进行浏览器实测；不能将静态核对视为可用性验收。暂时仅提供中文界面；未加入 AI Provider/账号管理、预算、自动调度或并行 Worker。用户要求稍后再做端到端测试，因此本阶段不主动创建测试 Task / Run，不产生测试业务记录。
+
+**静态核对：** 已确认入口、对话框、JS/CSS 引用、Basic Auth 请求、Task/Run/Execute/Pause/Resume 路由和密码不持久化逻辑均存在。尚未完成浏览器运行验证、Deno 类型检查和完整 API 集成验证。
+
 ## 10. 后续实施顺序
 
-1. 在具备 Supabase CLI 的本地项目中使用 `supabase migration new` 生成 Agent migration 文件；不再把此前的 migration ledger 差异作为 Agent 代码开发的前置阻塞。
-2. 对 Agent migration 做代码审查；确认 RLS、索引、唯一约束和 service_role 权限。
-3. 在用户选择的目标环境应用 migration，并验证三张表与约束。
-4. 部署独立 `agent-api`，完成接口连通验证。
-5. 用少量 API 集成测试验证创建 Task、创建 Run/Steps、读取状态、暂停和恢复。
-6. 已在 development 实现串行 Worker 初版代码；仍待 Deno 类型检查、数据库 migration、API 部署和集成验证。
-7. 核心流程稳定后，再增加定时调度和可选 AI 能力。
+1. 稍后由用户执行 `scripts/agent-api-smoke-test.ps1`，验证真实认证与 Task → Run → Worker → Step → Pause/Resume → Report 完整闭环。
+2. 根据端到端测试结果修复 API、数据库或 Worker 问题；在验证前不宣称系统已完整通过。
+3. 对前端管理界面进行浏览器实际验证，检查账号连接、任务创建、Run 创建、Step 执行、暂停/恢复和报告展示。
+4. 在核心流程稳定后，再单独设计可选 AI 分析能力和定时调度；不将 GitHub Actions 用作日常 Agent Scheduler/Worker。
 
-**本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
+**当前结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；数据库和 `agent-api` 已接通，最小管理界面已加入 development。真实端到端验证与浏览器验收仍待用户稍后执行。
