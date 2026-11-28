@@ -333,6 +333,7 @@ Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序
 - `supabase/config.toml`：增加 `agent-api` 配置，`verify_jwt = false`，因为当前应用的既有账号验证由 Edge Function 内部通过 `company_verify_credentials` RPC 完成，而不是 Supabase Auth JWT。API 每个请求仍必须通过 Basic Authorization 验证；该配置不代表匿名开放业务接口。
 - 创建 Task、分页读取 Task、读取 Task 详情、创建 Run/Steps、读取 Run 详情、暂停和恢复 Run。
 - 创建 Run 时读取共同规范仓库与目标仓库的最新公开 GitHub Commit SHA 并保存到 Run；任一来源无法读取时，不创建 Run。
+- 使用现有 `company_verify_credentials` 完成服务端 Basic 凭据验证，并复用 `company_consume_ip_rate_limit` 做 IP 频率限制。
 - 所有数据访问均由 Edge Function 使用服务端密钥执行；读取 Task / Run 前按已验证用户名检查所有权。浏览器不直接访问 Agent 表。
 
 当前限制：
