@@ -1,3 +1,9 @@
+# V10.73.2 Personal UI Interaction Fix — 2026-11-29
+
+- Bind theme and planner module navigation handlers before local data loading/rendering so a data-loading or rendering error cannot leave core controls uninitialized.
+- Guarded stale cloud-settings references to removed startup-form fields; configuration loading now updates only fields that still exist.
+- Restored core personal-page interactions; real browser verification remains pending.
+
 # V10.73.1 Entry Flow Fix — 2026-11-29
 
 - Fixed personal/admin entry routing: selecting a mode now opens the existing Manman Planner workspace directly instead of navigating to a separate login page.
