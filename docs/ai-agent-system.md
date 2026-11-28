@@ -1,10 +1,10 @@
 # 慢慢计划 AI Agent 核心设计
 
-- 文档状态：Phase 3 核心设计基线（2026-11-28）
+- 文档状态：Phase 4 最小数据结构与 API 契约（2026-11-28）
 - 目标仓库：`ouyangxinwei/daily_weekly_planner`
 - 规范来源：`ouyangxinwei/oooo_Dev_Standard`
 - 调度目标：每天 02:00（Asia/Tokyo）；调度器尚未实施
-- 当前范围：只定义第一版核心流程，不创建数据库、API、前端或执行服务
+- 当前范围：Task / Run / Step 最小数据结构、状态和 API 契约；不引入复杂队列或并行 Worker
 
 ## 1. 目标
 
@@ -35,47 +35,263 @@ Supabase
 
 第一版 Worker 先串行执行，避免过早引入并行队列、复杂锁和分布式调度。运行平台保持可替换，不依赖个人电脑必须开机，也不以当前免费平台条件限制核心设计。
 
-## 3. 四类核心数据
+## 3. 最小数据模型
 
-| 数据 | 含义 | 第一版关键内容 |
+第一版只建立三张业务表：`agent_tasks`、`agent_task_runs`、`agent_run_steps`。
+
+Agent 本身先作为代码中的固定角色配置，不建立 Agent 管理表。Master / Worker 是职责，不是需要用户管理的独立运行实例。
+
+### 3.1 关系
+
+```
+planner_credentials
+       │
+       └── agent_tasks (1)
+                 │
+                 └── agent_task_runs (N)
+                           │
+                           └── agent_run_steps (N)
+```
+
+- 一个 Task 属于一个慢慢计划账号。
+- 一个 Task 可以有多次 Run。
+- 一个 Run 包含有序 Steps。
+- Step 结果和证据直接保存在 Step，不单独建立日志、事件或 Checkpoint 表。
+- 每个 Run 保存规范仓库与目标仓库的 Commit SHA，避免结果混用不同版本。
+
+### 3.2 字段定义
+
+| 表 | 字段 | 用途 |
 |---|---|---|
-| Agent | 可被分配工作的角色定义 | 名称、职责、启用状态 |
-| Task | 用户希望完成的一项工作 | 目标、范围、状态、创建时间 |
-| Run | Task 的一次实际执行 | 状态、开始/结束时间、错误、基线信息 |
-| Step | Run 中一个可独立完成的步骤 | 顺序、执行说明、状态、结果、证据 |
+| `agent_tasks` | `id`、`owner_username` | 主键与任务所有者 |
+| | `title`、`description`、`task_type` | 任务说明 |
+| | `target_repository`、`scope` | 目标仓库和检查范围 |
+| | `status`、`created_at`、`updated_at` | 任务状态与时间 |
+| `agent_task_runs` | `id`、`task_id`、`run_number` | 执行记录及任务内序号 |
+| | `status`、`started_at`、`finished_at` | 执行状态与时间 |
+| | `standard_commit_sha`、`target_commit_sha` | 两个仓库的固定审查基线 |
+| | `error_code`、`error_message` | 运行失败信息 |
+| `agent_run_steps` | `id`、`run_id`、`step_order`、`step_key` | 步骤身份与顺序 |
+| | `title`、`instructions`、`status` | 步骤说明与状态 |
+| | `result`、`evidence` | 结构化结果和证据 |
+| | `error_code`、`error_message` | 步骤错误 |
+| | `started_at`、`finished_at`、`created_at`、`updated_at` | 时间信息 |
 
-一个 Task 可以有多次 Run；一个 Run 包含多个有序 Step。断点信息先保存在 Run/Step 状态中，不单独引入 Checkpoint、Queue、Lease 等复杂实体。
+字段约束：
+- 主键使用 UUID。
+- 时间统一使用 `timestamptz`，由数据库保存 UTC 时间；前端按 Asia/Tokyo 显示。
+- `scope` 和 `result` 必须是 JSON object；`evidence` 必须是 JSON array。
+- `target_repository` 使用 `owner/repository` 格式。
+- `run_number` 在同一个 Task 内递增。
+- 同一 Task 同时最多存在一个未完成 Run（queued / running / paused）。
+- 同一个 Run 内 `step_order` 和 `step_key` 均唯一。
 
-## 4. 第一版执行流程
+### 3.3 状态
+
+| 对象 | 状态 | 说明 |
+|---|---|---|
+| Task | `pending` | 已创建，尚未执行 |
+| | `active` | 当前存在执行中的 Run |
+| | `paused` | 当前 Run 暂停，等待恢复 |
+| | `completed` | 最近一次 Run 成功完成 |
+| | `failed` | 最近一次 Run 失败 |
+| Run | `queued` | 已创建，等待 Worker 开始 |
+| | `running` | 正在执行 |
+| | `paused` | 已保存进度，等待恢复 |
+| | `completed` | 所有必要步骤完成 |
+| | `failed` | 无法继续的执行失败 |
+| Step | `pending` | 尚未开始 |
+| | `running` | 正在执行 |
+| | `completed` | 已完成并保存结果 |
+| | `failed` | 执行失败 |
+| | `skipped` | 经 Master 判断无需执行，并记录原因 |
+
+允许的主要转换：
+- Task：pending → active → completed / paused / failed；paused → active。
+- Run：queued → running；running → paused / completed / failed；paused → running。
+- Step：pending → running → completed / failed；pending → skipped；failed → running（重试）。
+- 已完成的 Step 默认不重跑。恢复时从第一个 pending 或可重试 failed Step 继续。
+- Task 状态由后端根据 Run 状态汇总，不允许前端直接任意修改。
+
+## 4. SQL 结构基线
+
+以下 SQL 是 Phase 4 的结构基线，用于后续生成正式 Supabase migration；**本次没有直接应用到托管数据库**。
+
+```sql
+create table public.agent_tasks (
+  id uuid primary key default gen_random_uuid(),
+  owner_username text not null
+    references public.planner_credentials(username) on delete cascade,
+  title text not null check (char_length(btrim(title)) between 1 and 200),
+  description text not null default '' check (char_length(description) <= 5000),
+  task_type text not null default 'repository_audit'
+    check (task_type in ('repository_audit', 'general')),
+  target_repository text not null
+    check (target_repository ~ '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'),
+  scope jsonb not null default '{}'::jsonb
+    check (jsonb_typeof(scope) = 'object'),
+  status text not null default 'pending'
+    check (status in ('pending', 'active', 'paused', 'completed', 'failed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.agent_task_runs (
+  id uuid primary key default gen_random_uuid(),
+  task_id uuid not null
+    references public.agent_tasks(id) on delete cascade,
+  run_number integer not null check (run_number > 0),
+  status text not null default 'queued'
+    check (status in ('queued', 'running', 'paused', 'completed', 'failed')),
+  standard_commit_sha text,
+  target_commit_sha text,
+  error_code text,
+  error_message text,
+  started_at timestamptz,
+  finished_at timestamptz,
+  created_at timestamptz not null default now(),
+  constraint agent_task_runs_number_unique unique (task_id, run_number)
+);
+
+create table public.agent_run_steps (
+  id uuid primary key default gen_random_uuid(),
+  run_id uuid not null
+    references public.agent_task_runs(id) on delete cascade,
+  step_order integer not null check (step_order > 0),
+  step_key text not null check (char_length(btrim(step_key)) between 1 and 100),
+  title text not null check (char_length(btrim(title)) between 1 and 200),
+  instructions text not null default '',
+  status text not null default 'pending'
+    check (status in ('pending', 'running', 'completed', 'failed', 'skipped')),
+  result jsonb not null default '{}'::jsonb
+    check (jsonb_typeof(result) = 'object'),
+  evidence jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(evidence) = 'array'),
+  error_code text,
+  error_message text,
+  started_at timestamptz,
+  finished_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint agent_run_steps_order_unique unique (run_id, step_order),
+  constraint agent_run_steps_key_unique unique (run_id, step_key)
+);
+
+create index agent_tasks_owner_updated_idx
+  on public.agent_tasks (owner_username, updated_at desc);
+create index agent_task_runs_task_created_idx
+  on public.agent_task_runs (task_id, created_at desc);
+create index agent_run_steps_run_order_idx
+  on public.agent_run_steps (run_id, step_order);
+
+create unique index agent_task_runs_one_open_per_task_idx
+  on public.agent_task_runs (task_id)
+  where status in ('queued', 'running', 'paused');
+
+alter table public.agent_tasks enable row level security;
+alter table public.agent_task_runs enable row level security;
+alter table public.agent_run_steps enable row level security;
+
+revoke all on public.agent_tasks from public, anon, authenticated;
+revoke all on public.agent_task_runs from public, anon, authenticated;
+revoke all on public.agent_run_steps from public, anon, authenticated;
+
+grant select, insert, update, delete on public.agent_tasks to service_role;
+grant select, insert, update, delete on public.agent_task_runs to service_role;
+grant select, insert, update, delete on public.agent_run_steps to service_role;
+```
+
+安全原则：
+- 不创建 anon / authenticated 直接访问策略；前端只能调用受控 Edge Function。
+- Service role 密钥只存在于 Edge Function 环境，绝不进入浏览器。
+- API 从已验证的会话/凭据取得 `owner_username`，不接受客户端传入或覆盖所有者字段。
+- RLS 保持启用；数据库表不向普通客户端授权。Service role 只由后端使用。
+- 任何未来增加的 RPC 都必须单独审查执行权限、`SECURITY DEFINER`、固定 `search_path` 和参数校验。
+
+## 5. 最小 API 契约
+
+第一版建议使用独立的 `agent-api` Edge Function，避免把 Agent 逻辑混入现有 `company-api`。统一前缀为 `/agent`。沿用现有 API 的服务端认证、JSON 响应包络、请求 ID 和错误映射约定；具体身份认证实现须复用并验证现有账号认证机制。
+
+### 5.1 用户可调用的端点
+
+| 方法 | 路径 | 用途 | 成功状态 |
+|---|---|---|---|
+| POST | `/agent/tasks` | 创建任务 | 201 |
+| GET | `/agent/tasks` | 分页列出当前账号任务 | 200 |
+| GET | `/agent/tasks/{task_id}` | 读取任务及最近执行摘要 | 200 |
+| POST | `/agent/tasks/{task_id}/runs` | 创建一次 Run 和初始 Steps | 201 |
+| GET | `/agent/runs/{run_id}` | 读取 Run 与有序 Steps | 200 |
+| POST | `/agent/runs/{run_id}/pause` | 请求暂停并保存进度 | 200 |
+| POST | `/agent/runs/{run_id}/resume` | 从已保存进度恢复 | 202 |
+
+Worker 执行 Step、写入 Step 结果和汇总 Task 状态属于后端内部操作，不开放给浏览器直接调用。第一版没有公开的任意 Step 修改、删除 Task 或代码写入 API。
+
+### 5.2 创建任务请求
+
+```json
+{
+  "title": "审查慢慢计划是否符合共同开发规范",
+  "description": "检查文档、代码、API 和数据库证据",
+  "task_type": "repository_audit",
+  "target_repository": "ouyangxinwei/daily_weekly_planner",
+  "scope": {
+    "standard_repository": "ouyangxinwei/oooo_Dev_Standard",
+    "checks": ["documentation", "code", "api", "database"]
+  }
+}
+```
+
+客户端不得传入 `id`、`owner_username`、`status`、`created_at` 或 `updated_at`。所有者和初始状态由后端设置。
+
+### 5.3 创建 Run 请求
+
+```json
+{
+  "reason": "manual"
+}
+```
+
+Master 创建 Run 时在服务端读取两个仓库的 Commit SHA，生成有序 Step，并在同一数据库事务中写入 Run 与 Steps。若 Task 已有 queued / running / paused 的 Run，返回 `409 RUN_ALREADY_OPEN`，不创建重复执行。
+
+### 5.4 成功响应
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "status": "queued"
+  },
+  "request_id": "request-uuid"
+}
+```
+
+列表响应使用 `data.items`、`data.total`、`data.limit`、`data.offset`。Run 详情包含按 `step_order` 排序的 Steps。敏感凭据、服务端密钥和内部调试堆栈不得出现在响应中。
+
+### 5.5 错误响应
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "request_id": "request-uuid"
+}
+```
+
+最小错误码：`AUTHENTICATION_FAILED`（401）、`NOT_FOUND`（404）、`VALIDATION_ERROR`（400）、`RUN_ALREADY_OPEN`（409）、`INVALID_STATE_TRANSITION`（409）、`REQUEST_TOO_LARGE`（413）、`DATABASE_UNAVAILABLE`（503）、`INTERNAL_ERROR`（500）。
+
+每个请求返回 `X-Request-Id`；响应统一 `Cache-Control: no-store`。列表默认 limit=20、最大 100，offset 不得为负数。请求体限制 32 KB。错误响应不返回数据库原始错误文本。
+
+## 6. 第一版执行流程
 
 1. **创建任务**：用户选择目标仓库、任务类型和检查范围。
-2. **制定计划**：Master 将任务拆成少量明确步骤，并保存到 Run。
+2. **创建 Run**：Master 固定规范仓库与目标仓库 Commit SHA，并生成有序 Steps。
 3. **执行步骤**：Master 按顺序把当前 Step 交给 Worker。
 4. **保存进度**：每个 Step 完成后立即保存状态、结果和必要证据。
-5. **处理中断**：失败或运行时间到达安全上限时，保存当前进度并结束本次运行；下次从第一个未完成 Step 继续。
-6. **汇总报告**：所有步骤完成后，Master 汇总结果，生成 Markdown 报告并关联本次运行。
-
-建议的最小状态：
-
-- Task：`pending`、`active`、`completed`、`paused`、`failed`
-- Run：`queued`、`running`、`paused`、`completed`、`failed`
-- Step：`pending`、`running`、`completed`、`failed`、`skipped`
-
-恢复时只重做未完成或明确失败的步骤；已经完成的步骤默认复用其结果。若输入基线或规则版本发生变化，应重新判断旧结果是否仍有效。
-
-## 5. 第一项试点任务
-
-以共同规范库审查慢慢计划为第一个试点：
-
-1. 读取规范库和目标仓库的固定 Commit SHA。
-2. 获取相关文件与规范内容。
-3. 按步骤执行确定性检查。
-4. 保存每项检查的结论与证据。
-5. 汇总生成审查报告。
+5. **处理中断**：失败或运行时间到达安全上限时，保存当前进度并暂停；下次从第一个未完成 Step 继续。
+6. **汇总报告**：所有必要步骤完成后，Master 汇总结果，生成 Markdown 报告并关联 Run。
 
 报告状态必须区分「已找到 / 已实现」「部分实现」「未实现」「不一致」「待验证」「未检查」「检查失败」。没有完成检查或证据不足时，不得判定为未实现。每次 Run 记录规范库与目标仓库的 Commit SHA，确保结果可追溯。
 
-## 6. 安全边界
+## 7. 安全边界
 
 - 第一版默认只读目标仓库；允许执行检查和生成报告。
 - Agent 不得自动修改共同规范、业务代码、数据库结构或生产数据。
@@ -84,7 +300,7 @@ Supabase
 - AI 调用不是必需步骤；AI 不可用或余额不足时，仍须能够保存进度并生成规则检查报告。
 - 凭据只能由受控后端使用，不能把密钥暴露给浏览器。
 
-## 7. 暂不实现、以后扩展
+## 8. 暂不实现、以后扩展
 
 第一版不实现复杂队列、并行 Worker、自动模型路由、多 Provider 多账号、复杂预算系统、动态权限引擎或自动代码修改。
 
@@ -97,13 +313,24 @@ Supabase
 
 调度与执行平台暂不锁定。可评估本地手动运行、NAS、小型常开设备、云 VM 或托管容器；部署时再核实费用、免费资格、执行限制和可用性。当前先保证核心流程可移植，并能以手动/模拟方式验证。
 
-## 8. 实施顺序
+## 9. 当前实施状态与阻塞项
 
-1. 定义四类数据的字段和状态转换。
-2. 设计最小 API 与数据访问边界。
-3. 实现可手动启动的串行 Master / Worker 流程。
-4. 实现 Step 结果持久化和中断恢复。
-5. 实现带 Commit SHA 与证据的 Markdown 报告。
+本次已完成最小数据模型、状态转换、SQL 结构基线和 API 契约定义；尚未创建正式 migration、部署 `agent-api` 或修改托管数据库。
+
+在正式生成/应用 migration 前发现一项需要先处理的现状差异：
+- Git 仓库包含 `supabase/migrations/20261127090000_learning_meetings_cloud.sql`。
+- 当前 Supabase 迁移历史列表最新记录为 `20261126004847`，没有列出上述 2026-11-27 migration。
+- 但数据库当前已经存在 `public.learning_meetings_data` 表。
+
+这表示仓库 migration 文件、远程 migration ledger 与实际 schema 不能直接假定完全一致。为避免迁移冲突，本阶段不向生产数据库追加 Agent 表；下一步先核对 migration 状态和真实 DDL，再生成正式 migration。此项不影响本阶段 API 契约和数据模型定稿。
+
+## 10. 后续实施顺序
+
+1. 核对 Supabase 迁移历史与远程实际 schema 的差异，先解决已有 migration drift。
+2. 通过 Supabase CLI 正式生成 Agent migration；在隔离/本地环境验证 SQL、RLS 和索引。
+3. 迁移审查通过后再应用到目标数据库，并用查询验证三张表与约束。
+4. 创建独立 `agent-api`，实现上表列出的最小端点与认证/所有权校验。
+5. 用少量 API 集成测试验证创建 Task、创建 Run/Steps、读取状态、暂停和恢复。
 6. 核心流程稳定后，再增加定时调度和可选 AI 能力。
 
-**本阶段结论：** 第一版就是「管理界面 → Master → Worker → Supabase」的简单流程。先把任务执行、进度保存、恢复和报告做通，不提前建设复杂 Agent 平台。
+**本阶段结论：** 第一版数据结构固定为 Task / Run / Step 三张表，Agent 角色先写在代码配置中；API 通过受控 Edge Function 暴露，Worker 的 Step 写入操作保持内部调用。当前已完成数据与接口契约，生产 schema / API 实际部署待迁移差异核对后进行。
